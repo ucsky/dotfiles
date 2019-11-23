@@ -24,14 +24,14 @@ Givin researcher.json as
 
 will output researcher.csv as
 
-,first_name,last_name,homepage,linkedin,fields,wikipedia
-0,Pieter,Abbeel,https://people.eecs.berkeley.edu/~pabbeel,https://www.linkedin.com/in/pieterabbeel,"['deep-learning', 'reinforcement-learning', 'robotics']",
-1,Geoffrey,Hinton,https://www.cs.toronto.edu/~hinton,,['deep-learning'],https://www.cs.toronto.edu/~hinton
+first_name,last_name,homepage,linkedin,fields,wikipedia
+Pieter,Abbeel,https://people.eecs.berkeley.edu/~pabbeel,https://www.linkedin.com/in/pieterabbeel,"['deep-learning', 'reinforcement-learning', 'robotics']",
+Geoffrey,Hinton,https://www.cs.toronto.edu/~hinton,,['deep-learning'],https://www.cs.toronto.edu/~hinton
 
 '''
 import sys
 import pandas as pd
 pin = sys.argv[1]
 pout = pin.replace('.json', '.csv')
-df = pd.read_json(pin)
+df = pd.read_json(pin, index=False)
 df.to_csv(pout)    

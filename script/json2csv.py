@@ -33,5 +33,5 @@ import sys
 import pandas as pd
 pin = sys.argv[1]
 pout = pin.replace('.json', '.csv')
-df = pd.read_json(pin, index=False)
-df.to_csv(pout)    
+df = pd.read_json(pin)
+df.to_csv(pout, index=False)    

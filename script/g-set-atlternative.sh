@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if [ -z "$1" ]; then
-    echo "usage: $0 version" 1>&2
+    echo "usage: $(basename $0) version" 1>&2
     exit 1
 fi
 

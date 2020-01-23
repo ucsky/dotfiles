@@ -1,12 +1,6 @@
 # Configuration for interactive bash shell
 
-# Start here
-export BASH_DOTFILES="${BASH_DOTFILES}:<${BASH_SOURCE}"
-
-# Be aware of what change
+# What changed?
 pushd ~/.dotfiles > /dev/null
 git status -s
 popd > /dev/null
-
-# End here
-export BASH_DOTFILES="${BASH_DOTFILES}:${BASH_SOURCE}>"

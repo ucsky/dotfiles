@@ -4,3 +4,5 @@
 pushd ~/.dotfiles > /dev/null
 git status -s
 popd > /dev/null
+
+[[ ":$PATH:" != *":$HOME/.dotfiles/script:"* ]] && PATH="$HOME/.dotfiles/script:${PATH}"

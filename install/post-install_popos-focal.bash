@@ -51,7 +51,20 @@ install_slack () {
     fi
 }
 
+install_tlp(){
+    # TLP: for increase battery life.
+    #
+    # See:
+    # - https://support.system76.com/articles/battery
+    #
+    if [ -z $(command -v tlp) ];then
+	sudo apt install tlp tlp-rdw --no-install-recommends
+    else
+	echo "tlp already installed."
+    fi
+}
 # main
 check_install_apt virtualbox
+install_tlp
 install_teams
 install_slack

@@ -3,7 +3,7 @@
 # Description:
 #   Post install scripts for Pop!_OS 20.04 LTS (focal)
 #
-# See also:
+# See:
 # - Pop!_OS post install by Willi Mutschler: https://mutschler.eu/linux/install-guides/pop-os-post-install
 #
 #==
@@ -51,20 +51,49 @@ install_slack () {
     fi
 }
 
+adjust_charging_thresholds(){
+    # Adjust charging thresholds for best logevity of lithium batteries.
+    #
+    # See:
+    # - https://support.system76.com/articles/battery
+    #
+    charge_control_start_threshold=40
+    charge_control_end_threshold=80
+    cstart=$charge_control_start_threshold
+    cend=$charge_control_end_threshold
+    fstart=/sys/class/power_supply/BAT0/charge_control_start_threshold
+    fend=/sys/class/power_supply/BAT0/charge_control_end_threshold
+    cstart0=$(cat $fstart)
+    cend0=$(cat $fend)
+    if [ $cstart != $cstart0 ];then
+	echo "Modify start threshold from $cstart0 to $cstart"
+	sudo echo $cstart > $fstart
+    fi
+    if [ $cend != $cend0 ];then
+	echo "Modify end threshold from $cend0 to $cend"
+	sudo echo $cend > $fend
+    fi
+}
+
 install_tlp(){
     # TLP: for increase battery life.
     #
     # See:
     # - https://support.system76.com/articles/battery
     #
+    #--
     if [ -z $(command -v tlp) ];then
 	sudo apt install tlp tlp-rdw --no-install-recommends
     else
 	echo "tlp already installed."
     fi
 }
+
+
 # main
 check_install_apt virtualbox
+adjust_charging_thresholds
 install_tlp
+check_install_apt powertop
 install_teams
 install_slack

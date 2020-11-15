@@ -1,13 +1,10 @@
-# Configuration for non-interactive bash
+# Configuration for non-interactive bash shell
 
 # Start here
 export BASH_DOTFILES="${BASH_DOTFILES}:<${BASH_SOURCE}"
 
 # Cleaning
 alias c='rm -f *~'
-
-# Env variables
-export PATH="$PATH:$HOME/.dotfiles/script"
 
 # End here
 export BASH_DOTFILES="${BASH_DOTFILES}:${BASH_SOURCE}>"

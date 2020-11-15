@@ -1,17 +1,22 @@
 # Configuration for interactive bash shell
 
-# follow the initialization: start
+# START
 export BASH_CONFIG="${BASH_CONFIG}->${BASH_SOURCE}:start"
 echo "BASH_CONFIG is of level $(($(echo $BASH_CONFIG | awk -F'->' '{print NF}')-1))"
 if [ "$SEE_BASH_CONFIG" == 1 ];then
     echo $BASH_CONFIG
 fi
+# START
 
-[[ ":$PATH:" != *":$HOME/.dotfiles/script:"* ]] && PATH="$HOME/.dotfiles/script:${PATH}"
+[[ ":$PATH:" != *":$HOME/.dotfiles/script/sh:"* ]] && PATH="$HOME/.dotfiles/script/sh:${PATH}"
+[[ ":$PATH:" != *":$HOME/.dotfiles/script/bash:"* ]] && PATH="$HOME/.dotfiles/script/bash:${PATH}"
+[[ ":$PATH:" != *":$HOME/.dotfiles/script/python3:"* ]] && PATH="$HOME/.dotfiles/script/python3:${PATH}"
+export PATH
 
-# follow the initialization: end
+# END
 export BASH_CONFIG="${BASH_CONFIG}->${BASH_SOURCE}:end"
 echo "BASH_CONFIG is of level $(($(echo $BASH_CONFIG | awk -F'->' '{print NF}')-1))"
 if [ "$SEE_BASH_CONFIG" == 1 ];then
     echo $BASH_CONFIG
 fi
+# END

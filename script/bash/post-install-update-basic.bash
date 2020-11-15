@@ -8,9 +8,12 @@
 #
 #==
 
-if [ $(lsb_release -si) != Pop ] && [ $(lsb_release -c ) != focal ];then
-    echo "Wrong distribution"
-    lsb_realease -a
+distid=$(echo $(lsb_release -si)-$(lsb_release -sc) | tr '[:upper:]' '[:lower:]')
+
+if [[ "$distid" != 'pop-focal' ]];then
+    echo "Wrong distid=$distid"
+    echo ""
+    lsb_release -a
     exit 1
 fi
 
@@ -26,6 +29,28 @@ check_install_apt () {
 	package_name=$command_name
     fi
     command -v "$command_name" > /dev/null || sudo apt-get install -y "$package_name" && echo "$package_name already installed."
+}
+
+install_lsb-core () {
+    #
+    # In order to not have "No LSB modules are available" message when running lsb_release.
+    #
+    # See:
+    # - https://blog.echosystem.fr/?d=2016/10/18/14/15/23-debian-no-lsb-modules-are-available
+    #
+    #--
+    case "$distid" in
+	pop-focal | ubuntu-focal)
+	    isinst="$(apt list --installed lsb-core 2> /dev/null | grep installed)"
+	    if [ -z "$isinst" ];then
+		sudo apt-get install lsb-core
+	    else
+		echo "lsb-core is already installed"
+	    fi
+	    ;;
+	*)
+	    echo "$distid is not implemented in ${FUNCNAME[0]}. Skipping ..."
+    esac
 }
 
 install_teams () {
@@ -91,9 +116,12 @@ install_tlp(){
 
 
 # main
+install_lsb-core
 check_install_apt virtualbox
 adjust_charging_thresholds
 install_tlp
 check_install_apt powertop
 install_teams
 install_slack
+
+

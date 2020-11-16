@@ -1,7 +1,7 @@
 #!/bin/bash -e
 #
 # Description:
-#   Post install scripts for Pop!_OS 20.04 LTS (focal)
+#   Post install scripts.
 #
 # See:
 # - Pop!_OS post install by Willi Mutschler: https://mutschler.eu/linux/install-guides/pop-os-post-install
@@ -30,7 +30,6 @@ check_install_apt () {
     fi
     command -v "$command_name" > /dev/null || sudo apt-get install -y "$package_name" && echo "$package_name ALREADY INSTALLED."
 }
-
 install_lsb-core () {
     #
     # In order to not have "No LSB modules are available" message when running lsb_release.
@@ -76,43 +75,7 @@ install_slack () {
     fi
 }
 
-adjust_charging_thresholds(){
-    # Adjust charging thresholds for best logevity of lithium batteries.
-    #
-    # See:
-    # - https://support.system76.com/articles/battery
-    #
-    charge_control_start_threshold=40
-    charge_control_end_threshold=80
-    cstart=$charge_control_start_threshold
-    cend=$charge_control_end_threshold
-    fstart=/sys/class/power_supply/BAT0/charge_control_start_threshold
-    fend=/sys/class/power_supply/BAT0/charge_control_end_threshold
-    cstart0=$(cat $fstart)
-    cend0=$(cat $fend)
-    if [ $cstart != $cstart0 ];then
-	echo "Modify start threshold from $cstart0 to $cstart"
-	sudo echo $cstart > $fstart
-    fi
-    if [ $cend != $cend0 ];then
-	echo "Modify end threshold from $cend0 to $cend"
-	sudo echo $cend > $fend
-    fi
-}
 
-install_tlp(){
-    # TLP: for increase battery life.
-    #
-    # See:
-    # - https://support.system76.com/articles/battery
-    #
-    #--
-    if [ -z $(command -v tlp) ];then
-	sudo apt install tlp tlp-rdw --no-install-recommends
-    else
-	echo "tlp ALREADY INSTALLED."
-    fi
-}
 # Database management
 install_dbeaver () {
     if [ -z $(command -v dbeaver) ];then
@@ -126,13 +89,18 @@ install_dbeaver () {
 
 
 # main
-install_dbeaver
+## lsb_release
 install_lsb-core
+## APT
+check_install_apt evince
+check_install_apt autossh
+check_install_apt pandoc
+check_install_apt lynx
+check_install thunderbird
 check_install_apt virtualbox
 check_install_apt exiftool libimage-exiftool-perl
-# adjust_charging_thresholds # this is not working ...
-install_tlp
-check_install_apt powertop
+install_dbeaver
+# communication
 install_teams
 install_slack
 

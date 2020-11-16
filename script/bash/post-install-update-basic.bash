@@ -113,9 +113,20 @@ install_tlp(){
 	echo "tlp ALREADY INSTALLED."
     fi
 }
+# Database management
+install_dbeaver () {
+    if [ -z $(command -v dbeaver) ];then
+	wget https://dbeaver.io/files/7.2.2/dbeaver-ce_7.2.2_amd64.deb
+	sudo apt install ./dbeaver-ce_7.2.2_amd64.deb
+	rm dbeaver-ce_7.2.2_amd64.deb
+    else
+	echo "dbeaver ALREADY INSTALLED."
+    fi
+}
 
 
 # main
+install_dbeaver
 install_lsb-core
 check_install_apt virtualbox
 check_install_apt exiftool libimage-exiftool-perl

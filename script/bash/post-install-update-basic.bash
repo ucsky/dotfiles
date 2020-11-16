@@ -28,7 +28,7 @@ check_install_apt () {
     else
 	package_name=$command_name
     fi
-    command -v "$command_name" > /dev/null || sudo apt-get install -y "$package_name" && echo "$package_name already installed."
+    command -v "$command_name" > /dev/null || sudo apt-get install -y "$package_name" && echo "$package_name ALREADY INSTALLED."
 }
 
 install_lsb-core () {
@@ -45,7 +45,7 @@ install_lsb-core () {
 	    if [ -z "$isinst" ];then
 		sudo apt-get install lsb-core
 	    else
-		echo "lsb-core is already installed"
+		echo "lsb-core is ALREADY INSTALLED"
 	    fi
 	    ;;
 	*)
@@ -61,7 +61,7 @@ install_teams () {
 	sudo apt install ./teams_1.3.00.25560_amd64.deb
 	rm teams_1.3.00.25560_amd64.deb
     else
-	echo "teams already installed."
+	echo "teams ALREADY INSTALLED."
     fi
 }
 
@@ -72,7 +72,7 @@ install_slack () {
 	sudo apt install -y ./slack-desktop-4.3.2-amd64.deb
 	rm -f slack-desktop-4.3.2-amd64.deb
     else
-	echo "slack already installed."
+	echo "slack ALREADY INSTALLED."
     fi
 }
 
@@ -110,7 +110,7 @@ install_tlp(){
     if [ -z $(command -v tlp) ];then
 	sudo apt install tlp tlp-rdw --no-install-recommends
     else
-	echo "tlp already installed."
+	echo "tlp ALREADY INSTALLED."
     fi
 }
 
@@ -118,7 +118,8 @@ install_tlp(){
 # main
 install_lsb-core
 check_install_apt virtualbox
-adjust_charging_thresholds
+check_install_apt exiftool libimage-exiftool-perl
+# adjust_charging_thresholds # this is not working ...
 install_tlp
 check_install_apt powertop
 install_teams

@@ -1,7 +1,7 @@
 #!/bin/bash -e
 #
 # Description:
-#   Post install scripts.
+#   Post install script.
 #
 # See:
 # - Pop!_OS post install by Willi Mutschler: https://mutschler.eu/linux/install-guides/pop-os-post-install
@@ -30,6 +30,24 @@ check_install_apt () {
     fi
     command -v "$command_name" > /dev/null || sudo apt-get install -y "$package_name" && echo "$package_name ALREADY INSTALLED."
 }
+check_install_apt_pkg () {
+
+    if [ -z "$1" ];then
+	echo "ERROR: please give at least the command name."
+	exit 1
+    fi
+
+    pkg_name="$1"
+    set +e
+    isinst="$(apt list --installed ${pkg_name} 2> /dev/null | grep installed)"
+    set -e
+    if [ -z "$isinst" ];then
+	sudo apt-get install -y $pkg_name
+    else
+	echo "$pkg_name is ALREADY INSTALLED"
+    fi
+
+}
 install_lsb-core () {
     #
     # In order to not have "No LSB modules are available" message when running lsb_release.
@@ -52,29 +70,6 @@ install_lsb-core () {
     esac
 }
 
-install_teams () {
-    install_teams=0
-    command -v teams > /dev/null || install_teams=1
-    if [ $install_teams == 1 ];then
-	wget https://packages.microsoft.com/repos/ms-teams/pool/main/t/teams/teams_1.3.00.25560_amd64.deb
-	sudo apt install ./teams_1.3.00.25560_amd64.deb
-	rm teams_1.3.00.25560_amd64.deb
-    else
-	echo "teams ALREADY INSTALLED."
-    fi
-}
-
-install_slack () {
-    ## Slack
-    if [ -z $(command -v slack) ];then
-	wget https://downloads.slack-edge.com/linux_releases/slack-desktop-4.3.2-amd64.deb
-	sudo apt install -y ./slack-desktop-4.3.2-amd64.deb
-	rm -f slack-desktop-4.3.2-amd64.deb
-    else
-	echo "slack ALREADY INSTALLED."
-    fi
-}
-
 
 # Database management
 install_dbeaver () {
@@ -87,21 +82,34 @@ install_dbeaver () {
     fi
 }
 
-
+######################################################
 # main
+######################################################
 ## lsb_release
 install_lsb-core
+
 ## APT
+
+### package name and command are the same
 check_install_apt evince
 check_install_apt autossh
 check_install_apt pandoc
 check_install_apt lynx
-check_install thunderbird
+check_install_apt thunderbird
 check_install_apt virtualbox
+
+### command and package name are different
 check_install_apt exiftool libimage-exiftool-perl
+check_install_apt pip3 python3-pip
+check_install_apt csvcut csvkit
+check_install_apt chromium chromium-browser
+
+### there is no command
+check_install_apt_pkg texlive-latex-base
+check_install_apt_pkg texlive-fonts-recommended
+check_install_apt_pkg texlive-fonts-extra
+check_install_apt_pkg texlive-latex-extra
+check_install_apt_pkg texlive-full
+
+# DB management software
 install_dbeaver
-# communication
-install_teams
-install_slack
-
-

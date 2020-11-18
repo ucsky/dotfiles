@@ -10,7 +10,10 @@
 
 distid=$(echo $(lsb_release -si)-$(lsb_release -sc) | tr '[:upper:]' '[:lower:]')
 
-if [[ "$distid" != 'pop-focal' ]];then
+if \
+    [ "$distid" != 'pop-focal' ] \
+	&& \
+	[ "$distid" != 'ubuntu-focal' ];then
     echo "Wrong distid=$distid"
     echo ""
     lsb_release -a

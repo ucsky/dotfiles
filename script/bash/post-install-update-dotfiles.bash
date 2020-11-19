@@ -94,10 +94,11 @@ install_lsb-core
 ## APT
 
 ### package name and command are the same
-check_install_apt evince
 check_install_apt autossh
-check_install_apt pandoc
+check_install_apt evince
+check_install_apt gparted
 check_install_apt lynx
+check_install_apt pandoc
 check_install_apt thunderbird
 check_install_apt virtualbox
 

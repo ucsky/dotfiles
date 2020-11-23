@@ -103,7 +103,6 @@ install_lsb-core
 
 ### package name and command are the same
 check_install_apt autossh
-<<<<<<< HEAD
 check_install_apt darktable # photo
 check_install_apt digikam # photo
 check_install_apt gthumb # photo
@@ -111,12 +110,6 @@ check_install_apt kphotoalbum # photo
 check_install_apt pandoc
 check_install_apt lynx
 check_install_apt shotwell # photo
-=======
-check_install_apt evince
-check_install_apt gparted
-check_install_apt lynx
-check_install_apt pandoc
->>>>>>> c66a4aa64775e2b5056651f63c3a4e2bd193832e
 check_install_apt thunderbird
 check_install_apt virtualbox
 

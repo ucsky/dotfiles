@@ -101,6 +101,14 @@ install_vscode () {
 	sudo apt-get install apt-transport-https
 	sudo apt-get update
 	sudo apt-get install code
+    else
+	echo "vscode ALREADY INSTALLED."
+    fi
+    if [ -z $(code --list-extensions | grep ms-vscode-remote.vscode-remote-extensionpack) ];then
+	echo "INSTALLING ms-vscode-remote.vscode-remote-extensionpack"
+	code --install-extension ms-vscode-remote.vscode-remote-extensionpack
+    else
+		echo "ms-vscode-remote.vscode-remote-extensionpack ALREADY INSTALLED."
     fi
 }
 

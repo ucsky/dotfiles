@@ -8,6 +8,7 @@
 #
 #==
 
+
 distid=$(echo $(lsb_release -si)-$(lsb_release -sc) | tr '[:upper:]' '[:lower:]')
 
 if \
@@ -18,6 +19,13 @@ if \
     echo ""
     lsb_release -a
     exit 1
+fi
+
+if [ "$PIU_INFO" != 1 ];then
+    echo ""
+    echo "INFO: please use Post Install Update env variable PIU_FULL=1 for full install update."
+    echo ""
+    export PIU_INFO=1
 fi
 
 check_install_apt () {

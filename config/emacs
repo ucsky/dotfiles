@@ -1,3 +1,11 @@
-(message "Reading emacs.el in dotfiles")
-;; In order to make tramp quicker with ssh
+
+(if (not (package-installed-p 'use-package))
+    ;; Install package automatically if not already installed.
+    (progn
+      (package-refresh-contents)
+      (package-install 'use-package)))
+
+
+;; Make tramp quicker with ssh
 (setq tramp-default-method "ssh")
+

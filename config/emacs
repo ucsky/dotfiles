@@ -9,3 +9,37 @@
 ;; Make tramp quicker with ssh
 (setq tramp-default-method "ssh")
 
+
+
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode))
+
+;;list the packages I want
+(setq package-list '(use-package elpy))
+
+;; list the repositories containing them
+;; see https://elpa.gnu.org
+(add-to-list 'package-archives
+             '("gnu" . "https://elpa.gnu.org/packages/")
+             t)
+;; see https://marmalade-repo.org
+(add-to-list 'package-archives
+             '("marmalade" . "http://marmalade-repo.org/packages/")
+             t)
+
+(add-to-list 'package-archives
+             '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+
+;; activate all the packages (in particular autoloads)
+(package-initialize)
+
+(use-package elpy
+  :ensure t
+  :defer t
+  :init
+  (advice-add 'python-mode :before 'elpy-enable))
+
+;; py-autopep8
+ (add-hook 'python-mode-hook 'py-autopep8-enable-on-save)
+ (setq py-autopep8-options '("--max-line-length=100"))

@@ -112,9 +112,31 @@ install_vscode () {
     fi
 }
 
+install_setup () {
+    if [ "$PIU_FULL" != "1" ];then return 0;fi
+    # Install setup directory
+    pushd $HOME > /dev/null
+    if [ ! -d $HOME/setup ];then
+	if [ -d setup ];then
+	    rm -rf setup
+	fi
+	git clone git@bitbucket.org:ucsky/setup.git
+	mv setup setup
+    else
+	pushd $HOME/setup > /dev/null
+	git pull
+	popd > /dev/null
+    fi
+}
+
+
 ######################################################
 # main
 ######################################################
+
+## Setup system
+install_setup
+
 ## lsb_release
 install_lsb-core
 

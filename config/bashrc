@@ -13,6 +13,11 @@ fi
 [[ ":$PATH:" != *":$HOME/.dotfiles/script/python3:"* ]] && PATH="$HOME/.dotfiles/script/python3:${PATH}"
 export PATH
 
+function wk() {
+    # List all my currently working task to include
+    ls -1 $HOME/.wk
+}
+
 # END
 export BASH_CONFIG="${BASH_CONFIG}->${BASH_SOURCE}:end"
 echo "BASH_CONFIG is of level $(($(echo $BASH_CONFIG | awk -F'->' '{print NF}')-1))"

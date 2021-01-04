@@ -119,6 +119,18 @@ install_dbeaver () {
 	echo "dbeaver ALREADY INSTALLED."
     fi
 }
+
+install_qgis () {
+    if [ -z $(command -v qgis) ];then
+	sudo apt-get update
+	wget -qO - https://qgis.org/downloads/qgis-2020.gpg.key | sudo gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/qgis-archive.gpg --import
+	sudo chmod a+r /etc/apt/trusted.gpg.d/qgis-archive.gpg
+	sudo apt install qgis qgis-plugin-grass
+    else
+	echo "qgis ALREADY INSTALED"
+    fi
+}
+
 # Editor
 install_vscode () {
     if [ -z $(command -v code) ];then
@@ -193,6 +205,8 @@ check_install_apt_pkg texlive-fonts-recommended
 check_install_apt_pkg texlive-fonts-extra
 check_install_apt_pkg texlive-latex-extra
 check_install_apt_pkg texlive-full
+check_install_apt_pkg gnupg
+check_install_apt_pkg software-properties-common
 
 # DB management software
 install_dbeaver

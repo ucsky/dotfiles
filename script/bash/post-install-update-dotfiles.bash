@@ -207,6 +207,7 @@ check_install_apt_pkg texlive-latex-extra
 check_install_apt_pkg texlive-full
 check_install_apt_pkg gnupg
 check_install_apt_pkg software-properties-common
+check_install_apt_pkg cifs-utils
 
 # DB management software
 install_dbeaver

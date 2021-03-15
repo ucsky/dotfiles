@@ -208,6 +208,11 @@ check_install_apt_pkg texlive-full
 check_install_apt_pkg gnupg
 check_install_apt_pkg software-properties-common
 check_install_apt_pkg cifs-utils
+check_install_apt_pkg elpa-elpy
+check_install_apt_pkg python3-jedi
+check_install_apt_pkg black
+check_install_apt_pkg python3-autopep8
+check_install_apt_pkg python3-yapf
 
 # DB management software
 install_dbeaver

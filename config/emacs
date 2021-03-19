@@ -1,4 +1,4 @@
-(if (not (package-installed-p 'use-package))
+(if (not (package-installed-p 'use-package))
     ;; Install package automatically if not already installed.
     (progn
       (package-refresh-contents)

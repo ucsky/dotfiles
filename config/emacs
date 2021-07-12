@@ -24,23 +24,39 @@
 ;; activate all the packages (in particular autoloads)
 (package-initialize)
 
+;; ==========
+;; | PYTHON |
+;; ==========
+;;
 ;; See https://www.emacswiki.org/emacs/PythonProgrammingInEmacs
+;;
 ;;(use-package flycheck
 ;;  :ensure t
 ;;   :init (global-flycheck-mode))
-
-;;list the packages I want
-;; elpy https://elpy.readthedocs.io/en/latest/introduction.html#installation
-;; Before using
+;;
+;;
+;; = elpy =
+;;
+;; - Documentation: https://github.com/jorgenschaefer/elpy
+;; - Repository: https://elpy.readthedocs.io/en/latest/introduction.html#installation
+;;
+;; For Ubuntu:
+;; - sudo apt install elpa-elpy
+;; - sudo apt install python3-jedi black autopep8 yapf
+;;(elpy-enable)
+(use-package elpy
+  :ensure t
+  :init
+  (elpy-enable))
+;;
+;; Old elpy setup:
 ;;(setq package-list '(use-package elpy))
 ;;(use-package elpy
 ;;  :ensure t
 ;;  :defer t
 ;;  :init
 ;;  (advice-add 'python-mode :before 'elpy-enable))
-
-(elpy-enable)
-
+;;
 ;; py-autopep8
 ;; (add-hook 'python-mode-hook 'py-autopep8-enable-on-save)
 ;; (setq py-autopep8-options '("--max-line-length=100"))

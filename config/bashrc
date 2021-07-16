@@ -31,4 +31,5 @@ echo "BASH_CONFIG is of level $(($(echo $BASH_CONFIG | awk -F'->' '{print NF}')-
 if [ "$SEE_BASH_CONFIG" == 1 ];then
     echo $BASH_CONFIG
 fi
+alias jstart='jupyter notebook --no-browser'
 # END

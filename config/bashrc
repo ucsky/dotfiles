@@ -32,4 +32,6 @@ if [ "$SEE_BASH_CONFIG" == 1 ];then
     echo $BASH_CONFIG
 fi
 alias jstart='jupyter notebook --no-browser'
+alias k=kubectl
+complete -F __start_kubectl k
 # END

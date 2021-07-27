@@ -18,8 +18,18 @@ elif [ "$1" == "--help" ] || [ "$1" == "-h" ];then
     helpme
     exit 0
 else
-    path_notebook="$1"
+    nb_in="$1"
 fi
+nb_out=$(echo $nb_in | awk -F".ipynb" '{print $1}').out.ipynb
+
 export NOTEBOOK_BATCH=1
-jupyter nbconvert --to notebook --execute --inplace $path_notebook
-jupyter nbconvert --to html $path_notebook
+if [ -n "$(command -v papermill)" ];then
+    echo "Using papermill"
+    papermill --version
+    papermill  --request-save-on-cell-execute --log-output --report-mode --progress-bar $nb_in $nb_out
+else
+    echo "Using jupyter nbconvert"
+    jupyter nbconvert --version
+    jupyter nbconvert --to notebook --execute $nb_in --output $nb_out
+fi
+jupyter nbconvert --to html $nb_out

@@ -1,0 +1,25 @@
+#!/bin/bash -e
+
+function helpme() {
+    echo ""
+    echo "Run a Jupyter notebook in batch and output result in HTML."
+    echo "Use environement variable NOTEBOOK_BATCH."
+    echo ""
+    echo "See also: jpdf, jstart."
+    echo ""
+}
+
+#
+if [ -z "$1" ];then
+    echo "ERROR: please provide path to jupyter notebook."
+    helpme
+    exit 1
+elif [ "$1" == "--help" ] || [ "$1" == "-h" ];then
+    helpme
+    exit 0
+else
+    path_notebook="$1"
+fi
+export NOTEBOOK_BATCH=1
+jupyter nbconvert --to notebook --execute --inplace $path_notebook
+jupyter nbconvert --to html $path_notebook

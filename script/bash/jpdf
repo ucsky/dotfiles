@@ -1,13 +1,23 @@
 #!/bin/bash -e
+
+function helpme() {
+    echo ""
+    echo "Convert a Jupyter Notebook to PDF without code."
+    echo ""
+    echo "See also: jrun, jstart."
+    echo ""
+    echo "From: https://ga7g08.github.io/2015/06/25/ipython-nbconvert-latex-template-to-hide-code"
+    echo ""
+}
+
 #
-# Convert a Jupyter Notebook to PDF without code.
-#
-# See: https://ga7g08.github.io/2015/06/25/ipython-nbconvert-latex-template-to-hide-code/
-#
-##
 if [ -z "$1" ];then
-    echo "Please provide path to jupyter notebook"
+    echo "ERROR: please provide path to jupyter notebook."
+    helpme
     exit 1
+elif [ "$1" == "--help" ] || [ "$1" == "-h" ];then
+    helpme
+    exit 0
 fi
 jupy=$(basename $1)
 dir=$(dirname $1)

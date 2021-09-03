@@ -11,6 +11,7 @@ docker rmi -f `docker images -qa `
 
 echo "Remove all volumes"
 docker volume rm $(docker volume ls -qf)
+docker volume rm $(docker volume ls -qf dangling=true)
 
 echo "Remove all networks"
 docker network rm `docker network ls -q`
@@ -24,3 +25,6 @@ docker volume ls
 
 echo "The following command show only show the default networks:"
 docker network ls
+
+# Fix overlay2 problem
+docker system prune -a

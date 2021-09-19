@@ -1,0 +1,13 @@
+#!/bin/bash -e
+
+function helpme() {
+    echo ""
+    echo "Run a Jupyter notebook in batch and output result in HTML."
+    echo "Use environement variable NOTEBOOK_BATCH."
+    echo ""
+    echo "See also: jpdf, jstart."
+    echo ""
+}
+
+jupyter notebook --no-browser
+

@@ -1,5 +1,8 @@
 #!/bin/bash -e
-
+#
+# Description wrapper for jstart.py
+#
+##
 function helpme() {
     echo ""
     echo "Run a Jupyter notebook in batch and output result in HTML."
@@ -8,6 +11,5 @@ function helpme() {
     echo "See also: jpdf, jstart."
     echo ""
 }
-
-jupyter notebook --no-browser
-
+. $WORKON_HOME/eda/bin/activate
+python $HOME/.dotfiles/script/python3/jstart.py

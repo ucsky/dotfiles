@@ -70,3 +70,10 @@
 
 ;; Truncate long lines
 (set-default 'truncate-lines t)
+
+;; C-x <direction> to switch windows
+(use-package window-jump
+             :bind (("C-x <up>" . window-jump-up)
+                    ("C-x <down>" . window-jump-down)
+                    ("C-x <left>" . window-jump-left)
+                    ("C-x <right>" . window-jump-right)))

@@ -1,0 +1,8 @@
+#!/bin/bash
+if [ -z "$1" ];then
+    echo "ERROR: please give \$1 as URL."
+fi
+if [ -f $WORKON_HOME/youtube-dl/bin/activate ];then
+    source $WORKON_HOME/youtube-dl/bin/activate
+fi
+youtube-dl --extract-audio --audio-format mp3 "$1"

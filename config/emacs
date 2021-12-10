@@ -1,53 +1,73 @@
-(if (not (package-installed-p 'use-package))
-    ;; Install package automatically if not already installed.
-    (progn
-      (package-refresh-contents)
-      (package-install 'use-package)))
-
+;;(if (not (package-installed-p 'use-package))
+;;    ;; Install package automatically if not already installed.
+;;    (progn
+;;      (package-refresh-contents)
+;;      (package-install 'use-package)))
+;;
 
 ;; Make tramp quicker with ssh
 (setq tramp-default-method "ssh")
 
 
-;; list the repositories containing them
-;; see https://elpa.gnu.org
-(add-to-list 'package-archives
-             '("gnu" . "https://elpa.gnu.org/packages/")
-             t)
-;; see https://marmalade-repo.org
-(add-to-list 'package-archives
-             '("marmalade" . "http://marmalade-repo.org/packages/")
-             t)
-(add-to-list 'package-archives
-             '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+;;;; list the repositories containing them
+;;;; see https://elpa.gnu.org
+;;(add-to-list 'package-archives
+;;             '("gnu" . "https://elpa.gnu.org/packages/")
+;;             t)
+;;;; see https://marmalade-repo.org
+;;(add-to-list 'package-archives
+;;             '("marmalade" . "http://marmalade-repo.org/packages/")
+;;             t)
+;;(add-to-list 'package-archives
+;;             '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+;;
+;;;; activate all the packages (in particular autoloads)
+;;(package-initialize)
 
-;; activate all the packages (in particular autoloads)
-(package-initialize)
 
-;; ==========
-;; | PYTHON |
-;; ==========
+;;(add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
+;;(require 'eaf)
+;;(require 'eaf-browser)
+;;(require 'eaf-pdf-viewer)
+
+
+;; # Python
 ;;
 ;; See https://www.emacswiki.org/emacs/PythonProgrammingInEmacs
 ;;
+
 ;;(use-package flycheck
 ;;  :ensure t
 ;;   :init (global-flycheck-mode))
 ;;
 ;;
-;; = elpy =
+
+;; ## Elpy
 ;;
 ;; - Documentation: https://github.com/jorgenschaefer/elpy
 ;; - Repository: https://elpy.readthedocs.io/en/latest/introduction.html#installation
 ;;
-;; For Ubuntu:
+;; ### Installation
+
+;; #### From apt (Debian ≥10 an Ubuntu ≥18.10)
+;; History:
+;; - 2021-12-10: not working on supertube.
+;; Run:
 ;; - sudo apt install elpa-elpy
-;; - sudo apt install python3-jedi black autopep8 yapf
-;;(elpy-enable)
-(use-package elpy
-  :ensure t
-  :init
-  (elpy-enable))
+;; - sudo apt install python3-jedi black python3-autopep8 yapf3 python3-yapf
+(elpy-enable)
+
+
+;; #### With use-package
+;;(use-package elpy
+;;  :ensure t
+;;  :init
+;;  (elpy-enable))
+;;
+;;(put 'upcase-region 'disabled nil)
+;;(add-hook 'python-mode-hook 'jedi:setup)
+;;(setq jedi:complete-on-dot t)
+
 ;;
 ;; Old elpy setup:
 ;;(setq package-list '(use-package elpy))
@@ -71,9 +91,9 @@
 ;; Truncate long lines
 (set-default 'truncate-lines t)
 
-;; C-x <direction> to switch windows
-(use-package window-jump
-             :bind (("C-x <up>" . window-jump-up)
-                    ("C-x <down>" . window-jump-down)
-                    ("C-x <left>" . window-jump-left)
-                    ("C-x <right>" . window-jump-right)))
+;;;; C-x <direction> to switch windows
+;;(use-package window-jump
+;;             :bind (("C-x <up>" . window-jump-up)
+;;                    ("C-x <down>" . window-jump-down)
+;;                    ("C-x <left>" . window-jump-left)
+;;                    ("C-x <right>" . window-jump-right)))

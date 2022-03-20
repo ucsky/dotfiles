@@ -23,6 +23,8 @@ git config --global alias.br branch
 git config --global alias.ci commit
 git config --global alias.st status
 
+cd $HOME && cat ~/.gitignore | grep '/.dotfiles' || echo '/.dotfiles' >> .gitignore
+
 exit
 # I do not run this because it is too complicated.
 # Find another way, maybe based on setup

@@ -1,3 +1,24 @@
+;;{{{ Set up package and use-package
+
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
+
+;; Bootstrap 'use-package'
+(eval-after-load 'gnutls
+  '(add-to-list 'gnutls-trustfiles "/etc/ssl/cert.pem"))
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+(eval-when-compile
+  (require 'use-package))
+(require 'bind-key)
+(setq use-package-always-ensure t)
+
+;;}}}
+
+
 ;;(if (not (package-installed-p 'use-package))
 ;;    ;; Install package automatically if not already installed.
 ;;    (progn
@@ -55,14 +76,15 @@
 ;; Run:
 ;; - sudo apt install elpa-elpy
 ;; - sudo apt install python3-jedi black python3-autopep8 yapf3 python3-yapf
-(elpy-enable)
+;;(elpy-enable)
 
 
 ;; #### With use-package
-;;(use-package elpy
-;;  :ensure t
-;;  :init
-;;  (elpy-enable))
+(require 'use-package)
+(use-package elpy
+  :ensure t
+  :init
+  (elpy-enable))
 ;;
 ;;(put 'upcase-region 'disabled nil)
 ;;(add-hook 'python-mode-hook 'jedi:setup)

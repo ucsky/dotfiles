@@ -29,7 +29,7 @@ function wk() {
 
 # END
 export BASH_CONFIG="${BASH_CONFIG}->${BASH_SOURCE}:end"
-echo "BASH_CONFIG is of level $(($(echo $BASH_CONFIG | awk -F'->' '{print NF}')-1))"
+#echo "BASH_CONFIG is of level $(($(echo $BASH_CONFIG | awk -F'->' '{print NF}')-1))"
 if [ "$SEE_BASH_CONFIG" == 1 ];then
     echo $BASH_CONFIG
 fi

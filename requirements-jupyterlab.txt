@@ -1,0 +1,15 @@
+jupyter
+jupyterlab
+jupyter-lsp
+jupyterlab-lsp
+python-lsp-jsonrpc
+python-lsp-server
+pycodestyle
+mccabe
+pycodestyle
+pydocstyle
+pyflakes
+pylint
+rope
+rope
+yapf

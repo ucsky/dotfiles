@@ -1,0 +1,6 @@
+BINSH=$HOME/.dotfiles/script/sh
+BINBASH=$HOME/.dotfiles/script/bash
+BINPYTHON3=$HOME/.dotfiles/script/python3
+export PATH=$BINSH:$PATH
+export PATH=$BINBASH:$PATH
+export PATH=$BINPYTHON3:$PATH

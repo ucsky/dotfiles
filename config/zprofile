@@ -1,0 +1,17 @@
+
+# PATH utilities
+pathadd() {
+    if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
+        PATH="${PATH:+"$PATH:"}$1"
+    fi
+}
+pythonpathadd() {
+    if [ -d "$1" ] && [[ ":$PYTHONPATH:" != *":$1:"* ]]; then
+        PYTHONPATH="${PATH:+"$PYTHONPATH:"}$1"
+    fi
+}
+
+pathadd $HOME/.prifiles/script/sh
+pathadd $HOME/.prifiles/script/bash
+pathadd $HOME/.prifiles/script/python3
+

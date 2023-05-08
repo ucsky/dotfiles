@@ -1,8 +1,5 @@
 # Configuration for non-interactive bash shell
 
-# Dotfiles root directory
-export ROOT_DOTFILES=$HOME/.dotfiles
-
 # Cleaning
 alias c='rm -f *~'
 

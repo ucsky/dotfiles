@@ -4,11 +4,20 @@
 #              within the /var/lib/docker directory in a human-readable
 #              format.
 #
-# Usage: sudo ./docker-checksize.bash
+# Usage: sudo -E $USER $ROOT_DOTFILES/script/bash/docker-checksize.bash
 #
 # Tags: docker, disk-usage
 #
 ##
+
+help (){
+    sed -n '/#!/,/##/p' "$0" \
+	| grep -v '#!\|##'
+}
+if [ "$1" == "help" ];then
+    help
+    exit 0
+fi
 
 # change directory to /var/lib/docker
 pushd /var/lib/docker > /dev/null

@@ -4,7 +4,7 @@
 pushd /var/lib/docker > /dev/null
 
 # loop through each file and directory in /var/lib/docker
-for i in `sudo ls`; do
+for i in `ls`; do
     # display the disk usage of the current file or directory in a human-readable format
     du -sh $i
 done

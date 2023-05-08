@@ -1,11 +1,8 @@
 # Configuration for non-interactive bash shell
 
-# Start here
-export BASH_DOTFILES="${BASH_DOTFILES}:<${BASH_SOURCE}"
+# Dotfiles root directory
+export ROOT_DOTFILES=$HOME/.dotfiles
 
 # Cleaning
 alias c='rm -f *~'
-
-# End here
-export BASH_DOTFILES="${BASH_DOTFILES}:${BASH_SOURCE}>"
 

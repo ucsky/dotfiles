@@ -74,13 +74,19 @@
 ;; - sudo apt install python3-jedi black python3-autopep8 yapf3 python3-yapf
 ;;(elpy-enable)
 
+;; LSP Jedi
+;; More information:
+;; - https://emacs-lsp.github.io/lsp-mode/page/lsp-jedi/
+;; - https://github.com/fredcamps/lsp-jedi
+(use-package lsp-jedi
+  :ensure t)
 
-;; #### With use-package
-(require 'use-package)
-(use-package elpy
-  :ensure t
-  :init
-  (elpy-enable))
+;;;; #### With use-package
+;;(require 'use-package)
+;;(use-package elpy
+;;  :ensure t
+;;  :init
+;;  (elpy-enable))
 ;;
 ;;(put 'upcase-region 'disabled nil)
 ;;(add-hook 'python-mode-hook 'jedi:setup)
@@ -115,3 +121,6 @@
 ;;                    ("C-x <down>" . window-jump-down)
 ;;                    ("C-x <left>" . window-jump-left)
 ;;                    ("C-x <right>" . window-jump-right)))
+
+
+(add-to-list 'auto-mode-alist '(".*\\.tex\\.mustache\\'" . latex-mode))

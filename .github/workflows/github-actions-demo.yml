@@ -17,5 +17,5 @@ jobs:
           ls ${{ github.workspace }}
           pwd
       - name: Tests
-        run: bash tests/tests.bash
+        run: bash test/tests.bash
       - run: echo "🍏 This job's status is ${{ job.status }}."

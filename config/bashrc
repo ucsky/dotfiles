@@ -19,3 +19,18 @@ function wk() {
     ls -1 $HOME/.wk
 }
 
+function blockinfile() {
+    #
+    # Description:
+    #  Bash equivalent of Ansible blockinfile.
+    #  Found here https://kkovacs.eu/ansible-lineinfile-blockinfile-in-bash
+    #
+    # Usage:
+    #   blockinfile STARTMARK ENDMARK filename <<EOF
+    #   # STARTMARK
+    #   some text to
+    #   put inside
+    #   # ENDMARK
+    #   EOF
+    sed -i -ne '/'"${1//\//\\/}"'/{r/dev/stdin' -e ':a;n;/'"${2//\//\\/}"'/{:b;n;p;bb};ba};p;$r/dev/stdin' "$3" ;
+}

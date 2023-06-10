@@ -122,5 +122,7 @@
 ;;                    ("C-x <left>" . window-jump-left)
 ;;                    ("C-x <right>" . window-jump-right)))
 
-
+;; Automatically activate LaTeX mode for files with extention .tex.mustache
 (add-to-list 'auto-mode-alist '(".*\\.tex\\.mustache\\'" . latex-mode))
+;; Automatically activate LaTeX mode for files with extention .tex.jinja2
+(add-to-list 'auto-mode-alist '(".*\\.tex\\.jinja2\\'" . latex-mode))

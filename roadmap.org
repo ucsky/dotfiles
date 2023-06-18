@@ -1,10 +1,10 @@
+** TODO Install Ansible
+** TODO re-orga config in directory.
+** TODO rename script/python3 script/python
 ** TODO setup-setup and setup-clean
 *** TODO elementary-6.1
 *** TODO ubuntu-20.04
 *** TODO popos
-** TODO Install Ansible
-** TODO re-orga config in directory.
-** TODO rename script/python3 script/python
 ** TODO generate documentation automatically in HTML and Markdown from script.
 
 

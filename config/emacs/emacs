@@ -122,11 +122,11 @@
 ;;                    ("C-x <left>" . window-jump-left)
 ;;                    ("C-x <right>" . window-jump-right)))
 
-;; LaTeX mustache template
-(add-to-list 'auto-mode-alist '(".*\\.tex\\.mustache\\'" . latex-mode))
-;; LaTeX Jinja2 template
-(add-to-list 'auto-mode-alist '(".*\\.tex\\.jinja2\\'" . latex-mode))
-;; dotfiles .bashrc like configuration file
+;; Automatically activate bash mode for dotfiles .bashrc like configuration file
 (add-to-list 'auto-mode-alist '(".*/bash/rc\\'" . sh-mode))
-;; dotfiles .bash_profile like configuration file
+;;  Automatically activate bash mode for dotfiles .bash_profile like configuration file
 (add-to-list 'auto-mode-alist '(".*/bash/profile\\'" . sh-mode))
+;; Automatically activate LaTeX mode for files with extention .tex.mustache
+(add-to-list 'auto-mode-alist '(".*\\.tex\\.mustache\\'" . latex-mode))
+;; Automatically activate LaTeX mode for files with extention .tex.jinja2
+(add-to-list 'auto-mode-alist '(".*\\.tex\\.jinja2\\'" . latex-mode))

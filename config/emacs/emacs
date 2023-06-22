@@ -78,8 +78,10 @@
 ;; More information:
 ;; - https://emacs-lsp.github.io/lsp-mode/page/lsp-jedi/
 ;; - https://github.com/fredcamps/lsp-jedi
-(use-package lsp-jedi
-  :ensure t)
+(when (version<= "27.0" emacs-version)
+  (use-package lsp-jedi
+    :ensure t)
+)
 
 ;;;; #### With use-package
 ;;(require 'use-package)

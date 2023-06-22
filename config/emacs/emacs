@@ -1,4 +1,4 @@
-;;{{{ Set up package and use-package
+v;;{{{ Set up package and use-package
 (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
 (require 'package)
 (add-to-list 'package-archives
@@ -79,6 +79,7 @@
 ;; - https://emacs-lsp.github.io/lsp-mode/page/lsp-jedi/
 ;; - https://github.com/fredcamps/lsp-jedi
 (when (version<= "27.0" emacs-version)
+  ;; I need to do version check because for emacs26.3 lsp-jedi is not present on MELP.
   (use-package lsp-jedi
     :ensure t)
 )

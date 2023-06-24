@@ -1,5 +1,13 @@
 # Configuration for non-interactive bash shell
 
-# Cleaning
+# Env variables.
+export ROOT_DOTFILES=$HOME/.dotfiles
+
+# Cleaning.
 alias c='rm -f *~'
 
+# Dotfiles scripts.
+[[ ":$PATH:" != *":$HOME/.dotfiles/script/sh:"* ]] && PATH="$HOME/.dotfiles/script/sh:${PATH}"
+[[ ":$PATH:" != *":$HOME/.dotfiles/script/bash:"* ]] && PATH="$HOME/.dotfiles/script/bash:${PATH}"
+[[ ":$PATH:" != *":$HOME/.dotfiles/script/python3:"* ]] && PATH="$HOME/.dotfiles/script/python3:${PATH}"
+export PATH

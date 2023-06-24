@@ -1,11 +1,5 @@
 # Configuration for interactive bash shell
 
-export ROOT_DOTFILES=$HOME/.dotfiles
-
-[[ ":$PATH:" != *":$HOME/.dotfiles/script/sh:"* ]] && PATH="$HOME/.dotfiles/script/sh:${PATH}"
-[[ ":$PATH:" != *":$HOME/.dotfiles/script/bash:"* ]] && PATH="$HOME/.dotfiles/script/bash:${PATH}"
-[[ ":$PATH:" != *":$HOME/.dotfiles/script/python3:"* ]] && PATH="$HOME/.dotfiles/script/python3:${PATH}"
-export PATH
 
 function wk() {
     for i in `ls $HOME/.*files/wk/*`;do

@@ -1,12 +1,14 @@
 #!/bin/bash -e
 #
-# Description:
-#   First install and update.
+# Description: idenpotent setup.
 #
 #==
 
 distid=$(echo $(lsb_release -si)-$(lsb_release -sc) | tr '[:upper:]' '[:lower:]')
 
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install emacs
 ./setup/linux/setup.bash
 ./setup/linux/setup-bash.bash
 ./setup/linux/setup-emacs.bash

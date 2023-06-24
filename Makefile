@@ -1,6 +1,7 @@
 SHELL := /bin/bash # Bourne-Again SHell is a widly used command-line interpreter on Linux.
 PYTHON := python3.10 # Second to last Pyhon version in January 2023: I try to avoid missing dependencies.
 LEMPY_PYTHONPATH := ../../nbdev/
+CODENAME := $(shell echo "`lsb_release --id --short | tr '[:upper:]' '[:lower:]'`-`lsb_release --release --short`")
 ### 
 
 # Hack for displaying help message in Makefile
@@ -38,6 +39,11 @@ nbs-clear-output:
 	@for i in notebooks/*.ipynb;do \
 	jupyter nbconvert --ClearOutputPreprocessor.enabled=True --clear-output --inplace $$i; \
 	done
+
+.PHONY: setup
+setup:  ## Setup dotfiles
+setup: setup/linux/$(CODENAME)/setup.bash
+	(./$<)
 
 clean: ## Cleaning part of this directory.
 clean:

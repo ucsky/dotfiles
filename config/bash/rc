@@ -1,5 +1,16 @@
 # Configuration for interactive bash shell
 
+# PATH utilities (see also bash_profile)
+pathadd() {
+    if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
+        PATH="${PATH:+"$PATH:"}$1"
+    fi
+}
+pythonpathadd() {
+    if [ -d "$1" ] && [[ ":$PYTHONPATH:" != *":$1:"* ]]; then
+        PYTHONPATH="${PATH:+"$PYTHONPATH:"}$1"
+    fi
+}
 
 function wk() {
     for i in `ls $HOME/.*files/wk/*`;do

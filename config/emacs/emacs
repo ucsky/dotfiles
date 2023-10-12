@@ -1,13 +1,39 @@
+;; Initialize package system if not already done
+(require 'package)
+
+;; Add MELPA or other repositories if needed (optional but commonly done)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+
+;; Initialize the package system if it's not already done
+(unless (bound-and-true-p package--initialized) ; Don't reinitialize if already done
+  (package-initialize))
+
 ;; Bootstrap 'use-package'
 (eval-after-load 'gnutls
   '(add-to-list 'gnutls-trustfiles "/etc/ssl/cert.pem"))
+
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
+
 (eval-when-compile
   (require 'use-package))
+
 (require 'bind-key)
 (setq use-package-always-ensure t)
+;; todel 
+;; todel 
+;; todel 
+;; todel ;; Bootstrap 'use-package'
+;; todel (eval-after-load 'gnutls
+;; todel   '(add-to-list 'gnutls-trustfiles "/etc/ssl/cert.pem"))
+;; todel (unless (package-installed-p 'use-package)
+;; todel   (package-refresh-contents)
+;; todel   (package-install 'use-package))
+;; todel (eval-when-compile
+;; todel   (require 'use-package))
+;; todel (require 'bind-key)
+;; todel (setq use-package-always-ensure t)
 
 ;;}}}
 

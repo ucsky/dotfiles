@@ -1,0 +1,112 @@
+#!/bin/bash -e
+# 
+# Description: 
+#   Substitution of string ( $1 by $2 ) in 
+#   fileS located in directory ( $3 )
+#   and childrens
+#
+# Created: Guillaume Simon, 2007
+#
+# History:
+#   2015/12/16: change $iFILES by "$iFILES"
+#   2011/08/31: Fix the bug with grep -v '.svn' (G.S.)
+#   2007/04/05: Fix the bug with inter-ocean R (G.S.)
+#
+# Todo:
+#   -> How to deal with name file with a blank
+#   -> Make something for treat substitution when # is present.
+#      : Just make a test and change seperator in sed for example ...
+#
+echo '                                      '
+echo 'pVISU: $HOME/bin/multi/bin/subsr START'
+if [ $# != 3 ]; then
+    echo ':e+>                            '
+    echo ':e| USE: $1 string to match     '
+    echo ':e|      $2 new string          '
+    echo ':e|      $3 directory to search '
+    echo ':e+>                            '
+    exit 0
+fi
+echo ':q+>'
+echo ':q| Your are going to substitue:'
+echo ':q|                             '
+echo ':q|                   '$1
+echo ':q|                             '
+echo ':q|  by                         '
+echo ':q|                             '
+echo ':q|                   '$2
+echo ':q|                             '
+echo ':q|  in directory:              '
+echo ':q|                             '
+echo ':q|                   '$3  
+echo ':q|                             '
+echo ':q|                is it right ?'
+echo ':q| Answer yes or no:           '
+echo ':q+>'
+read answer                
+
+if [ "$answer" == no ]; then
+    echo ':i-> You said '"$answer"
+    exit 1
+elif [ "$answer" == yes ]; then
+    echo ':i-> You said '"$answer"
+else
+    echo ':i-> You said '"$answer"
+    echo ':e-> Answer mis match'
+    exit 1
+fi
+
+# Set directory for backup
+if [ -z "$old" ];then
+    old=/tmp
+fi
+
+# Get the location of matching files
+if [ -f tmp.grep ]; then rm -f tmp.grep;fi
+grep -nr "$1" "$3" | grep -v "\.svn" > tmp.grep
+if [ -f tmp.awk ]; then rm -f tmp.awk;fi
+cat tmp.grep | awk -F: '{FS=":"}{print $1}' > tmp.awk
+rm -f tmp.grep
+files=`cat tmp.awk`
+rm -f tmp.awk
+
+# save the files will be touch
+if [ ! -d $old/subsr ]; then
+    mkdir $old/subsr
+fi
+for iFILES in $files;do
+    cp -f "$iFILES" $old/subsr
+done
+echo ':i-> FileS are saved in '$old/subsr
+
+# Start subtitution
+for iFILES in $files; do
+    echo ':i-> '"$iFILES"' substitution'
+    cat > tmp.sed <<EOF
+s#$1#$2#
+EOF
+
+    #
+    sed -f tmp.sed "$iFILES" > "$iFILES".tmp
+    #---
+    if [ $? != 0 ]; then
+	echo ':e-> Substitution pb '"$iFILES"
+	exit 1
+    fi
+    rm -f tmp.sed
+    #---
+    if [ `wc "$iFILES".tmp | awk '{FS=""}{print $1}'` != `wc "$iFILES" | awk '{FS=""}{print $1}'` ]; then
+	echo ':e+>                                             '
+	echo ':e| Substitution pb '"$iFILES"' and '"$iFILES"'.tmp  '
+	echo ':e| doesn t have the same number of ligne       '
+	echo ':e+>                                             '
+	exit 1
+    fi
+    #---
+    rm -f "$iFILES"
+    mv "$iFILES".tmp "$iFILES"
+    chmod 700 "$iFILES"
+done
+echo 'pVISU: $HOME/bin/multi/bin/subsr   END'
+echo '                                    '
+#

@@ -1,6 +1,7 @@
 #!/bin/bash
 #
-# Miniconda Installation Script
+# Description:
+# Miniconda Installation Script.
 # This script automates the installation of Miniconda, a minimal installer for conda.
 # It checks for an existing Miniconda installation, downloads the latest Miniconda
 # installer if needed, and runs the installer. It then initializes conda for the current

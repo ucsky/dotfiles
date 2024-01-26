@@ -1,5 +1,4 @@
-SHELL := /bin/bash # Bourne-Again SHell is a widly used command-line interpreter on Linux.
-PYTHON := python3.10 # Second to last Pyhon version in January 2023: I try to avoid missing dependencies.
+SHELL := /bin/bash -i # Bourne-Again SHell is a widly used command-line interpreter on Linux.
 LEMPY_PYTHONPATH := ../../nbdev/
 CODENAME := $(shell echo "`lsb_release --id --short | tr '[:upper:]' '[:lower:]'`-`lsb_release --release --short`")
 ### 
@@ -11,7 +10,7 @@ help:
 ### venv-main
 venv-main: ## Create Python virtualenv for MAIN.
 venv-main:
-	-(test -d venv/main || $(PYTHON) -m venv venv/main)
+	-(test -d venv/main || python3 -m venv venv/main)
 	-(. venv/main/bin/activate \
 	&& pip install -U pip \
 	&& pip install -r requirements-main.txt \

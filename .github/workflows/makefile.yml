@@ -1,4 +1,4 @@
-name: Makefile CI
+name: All
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 
 on:
@@ -9,21 +9,8 @@ on:
 
 jobs:
   
-  build:
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-      
-    - name: Help
-      run: make
-
-    - name: Setup venv
-      run: make venv-setup-main
-      
-  Explore-GitHub-Actions:
-    runs-on: ubuntu-latest
+  windows-latest:
+    runs-on: windows-latest
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
@@ -39,3 +26,15 @@ jobs:
       - name: Tests
         run: bash test/tests.bash
       - run: echo "🍏 This job's status is ${{ job.status }}."
+  
+  ubuntu-latest:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      
+    - name: Help
+      run: make
+
+    - name: Setup venv
+      run: make venv-setup-main
+      

@@ -1,4 +1,4 @@
-name: All
+name: Workflows
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 
 on:
@@ -21,20 +21,52 @@ jobs:
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: List files in the repository
         run: |
+          dir ${{ github.workspace }}
+      - name: Tests
+        run: bash test/tests.bash
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+  
+  macos-latest:
+    runs-on: windows-latest
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - name: List files in the repository
+        run: |
           ls ${{ github.workspace }}
           pwd
       - name: Tests
         run: bash test/tests.bash
       - run: echo "🍏 This job's status is ${{ job.status }}."
-  
+
   ubuntu-latest:
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v3
-      
+      - uses: actions/checkout@v3    
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+          pwd
+      - name: Tests
+        run: bash test/tests.bash
+      - run: echo "🍏 This job's status is ${{ job.status }}."
     - name: Help
       run: make
-
+    - name: Help
+      run: make show-codename
     - name: Setup venv
       run: make venv-setup-main
       

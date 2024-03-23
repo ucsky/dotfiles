@@ -7,13 +7,13 @@ CODENAME := $(shell echo "`lsb_release --id --short | tr '[:upper:]' '[:lower:]'
 help: 
 	@grep -E '(^[0-9a-zA-Z_-]+:.*?##.*$$)' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m%-30s\033[0m %s\n", $$1, $$2}'
 
-### venv-main
-venv-main: ## Create Python virtualenv for MAIN.
-venv-main:
+### venv-setup-main
+venv-setup-main: ## Create Python virtualenv for MAIN.
+venv-setup-main:
 	-(test -d venv/main || python3 -m venv venv/main)
 	-(. venv/main/bin/activate \
 	&& pip install -U pip \
-	&& pip install -r requirements-main.txt \
+	&& pip install -r requirements/main.txt \
 	)
 venv-start-lab-main: ## Start jupyter lab with MAIN.
 venv-start-lab-main:

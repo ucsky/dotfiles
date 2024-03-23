@@ -15,12 +15,14 @@ venv-setup-main:
 	&& pip install -U pip \
 	&& pip install -r requirements/main.txt \
 	)
+
 venv-start-lab-main: ## Start jupyter lab with MAIN.
 venv-start-lab-main:
 	(export PYTHONPATH="$${PYTHONPATH}:$(LEMPY_PYTHONPATH)" \
 	&& . venv/main/bin/activate \
 	&& jupyter lab --no-browser \
 	)
+
 # Because sometime Jupyter lab freeze when performing visualization.
 venv-start-nb-main: ## Start jupyter notebook with MAIN.
 venv-start-nb-main:
@@ -28,6 +30,7 @@ venv-start-nb-main:
 	&& . venv/main/bin/activate \
 	&& jupyter notebook --no-browser \
 	)
+
 venv-clean-main: ## Clean venv MAIN.
 venv-clean-main:
 	@(rm -rf venv/main)

@@ -13,6 +13,10 @@ show-codename: ## Show distribution codename.
 show-codename:
 	-@(echo "$(CODENAME)")
 
+show-workflows:  ## Check workflows for CI.
+show-workflows:
+	-@(cat .github/workflows/workflows.yml | yq)
+
 ### venv-setup-main
 venv-setup-main: ## Create Python virtualenv for MAIN.
 venv-setup-main:

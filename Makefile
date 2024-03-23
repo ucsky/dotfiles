@@ -1,11 +1,17 @@
 SHELL := /bin/bash -i # Bourne-Again SHell is a widly used command-line interpreter on Linux.
-LEMPY_PYTHONPATH := ../../nbdev/
+
 CODENAME := $(shell echo "`lsb_release --id --short | tr '[:upper:]' '[:lower:]'`-`lsb_release --release --short`")
+
 ### 
 
 # Hack for displaying help message in Makefile
 help: 
 	@grep -E '(^[0-9a-zA-Z_-]+:.*?##.*$$)' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m%-30s\033[0m %s\n", $$1, $$2}'
+
+
+show-codename: ## Show distribution codename.
+show-codename:
+	-@(echo "$(CODENAME)")
 
 ### venv-setup-main
 venv-setup-main: ## Create Python virtualenv for MAIN.
@@ -16,16 +22,16 @@ venv-setup-main:
 	&& pip install -r requirements/main.txt \
 	)
 
-venv-start-lab-main: ## Start jupyter lab with MAIN.
-venv-start-lab-main:
+venv-startlab-main: ## Start jupyter lab with MAIN.
+venv-startlab-main:
 	(export PYTHONPATH="$${PYTHONPATH}:$(LEMPY_PYTHONPATH)" \
 	&& . venv/main/bin/activate \
 	&& jupyter lab --no-browser \
 	)
 
 # Because sometime Jupyter lab freeze when performing visualization.
-venv-start-nb-main: ## Start jupyter notebook with MAIN.
-venv-start-nb-main:
+venv-startnb-main: ## Start jupyter notebook with MAIN.
+venv-startnb-main:
 	(export PYTHONPATH="${PYTHONPATH}:$(LEMPY_PYTHONPATH)" \
 	&& . venv/main/bin/activate \
 	&& jupyter notebook --no-browser \

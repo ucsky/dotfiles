@@ -59,6 +59,6 @@ setup: setup/linux/$(CODENAME)/setup.bash
 
 clean: ## Cleaning part of this directory.
 clean:
-
+	rm -rf venv
 
 

@@ -16,7 +16,7 @@ yapf
 pandas
 papermill
 plotly
-pyarrow
+pyarrow>14.0.1
 black
 kaleido
 jupyterlab-git

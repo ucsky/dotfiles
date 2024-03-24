@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -i
 #
 # Description:
 # Miniconda Installation Script.
@@ -16,6 +16,13 @@
 #                  Defaults to "$HOME/.miniconda3" if not set.
 #
 ##
+
+# Test if conda is already installed
+command -v conda >> /dev/null && HAS_CONDA=1 || HAS_CONDA=0
+if [ $HAS_CONDA == 1 ];then
+    echo "conda already installed"
+    exit 0
+fi
 
 # Set the ROOT_MINICONDA variable to the user's home directory
 # with a default path to .miniconda3 or use the provided

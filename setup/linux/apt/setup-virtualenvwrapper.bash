@@ -1,4 +1,11 @@
-#!/bin/bash
+#!/bin/bash -i
+
+# Test if workon is already installed
+command -v workon >> /dev/null && HAS_WORKON=1 || HAS_WORKON=0
+if [ $HAS_WORKON == 1 ];then
+    echo "workon already installed"
+    exit 0
+fi
 
 # List of packages to check and potentially install
 packages=(

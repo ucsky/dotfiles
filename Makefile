@@ -54,7 +54,7 @@ nbs-clear-output:
 
 .PHONY: setup
 setup:  ## Setup dotfiles
-setup: setup/linux/$(CODENAME)/setup.bash
+setup: setup/linux/setup.bash
 	(./$<)
 
 clean: ## Cleaning part of this directory.

@@ -1,5 +1,5 @@
 # dotfiles 51
-<p align="center"> <img src="./assets/icon-tux.png"> p>
+<p align="center"> <img src="./assets/icon-M51.png"> </p>
 <p style="text-align: center;">Keep it simple</p>
 
 ## Install

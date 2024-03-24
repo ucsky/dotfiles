@@ -10,6 +10,13 @@
 #
 ##
 
+command -v docker >> /dev/null && HAS_DOCKER=1 || HAS_DOCKER=0
+if [ "$HAS_DOCKER" == 0 ];then
+    echo "WARNING: docker not found on `hostname`."
+    exit 0
+fi
+
+
 help (){
     sed -n '/#!/,/##/p' "$0" \
 	| grep -v '#!\|##'

@@ -1,2 +1,2 @@
 #!/bin/bash
-$HOME/.dotfiles/setup/linux/setup.bash
+./setup/linux/setup.bash

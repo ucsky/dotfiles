@@ -5,6 +5,6 @@
 ##
 
 # Run all linux bash sub-setup
-for i_setup in $HOME/.dotfiles/setup/linux/setup-*.bash; do
+for i_setup in setup/linux/setup-*.bash; do
     ./$i_setup
 done

@@ -1,5 +1,5 @@
 # dotfiles 51
-<p align="center"> <img src="./assets/icon-M51.png"> </p>
+<p align="center"> <img src="./assets/icon-M51.png" style="width: 100%;"> </p>
 <p style="text-align: center;">Keep it simple</p>
 
 ## Install

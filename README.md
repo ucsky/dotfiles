@@ -1,6 +1,6 @@
 # dotfiles 51
-
-Keep it simple.
+<p align="center"> <img src="./assets/icon-tux.png"> p>
+<p style="text-align: center;">Keep it simple</p>
 
 ## Install
 

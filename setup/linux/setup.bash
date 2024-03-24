@@ -7,10 +7,10 @@
 echo "Starting $0"
 
 # Check if user as sudo
-if [ $USERNAME == root ];then
+if [ "`whoami`" == root ];then
     HAS_SUDO=1
 else
-    groups $USERNAME | egrep '\ssudo\s' >> /dev/null && HAS_SUDO=1 || HAS_SUDO=0
+    groups `whoami` | egrep '\ssudo\s' >> /dev/null && HAS_SUDO=1 || HAS_SUDO=0
 fi
 echo "HAS_SUDO=${HAS_SUDO}"
 

@@ -9,7 +9,7 @@ cd $HOME
 git clone git@github.com:ucsky/dotfiles.git .dotfiles
 cd .dotfiles
 make setup
-`
+```
 
 ## See also
 

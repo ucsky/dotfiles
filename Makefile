@@ -41,12 +41,12 @@ venv-startnb-main:
 	&& jupyter notebook --no-browser \
 	)
 
-venv-clean-main: ## Clean venv MAIN.
+venv-clean-main: ## Clean venv MAIN
 venv-clean-main:
 	@(rm -rf venv/main)
 
 ### Cleaning
-nbs-clear-output: ## Clear all notebooks.
+nbs-clear-output: ## Clear all notebooks
 nbs-clear-output:
 	@for i in notebooks/*.ipynb;do \
 	jupyter nbconvert --ClearOutputPreprocessor.enabled=True --clear-output --inplace $$i; \
@@ -57,8 +57,8 @@ setup:  ## Setup dotfiles
 setup: setup/linux/setup.bash
 	(./$<)
 
-clean: ## Cleaning part of this directory.
-clean:
-	rm -rf venv
+clean: ## Cleaning this directory
+clean: venv-clean-main
+
 
 

@@ -4,8 +4,12 @@ Keep it simple.
 
 ## Install
 
-git clone 
+```bash
+cd $HOME
+git clone git@github.com:ucsky/dotfiles.git .dotfiles
+make setup
+`
 
 ## See also
 
-- https://github.com/webpro/awesome-dotfiles
+https://github.com/webpro/awesome-dotfiles

@@ -1,5 +1,5 @@
 name: Workflows
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+run-name: ${{ github.actor }} workflows 🚀
 
 on:
   push:
@@ -31,6 +31,8 @@ jobs:
         run: make show-codename
       - name: Setup venv
         run: make venv-setup-main
+      - name: Setup
+        run: make setup
       - name: Tests
         run: bash tests/tests.bash
       

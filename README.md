@@ -14,3 +14,6 @@ make setup
 ## See also
 
 https://github.com/webpro/awesome-dotfiles
+
+
+![linux icon](./assets/icon-tux.png)

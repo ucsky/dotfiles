@@ -28,7 +28,7 @@ venv-setup-main:
 
 venv-startlab-main: ## Start jupyter lab with MAIN.
 venv-startlab-main:
-	(export PYTHONPATH="$${PYTHONPATH}:$(LEMPY_PYTHONPATH)" \
+	(echo "Starting lab with venv main" \
 	&& . venv/main/bin/activate \
 	&& jupyter lab --no-browser \
 	)
@@ -36,7 +36,7 @@ venv-startlab-main:
 # Because sometime Jupyter lab freeze when performing visualization.
 venv-startnb-main: ## Start jupyter notebook with MAIN.
 venv-startnb-main:
-	(export PYTHONPATH="${PYTHONPATH}:$(LEMPY_PYTHONPATH)" \
+	(echo "Staring nb with venv main" \
 	&& . venv/main/bin/activate \
 	&& jupyter notebook --no-browser \
 	)
@@ -44,6 +44,39 @@ venv-startnb-main:
 venv-clean-main: ## Clean venv MAIN
 venv-clean-main:
 	@(rm -rf venv/main)
+
+
+conda-setup: ## Install using conda env main.
+conda-setup:
+	-@(\
+	conda env list \
+	| egrep '^main\s+/' \
+	&& conda activate main \
+	|| conda create --name main python=3.10 -y \
+	)
+	-@(conda activate main \
+	&&  conda install anaconda::pip -y \
+	&& pip install -r requirements/main.txt \
+	)
+
+conda-clean: ## Clean conda env main.
+conda-clean:
+	-@(conda env remove --name main)	
+
+conda-startlab-main: ## Start jupyter lab with MAIN.
+conda-startlab-main:
+	(echo "Starting lab with conda main" \
+	&& conda activate main \
+	&& jupyter lab --no-browser \
+	)
+
+# Because sometime Jupyter lab freeze when performing visualization.
+conda-startnb-main: ## Start jupyter notebook with MAIN.
+conda-startnb-main:
+	(echo "Staring nb with conda main" \
+	&& conda activate main \
+	&& jupyter notebook --no-browser \
+	)
 
 ### Cleaning
 nbs-clear-output: ## Clear all notebooks

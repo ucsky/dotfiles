@@ -14,10 +14,13 @@ papermill
 plotly
 pyarrow>14.0.1
 pycodestyle
+pycodestyle
+pydocstyle
 pyflakes
 pylint
 python-lsp-jsonrpc
 python-lsp-server
+rope
 rope
 setuptools>65.5.1
 tornado>6.3.3

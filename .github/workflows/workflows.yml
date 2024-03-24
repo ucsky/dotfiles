@@ -31,6 +31,8 @@ jobs:
         run: make show-codename
       - name: Setup venv
         run: make venv-setup-main
+      - name: Setup
+        run: make setup
       - name: Tests
         run: bash tests/tests.bash
       
@@ -49,8 +51,6 @@ jobs:
           dir ${{ github.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
   
-
-
   macos-latest:
     runs-on: windows-latest
     steps:

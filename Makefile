@@ -78,6 +78,14 @@ conda-startnb-main:
 	&& jupyter notebook --no-browser \
 	)
 
+format-req: ## Format requirements
+format-req:
+	-@(for i in requirements/*.txt;do \
+	echo "Processing $$i";\
+	sort $$i -o $$i;\
+	uniq $$i > temp-format-req.txt && mv temp-format-req.txt $$i;\
+	done)
+
 ### Cleaning
 nbs-clear-output: ## Clear all notebooks
 nbs-clear-output:

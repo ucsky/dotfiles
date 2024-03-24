@@ -3,8 +3,8 @@ ipython>8.10.0
 jupyter
 jupyterlab
 jupyterlab-git
-jupyterlab-lsp
-jupyter-lsp>5.02
+jupyterlab-lsp>5.02
+jupyter-lsp
 jupyter-server>2.11.2
 kaleido
 mccabe

@@ -10,13 +10,6 @@
 #
 ##
 
-command -v docker >> /dev/null && HAS_DOCKER=1 || HAS_DOCKER=0
-if [ "$HAS_DOCKER" == 0 ];then
-    echo "WARNING: docker not found on `hostname`."
-    exit 0
-fi
-
-
 help (){
     sed -n '/#!/,/##/p' "$0" \
 	| grep -v '#!\|##'
@@ -26,6 +19,14 @@ if [ "$1" == "help" ];then
     exit 0
 fi
 
+command -v docker >> /dev/null && HAS_DOCKER=1 || HAS_DOCKER=0
+if [ "$HAS_DOCKER" == 0 ];then
+    echo "WARNING: docker not found on `hostname`."
+    exit 0
+fi
+
+
+if test -x /var/lib/docker;then
 # change directory to /var/lib/docker
 pushd /var/lib/docker > /dev/null
 
@@ -37,3 +38,6 @@ done
 
 # change back to the previous directory
 popd > /dev/null
+else
+    echo "WARNING: do not have permision to go in /var/lib/docker"
+fi

@@ -46,8 +46,8 @@ venv-clean-main:
 	@(rm -rf venv/main)
 
 
-conda-setup: ## Install using conda env main.
-conda-setup:
+conda-setup-main: ## Install using conda env main.
+conda-setup-main:
 	-@(\
 	conda env list \
 	| egrep '^main\s+/' \
@@ -59,8 +59,8 @@ conda-setup:
 	&& pip install -r requirements/main.txt \
 	)
 
-conda-clean: ## Clean conda env main.
-conda-clean:
+conda-clean-main: ## Clean conda env main.
+conda-clean-main:
 	-@(conda env remove --name main)	
 
 conda-startlab-main: ## Start jupyter lab with MAIN.

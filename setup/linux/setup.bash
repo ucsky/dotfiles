@@ -5,7 +5,8 @@
 ##
 
 echo "Starting $0"
-
+echo "USERNAME=$USERNAME"
+echo "whoami=`whoami`"
 # Check if user as sudo
 if [ "`whoami`" == root ];then
     HAS_SUDO=1

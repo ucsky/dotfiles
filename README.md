@@ -16,5 +16,3 @@ https://github.com/webpro/awesome-dotfiles
 
 
 ![linux icon](./assets/icon-tux.png)
-
-<p align="center"> <img src="./assets/icon-M51.png" style="width: 100%;"> </p>

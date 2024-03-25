@@ -1,7 +1,7 @@
 #!/bin/bash
 
 BINARY=yq_linux_amd64
-VERSION=v4.2.0
+VERSION=v4.43.1
 PATH_EXE=$HOME/bin/yq_$VERSION
 test ! -d $HOME/bin && mkdir $HOME/bin || true
 test ! -f $PATH_EXE \
@@ -10,3 +10,5 @@ test ! -f $PATH_EXE \
 	    && mv ${BINARY} $PATH_EXE \
     ) \
     || true
+test -L $HOME/bin/yq && rm $HOME/bin/yq || true
+ln -s $PATH_EXE $HOME/bin/yq

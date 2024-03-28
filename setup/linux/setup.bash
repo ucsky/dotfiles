@@ -20,7 +20,7 @@ command -v apt >> /dev/null && HAS_APT=1 || HAS_APT=0
 echo "HAS_APT=${HAS_APT}"
 
 # Install package with apt
-if [ [ $HAS_ROOT == "1" ] && [ $HAS_APT == "1" ] ];then
+if [ [ $HAS_SUDO == "1" ] && [ $HAS_APT == "1" ] ];then
     for i_setup in setup/linux/apt/setup-*.bash;do
 	./$i_setup
     done

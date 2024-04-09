@@ -1,9 +1,9 @@
-black>24.3.0
+black
 ipython>8.10.0
 jupyter
 jupyterlab
 jupyterlab-git
-jupyterlab-lsp>5.02
+jupyterlab-lsp
 jupyter-lsp
 jupyter-server>2.11.2
 kaleido

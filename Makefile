@@ -17,6 +17,50 @@ show-workflows:  ## Check workflows for CI.
 show-workflows:
 	-@(cat .github/workflows/workflows.yml | yq)
 
+### workon
+setup-workon: ## Setup main project using virtualenv wrapper.
+setup-workon:
+	-@($(HOME)/.dotfiles/setup/linux/apt/virtualenvwrapper/setup.bash)
+	-@(command -v workon &> /dev/null \
+	&& \
+		(\
+		echo "Using workon for install the main." \
+		&& \
+			( \
+			workon main &> /dev/null \
+			&& echo "Virutal env main already created."\
+			|| (echo "Creating main" && mkvirtualenv main) \
+			) \
+		&& \
+			( \
+			workon main \
+			&& pip install -U pip \
+			&& pip install -r requirements/main.txt \
+			) \
+		) \
+	|| \
+		(\
+		echo "ERROR: please install Virtualenv Wrapper." \
+		) \
+	)
+
+clean-workon: ## Clean main project using virtualenv wrapper.
+clean-workon:
+	-@(command -v workon &> /dev/null \
+	&& \
+		(\
+		echo "Cleaning virtual env wrapper project main." \
+		&& \
+			( \
+			rmvirtualenv main \
+			) \
+		) \
+	|| \
+		(\
+		echo "ERROR: please install Virtualenv Wrapper." \
+		) \
+	)
+
 ### venv-setup-main
 venv-setup-main: ## Create Python virtualenv for MAIN.
 venv-setup-main:

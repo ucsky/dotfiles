@@ -11,7 +11,7 @@ echo "whoami=`whoami`"
 if [ "`whoami`" == root ];then
     HAS_SUDO=1
 else
-    groups `whoami` | egrep '\ssudo\s' >> /dev/null && HAS_SUDO=1 || HAS_SUDO=0
+    groups `whoami` | egrep '\ssudo|sudo\s|\ssudo\s' >> /dev/null && HAS_SUDO=1 || HAS_SUDO=0
 fi
 echo "HAS_SUDO=${HAS_SUDO}"
 
@@ -22,14 +22,14 @@ echo "HAS_APT=${HAS_APT}"
 # Install package with apt
 if [[ $HAS_SUDO == "1" && $HAS_APT == "1" ]];then
     for i_setup in setup/linux/apt/setup-*.bash;do
-	./$i_setup
+	test -f $i_setup && ./$i_setup || true
     done
 fi
 
 # Run all linux bash sub-setup
 for i_setup in setup/linux/setup-*.bash; do
     echo "Running $i_setup"
-    ./$i_setup
+    test -f $i_setup && ./$i_setup || true
 done
 
 echo "Finishing $0"

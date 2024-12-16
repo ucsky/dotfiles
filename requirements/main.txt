@@ -5,7 +5,7 @@ jupyterlab
 jupyterlab-git
 jupyterlab-lsp
 jupyter-lsp
-jupyter-server>2.11.2
+jupyter-server>2.14.1
 kaleido
 mccabe
 numpy>1.22.2
@@ -21,5 +21,5 @@ python-lsp-jsonrpc
 python-lsp-server
 rope
 setuptools>65.5.1
-tornado>6.3.3
+tornado>6.4.1
 yapf

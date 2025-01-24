@@ -20,6 +20,9 @@
 ;; --- TRAMP Optimization ---
 ;; Configure TRAMP to use SSH as the default method
 (setq tramp-default-method "ssh")
+(setq tramp-ssh-controlmaster-options
+      "-o ControlMaster=auto -o ControlPersist=yes -o ControlPath='~/.ssh/control-%%r@%%h:%%p'")
+(setq tramp-copy-size-limit 1000000) ;; Increase limit for file copy
 
 ;; --- Line Truncation ---
 ;; Enable line truncation (useful to avoid line wrapping in some views)
@@ -74,9 +77,10 @@
 (add-hook 'python-mode-hook
           (lambda ()
             (add-hook 'before-save-hook 'blacken-buffer nil t)))
-;; Automatically format code on save
-;; Format code  isort before each save
-(add-hook 'before-save-hook 'isortify-buffer)
+;; Automatically format code with isort before each save
+(add-hook 'python-mode-hook
+          (lambda ()
+            (add-hook 'before-save-hook 'isortify-buffer nil t)))
 
 ;; --- Appearance and Utility ---
 ;; Globally display line numbers
@@ -100,3 +104,16 @@
   :ensure auctex
   :hook (latex-mode . (lambda ()
                         (setq TeX-PDF-mode t))))
+
+;; --- Git Integration ---
+;; Add Magit for Git operations
+(use-package magit
+  :commands magit-status
+  :config
+  (global-set-key (kbd "C-x g") 'magit-status))
+
+;; --- Keybinding Discovery ---
+;; Add which-key to help discover keybindings
+(use-package which-key
+  :config
+  (which-key-mode))

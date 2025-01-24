@@ -35,8 +35,10 @@ jobs:
         run: make conda-setup-main
       - name: Setup
         run: make setup
-      - name: Tests
+      - name: Tests bash
         run: bash tests/tests.bash
+      - name: Tests check_nb_params.py
+        run: . venv/main/bin/activate && python tests/test_check_nb_params.py
       
   windows-latest:
     runs-on: windows-latest

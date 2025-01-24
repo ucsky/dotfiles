@@ -1,153 +1,119 @@
-;; Initialize package system if not already done
+;; --- Package Initialization ---
+;; Initialize the package manager and add MELPA and GNU ELPA repositories
 (require 'package)
-
-;; Add MELPA or other repositories if needed (optional but commonly done)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-
-;; Initialize the package system if it's not already done
-(unless (bound-and-true-p package--initialized) ; Don't reinitialize if already done
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("gnu" . "https://elpa.gnu.org/packages/")))
+(unless (bound-and-true-p package--initialized)
   (package-initialize))
 
 ;; Bootstrap 'use-package'
-(eval-after-load 'gnutls
-  '(add-to-list 'gnutls-trustfiles "/etc/ssl/cert.pem"))
-
+;; Ensure the "use-package" package is installed, which simplifies the management of other packages
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
 
 (eval-when-compile
   (require 'use-package))
-
 (require 'bind-key)
-(setq use-package-always-ensure t)
-;; todel 
-;; todel 
-;; todel 
-;; todel ;; Bootstrap 'use-package'
-;; todel (eval-after-load 'gnutls
-;; todel   '(add-to-list 'gnutls-trustfiles "/etc/ssl/cert.pem"))
-;; todel (unless (package-installed-p 'use-package)
-;; todel   (package-refresh-contents)
-;; todel   (package-install 'use-package))
-;; todel (eval-when-compile
-;; todel   (require 'use-package))
-;; todel (require 'bind-key)
-;; todel (setq use-package-always-ensure t)
+(setq use-package-always-ensure t) ;; Automatically install packages defined with use-package
 
-;;}}}
-
-
-;;(if (not (package-installed-p 'use-package))
-;;    ;; Install package automatically if not already installed.
-;;    (progn
-;;      (package-refresh-contents)
-;;      (package-install 'use-package)))
-;;
-
-;; Make tramp quicker with ssh
+;; --- TRAMP Optimization ---
+;; Configure TRAMP to use SSH as the default method
 (setq tramp-default-method "ssh")
+(setq tramp-ssh-controlmaster-options
+      "-o ControlMaster=auto -o ControlPersist=yes -o ControlPath='~/.ssh/control-%%r@%%h:%%p'")
+(setq tramp-copy-size-limit 1000000) ;; Increase limit for file copy
 
-
-;;;; list the repositories containing them
-;;;; see https://elpa.gnu.org
-;;(add-to-list 'package-archives
-;;             '("gnu" . "https://elpa.gnu.org/packages/")
-;;             t)
-;;;; see https://marmalade-repo.org
-;;(add-to-list 'package-archives
-;;             '("marmalade" . "http://marmalade-repo.org/packages/")
-;;             t)
-;;(add-to-list 'package-archives
-;;             '("melpa-stable" . "https://stable.melpa.org/packages/") t)
-;;
-;;;; activate all the packages (in particular autoloads)
-;;(package-initialize)
-
-
-
-
-;; # Python
-;;
-;; See https://www.emacswiki.org/emacs/PythonProgrammingInEmacs
-;;
-
-;;(use-package flycheck
-;;  :ensure t
-;;   :init (global-flycheck-mode))
-;;
-;;
-
-;; ## Elpy
-;;
-;; - Documentation: https://github.com/jorgenschaefer/elpy
-;; - Repository: https://elpy.readthedocs.io/en/latest/introduction.html#installation
-;;
-;; ### Installation
-
-;; #### From apt (Debian ≥10 an Ubuntu ≥18.10)
-;; History:
-;; - 2021-12-10: not working on supertube.
-;; Run:
-;; - sudo apt install elpa-elpy
-;; - sudo apt install python3-jedi black python3-autopep8 yapf3 python3-yapf
-;;(elpy-enable)
-
-;; LSP Jedi
-;; More information:
-;; - https://emacs-lsp.github.io/lsp-mode/page/lsp-jedi/
-;; - https://github.com/fredcamps/lsp-jedi
-(when (version<= "27.0" emacs-version)
-  ;; I need to do version check because for emacs26.3 lsp-jedi is not present on MELP.
-  (use-package lsp-jedi
-    :ensure t)
-)
-;;;; #### With use-package
-;;(require 'use-package)
-;;(use-package elpy
-;;  :ensure t
-;;  :init
-;;  (elpy-enable))
-;;
-;;(put 'upcase-region 'disabled nil)
-;;(add-hook 'python-mode-hook 'jedi:setup)
-;;(setq jedi:complete-on-dot t)
-
-;;
-;; Old elpy setup:
-;;(setq package-list '(use-package elpy))
-;;(use-package elpy
-;;  :ensure t
-;;  :defer t
-;;  :init
-;;  (advice-add 'python-mode :before 'elpy-enable))
-;;
-;; py-autopep8
-;; (add-hook 'python-mode-hook 'py-autopep8-enable-on-save)
-;; (setq py-autopep8-options '("--max-line-length=100"))
-;; LSP JEDI
-;;(use-package lsp-jedi
-;;  :ensure t
-;;  :config
-;;  (with-eval-after-load "lsp-mode"
-;;    (add-to-list 'lsp-disabled-clients 'pyls)
-;;    (add-to-list 'lsp-enabled-clients 'jedi)))
-
-;; Truncate long lines
+;; --- Line Truncation ---
+;; Enable line truncation (useful to avoid line wrapping in some views)
 (set-default 'truncate-lines t)
 
-;;;; C-x <direction> to switch windows
-;;(use-package window-jump
-;;             :bind (("C-x <up>" . window-jump-up)
-;;                    ("C-x <down>" . window-jump-down)
-;;                    ("C-x <left>" . window-jump-left)
-;;                    ("C-x <right>" . window-jump-right)))
+;; --- Auto-mode Settings ---
+;; Associate specific file types with major modes
+(add-to-list 'auto-mode-alist '(".*/bash/rc\\'" . sh-mode))       ;; Bash rc files -> sh-mode
+(add-to-list 'auto-mode-alist '(".*/bash/profile\\'" . sh-mode))  ;; Bash profile files -> sh-mode
+(add-to-list 'auto-mode-alist '(".*\\.tex\\.mustache\\'" . latex-mode)) ;; LaTeX Mustache files -> latex-mode
+(add-to-list 'auto-mode-alist '(".*\\.tex\\.jinja2\\'" . latex-mode))  ;; LaTeX Jinja2 files -> latex-mode
+(add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))    ;; Python files -> python-mode
 
-;; Automatically activate bash mode for dotfiles .bashrc like configuration file
-(add-to-list 'auto-mode-alist '(".*/bash/rc\\'" . sh-mode))
-;;  Automatically activate bash mode for dotfiles .bash_profile like configuration file
-(add-to-list 'auto-mode-alist '(".*/bash/profile\\'" . sh-mode))
-;; Automatically activate LaTeX mode for files with extention .tex.mustache
-(add-to-list 'auto-mode-alist '(".*\\.tex\\.mustache\\'" . latex-mode))
-;; Automatically activate LaTeX mode for files with extention .tex.jinja2
-(add-to-list 'auto-mode-alist '(".*\\.tex\\.jinja2\\'" . latex-mode))
+;; --- General Python Configuration ---
+;; Basic configuration for Python, such as indentation and using spaces instead of tabs
+(use-package python-mode
+  :hook (python-mode . (lambda ()
+                         (setq python-indent-offset 4
+                               tab-width 4
+                               indent-tabs-mode nil))))
+
+;; --- LSP Configuration ---
+;; Enable LSP (Language Server Protocol) for Python with Pyright as the server
+(use-package lsp-mode
+  :hook (python-mode . lsp)  ;; Enable LSP when python-mode starts
+  :custom
+  (lsp-pyright-multi-root nil)  ;; Optimization for Pyright (disables multi-root support)
+  (lsp-enable-snippet nil))     ;; Disable automatic snippets provided by LSP
+
+(use-package lsp-pyright
+  :after lsp-mode
+  :hook (python-mode . (lambda ()
+                         (require 'lsp-pyright)
+                         (lsp))))  ;; Use Pyright as the LSP server
+
+;; --- Flycheck ---
+;; Enable Flycheck for syntax checking
+(use-package flycheck
+  :hook (python-mode . flycheck-mode))
+
+;; --- Black Formatter ---
+;; Enable Black for automatic code formatting in Python
+(use-package blacken
+  :hook (python-mode . blacken-mode))
+
+;; --- isort ---
+;; Enable isort for automatically sorting Python imports
+(use-package isortify
+  :hook (python-mode . isortify-mode))
+
+;; Format Python code with Black before saving
+(add-hook 'python-mode-hook
+          (lambda ()
+            (add-hook 'before-save-hook 'blacken-buffer nil t)))
+;; Automatically format code with isort before each save
+(add-hook 'python-mode-hook
+          (lambda ()
+            (add-hook 'before-save-hook 'isortify-buffer nil t)))
+
+;; --- Appearance and Utility ---
+;; Globally display line numbers
+(global-display-line-numbers-mode t)
+
+;; ANSI Colors in Buffers
+;; Add ANSI colors to compilation buffers and shells
+(use-package ansi-color
+  :config
+  (defun colorize-compilation-buffer ()
+    (ansi-color-apply-on-region compilation-filter-start (point-max)))
+  (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
+
+  (defun my-shell-mode-hook ()
+    (ansi-color-for-comint-mode-on))
+  (add-hook 'shell-mode-hook 'my-shell-mode-hook))
+
+;; --- LaTeX Configuration ---
+;; Configure AUCTeX for editing LaTeX files with PDF output as default
+(use-package tex
+  :ensure auctex
+  :hook (latex-mode . (lambda ()
+                        (setq TeX-PDF-mode t))))
+
+;; --- Git Integration ---
+;; Add Magit for Git operations
+(use-package magit
+  :commands magit-status
+  :config
+  (global-set-key (kbd "C-x g") 'magit-status))
+
+;; --- Keybinding Discovery ---
+;; Add which-key to help discover keybindings
+(use-package which-key
+  :config
+  (which-key-mode))

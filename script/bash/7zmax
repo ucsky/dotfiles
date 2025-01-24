@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Check if the filename argument is provided
+if [ -z "$1" ]; then
+    echo "Usage: $0 <file_or_folder_to_compress>"
+    exit 1
+fi
+
+# Set the filename and output compressed file name
+input_file="$1"
+output_file="${input_file}.7z"
+
+# Compress with 7z using maximum compression
+7z a -t7z -m0=lzma2 -mx=9 -ms=on "$output_file" "$input_file"
+
+# Check if the compression was successful
+if [ $? -eq 0 ]; then
+    echo "Compression successful: $output_file"
+else
+    echo "Compression failed."
+fi

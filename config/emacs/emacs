@@ -1,107 +1,112 @@
-;; Initialize package system
+;; --- Package Initialization ---
+;; Initialize the package manager and add MELPA and GNU ELPA repositories
 (require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("gnu" . "https://elpa.gnu.org/packages/")))
 (unless (bound-and-true-p package--initialized)
   (package-initialize))
 
 ;; Bootstrap 'use-package'
+;; Ensure the "use-package" package is installed, which simplifies the management of other packages
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
 
 (eval-when-compile
   (require 'use-package))
-
 (require 'bind-key)
-(setq use-package-always-ensure t)
+(setq use-package-always-ensure t) ;; Automatically install packages defined with use-package
 
-;; Optimize TRAMP for SSH
+;; --- TRAMP Optimization ---
+;; Configure TRAMP to use SSH as the default method
 (setq tramp-default-method "ssh")
 
-;; Enable line truncation
+;; --- Line Truncation ---
+;; Enable line truncation (useful to avoid line wrapping in some views)
 (set-default 'truncate-lines t)
 
-;; Auto-mode settings for specific file types
-(add-to-list 'auto-mode-alist '(".*/bash/rc\\'" . sh-mode))
-(add-to-list 'auto-mode-alist '(".*/bash/profile\\'" . sh-mode))
-(add-to-list 'auto-mode-alist '(".*\\.tex\\.mustache\\'" . latex-mode))
-(add-to-list 'auto-mode-alist '(".*\\.tex\\.jinja2\\'" . latex-mode))
+;; --- Auto-mode Settings ---
+;; Associate specific file types with major modes
+(add-to-list 'auto-mode-alist '(".*/bash/rc\\'" . sh-mode))       ;; Bash rc files -> sh-mode
+(add-to-list 'auto-mode-alist '(".*/bash/profile\\'" . sh-mode))  ;; Bash profile files -> sh-mode
+(add-to-list 'auto-mode-alist '(".*\\.tex\\.mustache\\'" . latex-mode)) ;; LaTeX Mustache files -> latex-mode
+(add-to-list 'auto-mode-alist '(".*\\.tex\\.jinja2\\'" . latex-mode))  ;; LaTeX Jinja2 files -> latex-mode
+(add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))    ;; Python files -> python-mode
 
-;; --- General Configuration ---
-(require 'package)
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("gnu" . "https://elpa.gnu.org/packages/")))
-(package-initialize)
+;; --- General Python Configuration ---
+;; Basic configuration for Python, such as indentation and using spaces instead of tabs
+(use-package python-mode
+  :hook (python-mode . (lambda ()
+                         (setq python-indent-offset 4
+                               tab-width 4
+                               indent-tabs-mode nil))))
 
-;; Automatically install missing packages
-(unless package-archive-contents
-  (package-refresh-contents))
+;; --- LSP Configuration ---
+;; Enable LSP (Language Server Protocol) for Python with Pyright as the server
+(use-package lsp-mode
+  :hook (python-mode . lsp)  ;; Enable LSP when python-mode starts
+  :custom
+  (lsp-pyright-multi-root nil)  ;; Optimization for Pyright (disables multi-root support)
+  (lsp-enable-snippet nil))     ;; Disable automatic snippets provided by LSP
 
-(dolist (package '(lsp-mode lsp-pyright python-mode blacken isortify flycheck company pyvenv))
-  (unless (package-installed-p package)
-    (package-install package)))
-
-;; --- Python Mode ---
-(require 'python-mode)
-(add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
-(setq python-indent-offset 4
-      tab-width 4
-      indent-tabs-mode nil) ;; Use spaces instead of tabs
-
-;; --- LSP Mode ---
-(require 'lsp-mode)
-(add-hook 'python-mode-hook #'lsp)
-(setq lsp-pyright-multi-root nil    ;; For Pyright
-      lsp-enable-snippet nil)      ;; Disable automatic snippets
-
-;; Configure Pyright as the LSP server
-(require 'lsp-pyright)
-(add-hook 'python-mode-hook (lambda ()
-                              (require 'lsp-pyright)
-                              (lsp)))
+(use-package lsp-pyright
+  :after lsp-mode
+  :hook (python-mode . (lambda ()
+                         (require 'lsp-pyright)
+                         (lsp))))  ;; Use Pyright as the LSP server
 
 ;; --- Flycheck ---
-(require 'flycheck)
-(add-hook 'python-mode-hook 'flycheck-mode)
+;; Enable Flycheck for syntax checking
+(use-package flycheck
+  :hook (python-mode . flycheck-mode))
 
 ;; --- Company Mode ---
-(require 'company)
-(add-hook 'python-mode-hook 'company-mode)
-(setq company-idle-delay 0.2
-      company-minimum-prefix-length 1)
+;; Enable Company for code autocompletion
+(use-package company
+  :hook (python-mode . company-mode)
+  :custom
+  (company-idle-delay 0.2)            ;; Delay before autocomplete suggestions appear
+  (company-minimum-prefix-length 1))  ;; Minimum number of characters before suggestions
 
 ;; --- Black Formatter ---
-(require 'blacken)
-(add-hook 'python-mode-hook 'blacken-mode)
+;; Enable Black for automatic code formatting in Python
+(use-package blacken
+  :hook (python-mode . blacken-mode))
+
+
 
 ;; --- isort ---
-(require 'isortify)
-(add-hook 'python-mode-hook 'isortify-mode)
+;; Enable isort for automatically sorting Python imports
+(use-package isortify
+  :hook (python-mode . isortify-mode))
 
-;; --- Appearance and Utility ---
-(global-display-line-numbers-mode t) ;; Display line numbers
-
+;; Format Python code with Black before saving
+(add-hook 'python-mode-hook
+          (lambda ()
+            (add-hook 'before-save-hook 'blacken-buffer nil t)))
 ;; Automatically format code on save
-(add-hook 'before-save-hook 'blacken-buffer)
+;; Format code  isort before each save
 (add-hook 'before-save-hook 'isortify-buffer)
 
+;; --- Appearance and Utility ---
+;; Globally display line numbers
+(global-display-line-numbers-mode t)
 
-;; ANSI colors in compilation buffers
-(require 'ansi-color)
-(defun colorize-compilation-buffer ()
-  (ansi-color-apply-on-region compilation-filter-start (point-max)))
-(add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
+;; ANSI Colors in Buffers
+;; Add ANSI colors to compilation buffers and shells
+(use-package ansi-color
+  :config
+  (defun colorize-compilation-buffer ()
+    (ansi-color-apply-on-region compilation-filter-start (point-max)))
+  (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
 
-;; ANSI colors in shell mode
-(defun my-shell-mode-hook ()
-  (ansi-color-for-comint-mode-on))
-(add-hook 'shell-mode-hook 'my-shell-mode-hook)
-
-;; Use SSH as the default method in TRAMP
-(setq tramp-default-method "ssh")
+  (defun my-shell-mode-hook ()
+    (ansi-color-for-comint-mode-on))
+  (add-hook 'shell-mode-hook 'my-shell-mode-hook))
 
 ;; --- LaTeX Configuration ---
-(require 'tex)
-(require 'latex)
-(setq TeX-PDF-mode t) ;; Default to PDF output
+;; Configure AUCTeX for editing LaTeX files with PDF output as default
+(use-package tex
+  :ensure auctex
+  :hook (latex-mode . (lambda ()
+                        (setq TeX-PDF-mode t))))

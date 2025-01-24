@@ -68,9 +68,13 @@ on:
     branches: [ "master" ]
     types: [ assigned, opened, synchronize, reopened, labeled, edited ]
 
-permissions:
-  contents: read
 
+permissions:
+  contents: read            # Minimum permissions required to read repository contents
+  pull-requests: write      # Required for pull_request_target to add labels or comments
+
+
+  
 jobs:
   crda-scan:
     permissions:

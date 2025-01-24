@@ -60,20 +60,10 @@
 (use-package flycheck
   :hook (python-mode . flycheck-mode))
 
-;; --- Company Mode ---
-;; Enable Company for code autocompletion
-(use-package company
-  :hook (python-mode . company-mode)
-  :custom
-  (company-idle-delay 0.2)            ;; Delay before autocomplete suggestions appear
-  (company-minimum-prefix-length 1))  ;; Minimum number of characters before suggestions
-
 ;; --- Black Formatter ---
 ;; Enable Black for automatic code formatting in Python
 (use-package blacken
   :hook (python-mode . blacken-mode))
-
-
 
 ;; --- isort ---
 ;; Enable isort for automatically sorting Python imports

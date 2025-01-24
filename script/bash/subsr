@@ -63,7 +63,7 @@ fi
 
 # Get the location of matching files
 if [ -f tmp.grep ]; then rm -f tmp.grep;fi
-grep -nr "$1" "$3" | grep -v "\.svn" > tmp.grep
+grep -nr "$1" "$3" | grep -v "\.svn" | grep -v "\.git" > tmp.grep
 if [ -f tmp.awk ]; then rm -f tmp.awk;fi
 cat tmp.grep | awk -F: '{FS=":"}{print $1}' > tmp.awk
 rm -f tmp.grep

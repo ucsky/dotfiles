@@ -1,17 +1,11 @@
-;; Initialize package system if not already done
+;; Initialize package system
 (require 'package)
-
-;; Add MELPA or other repositories if needed (optional but commonly done)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 
-;; Initialize the package system if it's not already done
-(unless (bound-and-true-p package--initialized) ; Don't reinitialize if already done
+(unless (bound-and-true-p package--initialized)
   (package-initialize))
 
 ;; Bootstrap 'use-package'
-(eval-after-load 'gnutls
-  '(add-to-list 'gnutls-trustfiles "/etc/ssl/cert.pem"))
-
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
@@ -21,133 +15,16 @@
 
 (require 'bind-key)
 (setq use-package-always-ensure t)
-;; todel 
-;; todel 
-;; todel 
-;; todel ;; Bootstrap 'use-package'
-;; todel (eval-after-load 'gnutls
-;; todel   '(add-to-list 'gnutls-trustfiles "/etc/ssl/cert.pem"))
-;; todel (unless (package-installed-p 'use-package)
-;; todel   (package-refresh-contents)
-;; todel   (package-install 'use-package))
-;; todel (eval-when-compile
-;; todel   (require 'use-package))
-;; todel (require 'bind-key)
-;; todel (setq use-package-always-ensure t)
 
-;;}}}
-
-
-;;(if (not (package-installed-p 'use-package))
-;;    ;; Install package automatically if not already installed.
-;;    (progn
-;;      (package-refresh-contents)
-;;      (package-install 'use-package)))
-;;
-
-;; Make tramp quicker with ssh
+;; Optimize TRAMP for SSH
 (setq tramp-default-method "ssh")
 
-
-;;;; list the repositories containing them
-;;;; see https://elpa.gnu.org
-;;(add-to-list 'package-archives
-;;             '("gnu" . "https://elpa.gnu.org/packages/")
-;;             t)
-;;;; see https://marmalade-repo.org
-;;(add-to-list 'package-archives
-;;             '("marmalade" . "http://marmalade-repo.org/packages/")
-;;             t)
-;;(add-to-list 'package-archives
-;;             '("melpa-stable" . "https://stable.melpa.org/packages/") t)
-;;
-;;;; activate all the packages (in particular autoloads)
-;;(package-initialize)
-
-
-
-
-;; # Python
-;;
-;; See https://www.emacswiki.org/emacs/PythonProgrammingInEmacs
-;;
-
-;;(use-package flycheck
-;;  :ensure t
-;;   :init (global-flycheck-mode))
-;;
-;;
-
-;; ## Elpy
-;;
-;; - Documentation: https://github.com/jorgenschaefer/elpy
-;; - Repository: https://elpy.readthedocs.io/en/latest/introduction.html#installation
-;;
-;; ### Installation
-
-;; #### From apt (Debian ≥10 an Ubuntu ≥18.10)
-;; History:
-;; - 2021-12-10: not working on supertube.
-;; Run:
-;; - sudo apt install elpa-elpy
-;; - sudo apt install python3-jedi black python3-autopep8 yapf3 python3-yapf
-;;(elpy-enable)
-
-;; LSP Jedi
-;; More information:
-;; - https://emacs-lsp.github.io/lsp-mode/page/lsp-jedi/
-;; - https://github.com/fredcamps/lsp-jedi
-(when (version<= "27.0" emacs-version)
-  ;; I need to do version check because for emacs26.3 lsp-jedi is not present on MELP.
-  (use-package lsp-jedi
-    :ensure t)
-)
-;;;; #### With use-package
-;;(require 'use-package)
-;;(use-package elpy
-;;  :ensure t
-;;  :init
-;;  (elpy-enable))
-;;
-;;(put 'upcase-region 'disabled nil)
-;;(add-hook 'python-mode-hook 'jedi:setup)
-;;(setq jedi:complete-on-dot t)
-
-;;
-;; Old elpy setup:
-;;(setq package-list '(use-package elpy))
-;;(use-package elpy
-;;  :ensure t
-;;  :defer t
-;;  :init
-;;  (advice-add 'python-mode :before 'elpy-enable))
-;;
-;; py-autopep8
-;; (add-hook 'python-mode-hook 'py-autopep8-enable-on-save)
-;; (setq py-autopep8-options '("--max-line-length=100"))
-;; LSP JEDI
-;;(use-package lsp-jedi
-;;  :ensure t
-;;  :config
-;;  (with-eval-after-load "lsp-mode"
-;;    (add-to-list 'lsp-disabled-clients 'pyls)
-;;    (add-to-list 'lsp-enabled-clients 'jedi)))
-
-;; Truncate long lines
+;; Enable line truncation
 (set-default 'truncate-lines t)
 
-;;;; C-x <direction> to switch windows
-;;(use-package window-jump
-;;             :bind (("C-x <up>" . window-jump-up)
-;;                    ("C-x <down>" . window-jump-down)
-;;                    ("C-x <left>" . window-jump-left)
-;;                    ("C-x <right>" . window-jump-right)))
-
-;; Automatically activate bash mode for dotfiles .bashrc like configuration file
+;; Auto-mode settings for specific file types
 (add-to-list 'auto-mode-alist '(".*/bash/rc\\'" . sh-mode))
-;;  Automatically activate bash mode for dotfiles .bash_profile like configuration file
 (add-to-list 'auto-mode-alist '(".*/bash/profile\\'" . sh-mode))
-;; Automatically activate LaTeX mode for files with extention .tex.mustache
 (add-to-list 'auto-mode-alist '(".*\\.tex\\.mustache\\'" . latex-mode))
-;; Automatically activate LaTeX mode for files with extention .tex.jinja2
 (add-to-list 'auto-mode-alist '(".*\\.tex\\.jinja2\\'" . latex-mode))
+

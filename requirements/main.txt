@@ -20,7 +20,7 @@ pylint
 python-lsp-jsonrpc
 python-lsp-server
 rope
-setuptools>70.0.0
+setuptools>65.5.1
 tornado>6.4.1
 yapf
 anyio>=4.4.0 # not directly required, pinned by Snyk to avoid a vulnerability

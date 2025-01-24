@@ -23,3 +23,5 @@ rope
 setuptools>65.5.1
 tornado>6.3.3
 yapf
+typer
+tabulate

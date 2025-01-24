@@ -17,6 +17,8 @@
 #
 ##
 
+MINICONDA_URL=https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+
 # Test if conda is already installed
 command -v conda >> /dev/null && HAS_CONDA=1 || HAS_CONDA=0
 if [ $HAS_CONDA == 1 ];then
@@ -36,8 +38,14 @@ test -d ${ROOT_MINICONDA} || mkdir -p ${ROOT_MINICONDA}
 # Check if the Miniconda install script exists; if not,
 # download it using wget and save it as install.sh in the
 # Miniconda directory.
+nlines=`wc -l ${ROOT_MINICONDA}/install.sh  | cut -d " " -f 1 `
+if [ $nlines == 0 ];then
+    echo "WARNING: something wrong with ${ROOT_MINICONDA}/install.sh"
+    echo "         removing ${ROOT_MINICONDA}/install.sh"
+    rm ${ROOT_MINICONDA}/install.sh
+fi
 test -f ${ROOT_MINICONDA}/install.sh \
-    || wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+    || wget $MINICONDA_URL \
             -O ${ROOT_MINICONDA}/install.sh
 
 # Execute the Miniconda install script in batch mode (-b),

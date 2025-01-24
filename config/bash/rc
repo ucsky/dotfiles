@@ -1,15 +1,20 @@
 # Configuration for interactive bash shell
 
+# du on all file and sort
+alias dusort='du -sh .[!.]* * | sort -h'
+
 # PATH utilities (see also bash_profile)
 pathadd() {
     if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
         PATH="${PATH:+"$PATH:"}$1"
     fi
+    export PATH
 }
 pythonpathadd() {
     if [ -d "$1" ] && [[ ":$PYTHONPATH:" != *":$1:"* ]]; then
         PYTHONPATH="${PATH:+"$PYTHONPATH:"}$1"
     fi
+    export PYTHONPATH
 }
 
 function wk() {

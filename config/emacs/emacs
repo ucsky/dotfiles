@@ -28,3 +28,80 @@
 (add-to-list 'auto-mode-alist '(".*\\.tex\\.mustache\\'" . latex-mode))
 (add-to-list 'auto-mode-alist '(".*\\.tex\\.jinja2\\'" . latex-mode))
 
+;; --- General Configuration ---
+(require 'package)
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("gnu" . "https://elpa.gnu.org/packages/")))
+(package-initialize)
+
+;; Automatically install missing packages
+(unless package-archive-contents
+  (package-refresh-contents))
+
+(dolist (package '(lsp-mode lsp-pyright python-mode blacken isortify flycheck company pyvenv))
+  (unless (package-installed-p package)
+    (package-install package)))
+
+;; --- Python Mode ---
+(require 'python-mode)
+(add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
+(setq python-indent-offset 4
+      tab-width 4
+      indent-tabs-mode nil) ;; Use spaces instead of tabs
+
+;; --- LSP Mode ---
+(require 'lsp-mode)
+(add-hook 'python-mode-hook #'lsp)
+(setq lsp-pyright-multi-root nil    ;; For Pyright
+      lsp-enable-snippet nil)      ;; Disable automatic snippets
+
+;; Configure Pyright as the LSP server
+(require 'lsp-pyright)
+(add-hook 'python-mode-hook (lambda ()
+                              (require 'lsp-pyright)
+                              (lsp)))
+
+;; --- Flycheck ---
+(require 'flycheck)
+(add-hook 'python-mode-hook 'flycheck-mode)
+
+;; --- Company Mode ---
+(require 'company)
+(add-hook 'python-mode-hook 'company-mode)
+(setq company-idle-delay 0.2
+      company-minimum-prefix-length 1)
+
+;; --- Black Formatter ---
+(require 'blacken)
+(add-hook 'python-mode-hook 'blacken-mode)
+
+;; --- isort ---
+(require 'isortify)
+(add-hook 'python-mode-hook 'isortify-mode)
+
+;; --- Appearance and Utility ---
+(global-display-line-numbers-mode t) ;; Display line numbers
+
+;; Automatically format code on save
+(add-hook 'before-save-hook 'blacken-buffer)
+(add-hook 'before-save-hook 'isortify-buffer)
+
+
+;; ANSI colors in compilation buffers
+(require 'ansi-color)
+(defun colorize-compilation-buffer ()
+  (ansi-color-apply-on-region compilation-filter-start (point-max)))
+(add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
+
+;; ANSI colors in shell mode
+(defun my-shell-mode-hook ()
+  (ansi-color-for-comint-mode-on))
+(add-hook 'shell-mode-hook 'my-shell-mode-hook)
+
+;; Use SSH as the default method in TRAMP
+(setq tramp-default-method "ssh")
+
+;; --- LaTeX Configuration ---
+(require 'tex)
+(require 'latex)
+(setq TeX-PDF-mode t) ;; Default to PDF output

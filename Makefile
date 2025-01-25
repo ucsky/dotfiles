@@ -2,16 +2,24 @@ SHELL := /bin/bash -i # Bourne-Again SHell is a widly used command-line interpre
 CODENAME := $(shell echo "`lsb_release --id --short | tr '[:upper:]' '[:lower:]'`-`lsb_release --release --short`")
 PATH_PYTHON_VENV := $(HOME)/.venv
 PATH_PYTHON_VIRTUALENV := $(HOME)/.virtualenvs
+NAME_PYTHON_VENV := dotfiles
 .SHELLFLAGS := -e -c
-TESTING ?= 0
-### 
+OS ?= $(shell uname -s | tr '[:upper:]' '[:lower:]')
 
+ifeq ($(OS),linux)
+	SETUP_SCRIPT := setup/$(OS)/setup.bash
+endif
+
+#---------------------------------------------
 # Hack for displaying help message in Makefile
+#---------------------------------------------
 help: 
 	@grep -E '(^[0-9a-zA-Z_-]+:.*?##.*$$)' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m%-30s\033[0m %s\n", $$1, $$2}'
 
 
-
+#---------------------------------------------
+# Show
+#---------------------------------------------
 show-vars: ## Show variables.
 show-vars:
 	-@(echo "CODENAME=$(CODENAME)")
@@ -23,7 +31,30 @@ show-workflows:  ## Check workflows for CI.
 show-workflows:
 	-@(cat .github/workflows/workflows.yml | yq)
 
-### workon
+#---------------------------------------------
+# Format
+#---------------------------------------------
+format-req: ## Format requirements
+format-req:
+	-@(for i in requirements.txt;do \
+	echo "Processing $$i";\
+	sort $$i -o $$i;\
+	uniq $$i > temp-format-req.txt && mv temp-format-req.txt $$i;\
+	done)
+
+#---------------------------------------------
+# Setup
+#---------------------------------------------
+
+setup-venv: ## Create Python virtualenv for DOTFILES.
+setup-venv:
+	-(test -d $(PATH_PYTHON_VENV)/$(NAME_PYTHON_ENV) || python3 -m venv $(PATH_PYTHON_VENV)/$(NAME_PYTHON_ENV))
+	-(. $(PATH_PYTHON_VENV)/$(NAME_PYTHON_ENV)/bin/activate \
+	&& pip install -U pip \
+	&& pip install -r requirements.txt \
+	)
+
+
 setup-workon: ## Setup dotfiles project using virtualenv wrapper.
 setup-workon:
 	-@($(HOME)/.dotfiles/setup/linux/with_apt/virtualenvwrapper/setup.bash)
@@ -50,6 +81,69 @@ setup-workon:
 		) \
 	)
 
+
+
+setup-miniconda: ## Install using miniconda env dotfiles.
+setup-miniconda:
+	-@(\
+	conda env list \
+	| egrep '^dotfiles\s+/' \
+	&& conda activate dotfiles \
+	|| conda create --name dotfiles python=3.10 -y \
+	)
+	-@(conda activate dotfiles \
+	&&  conda install anaconda::pip -y \
+	&& pip install -r requirements.txt \
+	)
+
+.PHONY: setup
+setup:  ## Setup dotfiles
+setup: $(SETUP_SCRIPT) setup-venv setup-workon setup-miniconda
+	(./$<)
+
+#---------------------------------------------
+# Start Jupyter Notebook and Lab
+#---------------------------------------------
+## Jupyter notebook and lab
+startlab-venv: ## Start jupyter lab with DOTFILES.
+startlab-venv:
+	(echo "Starting lab with venv dotfiles" \
+	&& . $(PATH_PYTHON_VENV)/$(NAME_PYTHON_ENV)/bin/activate \
+	&& jupyter lab --no-browser \
+	)
+
+# Because sometime Jupyter lab freeze when performing visualization.
+startnb-venv: ## Start jupyter notebook with DOTFILES.
+startnb-venv:
+	(echo "Staring nb with venv dotfiles" \
+	&& . $(PATH_PYTHON_VENV)/$(NAME_PYTHON_ENV)/bin/activate \
+	&& jupyter notebook --no-browser \
+	)
+
+startlab-miniconda: ## Start jupyter lab with DOTFILES.
+startlab-miniconda:
+	(echo "Starting lab with miniconda dotfiles" \
+	&& conda activate dotfiles \
+	&& jupyter lab --no-browser \
+	)
+
+# Because sometime Jupyter lab freeze when performing visualization.
+startnb-miniconda: ## Start jupyter notebook with DOTFILES.
+startnb-miniconda:
+	(echo "Staring nb with miniconda dotfiles" \
+	&& conda activate dotfiles \
+	&& jupyter notebook --no-browser \
+	)
+
+#---------------------------------------------
+# Cleaning
+#---------------------------------------------
+clean-nb-output: ## Clear all notebooks
+clean-nb-output:
+	@for i in notebooks/*.ipynb;do \
+	jupyter nbconvert --ClearOutputPreprocessor.enabled=True --clear-output --inplace $$i; \
+	done
+
 clean-workon: ## Clean dotfiles project using virtualenv wrapper.
 clean-workon:
 	-@(command -v workon &> /dev/null \
@@ -67,89 +161,17 @@ clean-workon:
 		) \
 	)
 
-### venv-setup-dotfiles
-venv-setup-dotfiles: ## Create Python virtualenv for DOTFILES.
-venv-setup-dotfiles:
-	-(test -d venv/dotfiles || python3 -m venv venv/dotfiles)
-	-(. venv/dotfiles/bin/activate \
-	&& pip install -U pip \
-	&& pip install -r requirements.txt \
-	)
 
-venv-startlab-dotfiles: ## Start jupyter lab with DOTFILES.
-venv-startlab-dotfiles:
-	(echo "Starting lab with venv dotfiles" \
-	&& . venv/dotfiles/bin/activate \
-	&& jupyter lab --no-browser \
-	)
+clean-venv: ## Clean venv DOTFILES
+clean-venv:
+	@(rm -rf $(PATH_PYTHON_VENV)/$(NAME_PYTHON_ENV))
 
-# Because sometime Jupyter lab freeze when performing visualization.
-venv-startnb-dotfiles: ## Start jupyter notebook with DOTFILES.
-venv-startnb-dotfiles:
-	(echo "Staring nb with venv dotfiles" \
-	&& . venv/dotfiles/bin/activate \
-	&& jupyter notebook --no-browser \
-	)
-
-venv-clean-dotfiles: ## Clean venv DOTFILES
-venv-clean-dotfiles:
-	@(rm -rf venv/dotfiles)
-
-
-miniconda-setup-dotfiles: ## Install using miniconda env dotfiles.
-miniconda-setup-dotfiles:
-	-@(\
-	conda env list \
-	| egrep '^dotfiles\s+/' \
-	&& conda activate dotfiles \
-	|| conda create --name dotfiles python=3.10 -y \
-	)
-	-@(conda activate dotfiles \
-	&&  conda install anaconda::pip -y \
-	&& pip install -r requirements.txt \
-	)
-
-miniconda-clean-dotfiles: ## Clean miniconda env dotfiles.
-miniconda-clean-dotfiles:
-	-@(conda env remove --name dotfiles)	
-
-miniconda-startlab-dotfiles: ## Start jupyter lab with DOTFILES.
-miniconda-startlab-dotfiles:
-	(echo "Starting lab with miniconda dotfiles" \
-	&& conda activate dotfiles \
-	&& jupyter lab --no-browser \
-	)
-
-# Because sometime Jupyter lab freeze when performing visualization.
-miniconda-startnb-dotfiles: ## Start jupyter notebook with DOTFILES.
-miniconda-startnb-dotfiles:
-	(echo "Staring nb with miniconda dotfiles" \
-	&& conda activate dotfiles \
-	&& jupyter notebook --no-browser \
-	)
-
-format-req: ## Format requirements
-format-req:
-	-@(for i in requirements.txt;do \
-	echo "Processing $$i";\
-	sort $$i -o $$i;\
-	uniq $$i > temp-format-req.txt && mv temp-format-req.txt $$i;\
-	done)
-
-### Cleaning
-nbs-clear-output: ## Clear all notebooks
-nbs-clear-output:
-	@for i in notebooks/*.ipynb;do \
-	jupyter nbconvert --ClearOutputPreprocessor.enabled=True --clear-output --inplace $$i; \
-	done
-
-.PHONY: setup
-setup:  ## Setup dotfiles
-setup: setup/linux/setup.bash
-	(./$<)
+clean-miniconda: ## Clean miniconda env dotfiles.
+clean-miniconda:
+	-@(conda env remove --name $(NAME_PYTHON_ENV))	
 
 clean: ## Cleaning this directory
-clean: venv-clean-dotfiles
+clean: clean-venv clean-miniconda
 
 
 

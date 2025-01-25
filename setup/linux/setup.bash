@@ -27,7 +27,7 @@ if [[ $HAS_SUDO == "1" && $HAS_APT == "1" ]];then
 fi
 
 # Run all linux bash sub-setup
-for i_setup in setup/linux/with_bash/setup-*.bash; do
+for i_setup in setup/linux/with_bin/setup-*.bash; do
     echo "Running $i_setup"
     test -f $i_setup && ./$i_setup || true
 done

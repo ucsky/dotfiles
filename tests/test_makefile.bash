@@ -19,7 +19,7 @@ fi
 
 
 ## 1. Get all rules from the Makefile
-rules=$(grep -E '^[a-zA-Z0-9_-]+:' Makefile | grep -v startlab | sed 's/:.*//' | uniq)
+rules=$(grep -E '^[a-zA-Z0-9_-]+:' Makefile | grep -v startlab | grep -v startnb | sed 's/:.*//' | uniq)
 echo -e "Found the follwing rules: \n$rules"
 
 ## 2. Test all rules

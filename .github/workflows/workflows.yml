@@ -39,6 +39,8 @@ jobs:
         run: bash tests/tests.bash
       - name: Tests check_nb_params.py
         run: . venv/main/bin/activate && python tests/test_check_nb_params.py
+      - name: Tests emacs config
+        run: ./tests/config/tests-emacs.bash
       
   windows-latest:
     runs-on: windows-latest

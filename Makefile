@@ -37,7 +37,7 @@ setup-workon:
 			( \
 			workon dotfiles \
 			&& pip install -U pip \
-			&& pip install -r requirments.txt \
+			&& pip install -r requirements.txt \
 			) \
 		) \
 	|| \
@@ -69,7 +69,7 @@ venv-setup-dotfiles:
 	-(test -d venv/dotfiles || python3 -m venv venv/dotfiles)
 	-(. venv/dotfiles/bin/activate \
 	&& pip install -U pip \
-	&& pip install -r requirments.txt \
+	&& pip install -r requirements.txt \
 	)
 
 venv-startlab-dotfiles: ## Start jupyter lab with DOTFILES.
@@ -92,8 +92,8 @@ venv-clean-dotfiles:
 	@(rm -rf venv/dotfiles)
 
 
-conda-setup-dotfiles: ## Install using conda env dotfiles.
-conda-setup-dotfiles:
+miniconda-setup-dotfiles: ## Install using miniconda env dotfiles.
+miniconda-setup-dotfiles:
 	-@(\
 	conda env list \
 	| egrep '^dotfiles\s+/' \
@@ -102,24 +102,24 @@ conda-setup-dotfiles:
 	)
 	-@(conda activate dotfiles \
 	&&  conda install anaconda::pip -y \
-	&& pip install -r requirments.txt \
+	&& pip install -r requirements.txt \
 	)
 
-conda-clean-dotfiles: ## Clean conda env dotfiles.
-conda-clean-dotfiles:
+miniconda-clean-dotfiles: ## Clean miniconda env dotfiles.
+miniconda-clean-dotfiles:
 	-@(conda env remove --name dotfiles)	
 
-conda-startlab-dotfiles: ## Start jupyter lab with DOTFILES.
-conda-startlab-dotfiles:
-	(echo "Starting lab with conda dotfiles" \
+miniconda-startlab-dotfiles: ## Start jupyter lab with DOTFILES.
+miniconda-startlab-dotfiles:
+	(echo "Starting lab with miniconda dotfiles" \
 	&& conda activate dotfiles \
 	&& jupyter lab --no-browser \
 	)
 
 # Because sometime Jupyter lab freeze when performing visualization.
-conda-startnb-dotfiles: ## Start jupyter notebook with DOTFILES.
-conda-startnb-dotfiles:
-	(echo "Staring nb with conda dotfiles" \
+miniconda-startnb-dotfiles: ## Start jupyter notebook with DOTFILES.
+miniconda-startnb-dotfiles:
+	(echo "Staring nb with miniconda dotfiles" \
 	&& conda activate dotfiles \
 	&& jupyter notebook --no-browser \
 	)

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+#
+#
 
 import re
 import sys
@@ -10,12 +12,12 @@ if len(sys.argv) < 1:
     sys.exit(1)
 
 filein = sys.argv[1]
-fileout = filein.replace('log', 'csv')
+fileout = filein.replace("log", "csv")
 
 with open(filein) as f:
     logs = f.readlines()
 
-reg = r'^Executing:\s*([0-9]*)%\|.*\|\s*([0-9]+)/([0-9]+)\s*\[\s*([0-9\:]+)<([0-9\:]+)\s*,\s*([0-9\.]*).*cell.*\].*'
+reg = r"^Executing:\s*([0-9]*)%\|.*\|\s*([0-9]+)/([0-9]+)\s*\[\s*([0-9\:]+)<([0-9\:]+)\s*,\s*([0-9\.]*).*cell.*\].*"
 
 lines = []
 for log in logs:
@@ -23,5 +25,15 @@ for log in logs:
     if linematch:
         lines.append(linematch[0])
 
-df = pd.DataFrame(lines, columns=['progress', 'i_cell', 'n_cell', 'time_processing', 'time_remaing', 'time_per_cell'])
+df = pd.DataFrame(
+    lines,
+    columns=[
+        "progress",
+        "i_cell",
+        "n_cell",
+        "time_processing",
+        "time_remaing",
+        "time_per_cell",
+    ],
+)
 df.to_csv(fileout, index=False)

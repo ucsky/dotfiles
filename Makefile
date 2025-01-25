@@ -64,13 +64,13 @@ setup-workon:
 		echo "Using workon for install the dotfiles." \
 		&& \
 			( \
-			workon dotfiles &> /dev/null \
-			&& echo "Virutal env dotfiles already created."\
-			|| (echo "Creating dotfiles" && mkvirtualenv dotfiles) \
+			workon $(NAME_PYTHON_VENV) &> /dev/null \
+			&& echo "Virutal env $(NAME_PYTHON_VENV) already created."\
+			|| (echo "Creating $(NAME_PYTHON_VENV)" && mkvirtualenv $(NAME_PYTHON_VENV)) \
 			) \
 		&& \
 			( \
-			workon dotfiles \
+			workon $(NAME_PYTHON_VENV) \
 			&& pip install -U pip \
 			&& pip install -r requirements.txt \
 			) \
@@ -87,11 +87,11 @@ setup-miniconda: ## Install using miniconda env dotfiles.
 setup-miniconda:
 	-@(\
 	conda env list \
-	| egrep '^dotfiles\s+/' \
-	&& conda activate dotfiles \
-	|| conda create --name dotfiles python=3.10 -y \
+	| egrep '^$(NAME_PYTHON_VENV)\s+/' \
+	&& conda activate $(NAME_PYTHON_VENV) \
+	|| conda create --name $(NAME_PYTHON_VENV) python=3.10 -y \
 	)
-	-@(conda activate dotfiles \
+	-@(conda activate $(NAME_PYTHON_VENV) \
 	&&  conda install anaconda::pip -y \
 	&& pip install -r requirements.txt \
 	)

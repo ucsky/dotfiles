@@ -44,6 +44,11 @@
                                tab-width 4
                                indent-tabs-mode nil))))
 
+;; ---  Virtual Environment ---
+(require 'pyvenv)
+(setenv "WORKON_HOME" "~/.virtualenvs")
+(add-hook 'python-mode-hook 'pyvenv-mode)
+
 ;; --- LSP Configuration ---
 ;; Enable LSP (Language Server Protocol) for Python with Pyright as the server
 (use-package lsp-mode

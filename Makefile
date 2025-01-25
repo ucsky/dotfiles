@@ -1,12 +1,14 @@
 SHELL := /bin/bash -i # Bourne-Again SHell is a widly used command-line interpreter on Linux.
-
 CODENAME := $(shell echo "`lsb_release --id --short | tr '[:upper:]' '[:lower:]'`-`lsb_release --release --short`")
+PATH_PYTHON_VENV := $(HOME)/.venv
+PATH_PYTHON_VIRTUALENV := $(HOME)/.virtualenvs
 
 ### 
 
 # Hack for displaying help message in Makefile
 help: 
 	@grep -E '(^[0-9a-zA-Z_-]+:.*?##.*$$)' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m%-30s\033[0m %s\n", $$1, $$2}'
+
 
 
 show-codename: ## Show distribution codename.
@@ -18,24 +20,24 @@ show-workflows:
 	-@(cat .github/workflows/workflows.yml | yq)
 
 ### workon
-setup-workon: ## Setup main project using virtualenv wrapper.
+setup-workon: ## Setup dotfiles project using virtualenv wrapper.
 setup-workon:
-	-@($(HOME)/.dotfiles/setup/linux/apt/virtualenvwrapper/setup.bash)
+	-@($(HOME)/.dotfiles/setup/linux/with_apt/virtualenvwrapper/setup.bash)
 	-@(command -v workon &> /dev/null \
 	&& \
 		(\
-		echo "Using workon for install the main." \
+		echo "Using workon for install the dotfiles." \
 		&& \
 			( \
-			workon main &> /dev/null \
-			&& echo "Virutal env main already created."\
-			|| (echo "Creating main" && mkvirtualenv main) \
+			workon dotfiles &> /dev/null \
+			&& echo "Virutal env dotfiles already created."\
+			|| (echo "Creating dotfiles" && mkvirtualenv dotfiles) \
 			) \
 		&& \
 			( \
-			workon main \
+			workon dotfiles \
 			&& pip install -U pip \
-			&& pip install -r requirements/main.txt \
+			&& pip install -r requirments.txt \
 			) \
 		) \
 	|| \
@@ -44,15 +46,15 @@ setup-workon:
 		) \
 	)
 
-clean-workon: ## Clean main project using virtualenv wrapper.
+clean-workon: ## Clean dotfiles project using virtualenv wrapper.
 clean-workon:
 	-@(command -v workon &> /dev/null \
 	&& \
 		(\
-		echo "Cleaning virtual env wrapper project main." \
+		echo "Cleaning virtual env wrapper project dotfiles." \
 		&& \
 			( \
-			rmvirtualenv main \
+			rmvirtualenv dotfiles \
 			) \
 		) \
 	|| \
@@ -61,70 +63,70 @@ clean-workon:
 		) \
 	)
 
-### venv-setup-main
-venv-setup-main: ## Create Python virtualenv for MAIN.
-venv-setup-main:
-	-(test -d venv/main || python3 -m venv venv/main)
-	-(. venv/main/bin/activate \
+### venv-setup-dotfiles
+venv-setup-dotfiles: ## Create Python virtualenv for DOTFILES.
+venv-setup-dotfiles:
+	-(test -d venv/dotfiles || python3 -m venv venv/dotfiles)
+	-(. venv/dotfiles/bin/activate \
 	&& pip install -U pip \
-	&& pip install -r requirements/main.txt \
+	&& pip install -r requirments.txt \
 	)
 
-venv-startlab-main: ## Start jupyter lab with MAIN.
-venv-startlab-main:
-	(echo "Starting lab with venv main" \
-	&& . venv/main/bin/activate \
+venv-startlab-dotfiles: ## Start jupyter lab with DOTFILES.
+venv-startlab-dotfiles:
+	(echo "Starting lab with venv dotfiles" \
+	&& . venv/dotfiles/bin/activate \
 	&& jupyter lab --no-browser \
 	)
 
 # Because sometime Jupyter lab freeze when performing visualization.
-venv-startnb-main: ## Start jupyter notebook with MAIN.
-venv-startnb-main:
-	(echo "Staring nb with venv main" \
-	&& . venv/main/bin/activate \
+venv-startnb-dotfiles: ## Start jupyter notebook with DOTFILES.
+venv-startnb-dotfiles:
+	(echo "Staring nb with venv dotfiles" \
+	&& . venv/dotfiles/bin/activate \
 	&& jupyter notebook --no-browser \
 	)
 
-venv-clean-main: ## Clean venv MAIN
-venv-clean-main:
-	@(rm -rf venv/main)
+venv-clean-dotfiles: ## Clean venv DOTFILES
+venv-clean-dotfiles:
+	@(rm -rf venv/dotfiles)
 
 
-conda-setup-main: ## Install using conda env main.
-conda-setup-main:
+conda-setup-dotfiles: ## Install using conda env dotfiles.
+conda-setup-dotfiles:
 	-@(\
 	conda env list \
-	| egrep '^main\s+/' \
-	&& conda activate main \
-	|| conda create --name main python=3.10 -y \
+	| egrep '^dotfiles\s+/' \
+	&& conda activate dotfiles \
+	|| conda create --name dotfiles python=3.10 -y \
 	)
-	-@(conda activate main \
+	-@(conda activate dotfiles \
 	&&  conda install anaconda::pip -y \
-	&& pip install -r requirements/main.txt \
+	&& pip install -r requirments.txt \
 	)
 
-conda-clean-main: ## Clean conda env main.
-conda-clean-main:
-	-@(conda env remove --name main)	
+conda-clean-dotfiles: ## Clean conda env dotfiles.
+conda-clean-dotfiles:
+	-@(conda env remove --name dotfiles)	
 
-conda-startlab-main: ## Start jupyter lab with MAIN.
-conda-startlab-main:
-	(echo "Starting lab with conda main" \
-	&& conda activate main \
+conda-startlab-dotfiles: ## Start jupyter lab with DOTFILES.
+conda-startlab-dotfiles:
+	(echo "Starting lab with conda dotfiles" \
+	&& conda activate dotfiles \
 	&& jupyter lab --no-browser \
 	)
 
 # Because sometime Jupyter lab freeze when performing visualization.
-conda-startnb-main: ## Start jupyter notebook with MAIN.
-conda-startnb-main:
-	(echo "Staring nb with conda main" \
-	&& conda activate main \
+conda-startnb-dotfiles: ## Start jupyter notebook with DOTFILES.
+conda-startnb-dotfiles:
+	(echo "Staring nb with conda dotfiles" \
+	&& conda activate dotfiles \
 	&& jupyter notebook --no-browser \
 	)
 
 format-req: ## Format requirements
 format-req:
-	-@(for i in requirements/*.txt;do \
+	-@(for i in requirements.txt;do \
 	echo "Processing $$i";\
 	sort $$i -o $$i;\
 	uniq $$i > temp-format-req.txt && mv temp-format-req.txt $$i;\
@@ -143,7 +145,7 @@ setup: setup/linux/setup.bash
 	(./$<)
 
 clean: ## Cleaning this directory
-clean: venv-clean-main
+clean: venv-clean-dotfiles
 
 
 

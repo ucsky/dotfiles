@@ -4,5 +4,5 @@ comstr=$(echo "(load-file \"$HOME/.dotfiles/config/emacs/emacs\") ;; Automatical
 cat ~/.emacs | grep "$comstr" >> /dev/null && echo "~/.emacs already include ~/.dotfiles/config/emacs/emacs" || (echo "Modifying ~/.emacs" && echo $comstr >> ~/.emacs)
 sudo apt update
 sudo apt install -y emacs python3 python3-pip python3-venv git curl
-pip3 -U pip
+pip3 install -U pip
 pip3 install black isort flake8 pylint mypy pyright jedi

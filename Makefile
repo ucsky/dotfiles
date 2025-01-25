@@ -3,7 +3,7 @@ CODENAME := $(shell echo "`lsb_release --id --short | tr '[:upper:]' '[:lower:]'
 PATH_PYTHON_VENV := $(HOME)/.venv
 PATH_PYTHON_VIRTUALENV := $(HOME)/.virtualenvs
 .SHELLFLAGS := -e -c
-
+TESTING ?= 0
 ### 
 
 # Hack for displaying help message in Makefile

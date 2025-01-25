@@ -19,7 +19,7 @@ fi
 
 
 ## 1. Get all rules from the Makefile
-rules=$(grep -E '^[a-zA-Z0-9_-]+:' Makefile | sed 's/:.*//' | uniq)
+rules=$(grep -E '^[a-zA-Z0-9_-]+:' Makefile | grep -v startlab | sed 's/:.*//' | uniq)
 echo -e "Found the follwing rules: \n$rules"
 
 ## 2. Test all rules
@@ -35,6 +35,6 @@ for i in $rules;do
 	#              not execute them.
 	make -n $i
     else
-	echo make $i
+	make $i
     fi
 done

@@ -1,6 +1,7 @@
 name: Workflows
 run-name: ${{ github.actor }} workflows 🚀
-
+variables:
+  TESTING: true
 on:
   push:
     branches: [ "master" ]

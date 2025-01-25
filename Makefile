@@ -2,6 +2,7 @@ SHELL := /bin/bash -i # Bourne-Again SHell is a widly used command-line interpre
 CODENAME := $(shell echo "`lsb_release --id --short | tr '[:upper:]' '[:lower:]'`-`lsb_release --release --short`")
 PATH_PYTHON_VENV := $(HOME)/.venv
 PATH_PYTHON_VIRTUALENV := $(HOME)/.virtualenvs
+.SHELLFLAGS := -e -c
 
 ### 
 

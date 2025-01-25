@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 BINARY=yq_linux_amd64
 VERSION=v4.43.1
 PATH_EXE=$HOME/bin/yq_$VERSION

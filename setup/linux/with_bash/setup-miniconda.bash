@@ -1,4 +1,4 @@
-#!/bin/bash -i
+#!/bin/bash -ie
 #
 # Description:
 # Miniconda Installation Script.

@@ -11,9 +11,12 @@ help:
 
 
 
-show-codename: ## Show distribution codename.
-show-codename:
-	-@(echo "$(CODENAME)")
+show-vars: ## Show variables.
+show-vars:
+	-@(echo "CODENAME=$(CODENAME)")
+	-@(echo "PATH_PYTHON_VENV=$(PATH_PYTHON_VENV)")
+	-@(echo "PATH_PYTHON_VIRTUALENV=$(PATH_PYTHON_VIRTUALENV)")
+	-@(echo "SHELL=$(SHELL)")
 
 show-workflows:  ## Check workflows for CI.
 show-workflows:

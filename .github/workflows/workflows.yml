@@ -27,7 +27,7 @@ jobs:
           ls -la ../
           pwd
       - name: "Hello world"
-      - run: echo "🍏 This job's status is ${{ job.status }}."
+        run: echo "🍏 This job's status is ${{ job.status }}."
       - name: "Vars"
         run: make show-vars
       - name: Help

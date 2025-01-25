@@ -27,7 +27,6 @@ jobs:
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - name: Help
         run: make
-      - name: Help
       - name: Setup
         run: make setup
       - name: Tests bash

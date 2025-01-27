@@ -117,8 +117,13 @@
   :config
   (global-set-key (kbd "C-x g") 'magit-status))
 
-;; --- Keybinding Discovery ---
-;; Add which-key to help discover keybindings
+;; ---------------------------------------------------
+;; ---           Keybinding Discovery              ---
+;; ---------------------------------------------------
+;; Description: which-key help discover keybindings
+;; Sources: https://github.com/justbur/emacs-which-key
+;; Information:
+;; - https://systemhalted.in/emacs/emacs-which-key
 (use-package which-key
   :config
   (which-key-mode))

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 #
 # This script is used to test all rules in the Makefile
 #

@@ -165,7 +165,7 @@ test-script-python3:
 		done \
 	)
 
-
+.PHONY: tests
 tests: ## Run all tests
 tests: tests/test_makefile.bash
 	-@(bash tests/test_makefile.bash)

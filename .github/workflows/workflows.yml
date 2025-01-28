@@ -26,6 +26,7 @@ jobs:
           ls -la
           ls -la ../
           pwd
+          echo "CI=${CI}"
       - name: "Hello world"
         run: echo "🍏 This job's status is ${{ job.status }}."
       - name: "Help"

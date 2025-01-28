@@ -166,8 +166,8 @@ test-script-python3:
 	)
 
 
-tests-all: ## Run all tests
-tests-all: tests/test_makefile.bash
+tests: ## Run all tests
+tests: tests/test_makefile.bash
 	-@(bash tests/test_makefile.bash)
 #---------------------------------------------
 # Cleaning

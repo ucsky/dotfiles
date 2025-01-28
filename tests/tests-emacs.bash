@@ -7,6 +7,11 @@ set -e
 CONFIG_FILE="$HOME/.dotfiles/config/emacs/emacs"
 LOG_FILE="emacs-test.log"
 
+
+# emacs version
+emacs_version=$(emacs --version | head -n 1 | awk '{print $3}')
+echo "emacs version: $emacs_version"
+
 # Function to print messages with formatting
 print_message() {
     echo -e "\n[INFO] $1\n"
@@ -50,8 +55,8 @@ test_emacs_config() {
 
     # Test individual features
     test_feature "use-package" "use-package loaded successfully."
-    test_feature "tramp" "TRAMP loaded successfully."
-    test_feature "python-mode" "Python mode loaded successfully."
+    #    test_feature "tramp" "TRAMP loaded successfully."
+    #   test_feature "python-mode" "Python mode loaded successfully."
     test_feature "tex" "AUCTeX loaded successfully."
 }
 

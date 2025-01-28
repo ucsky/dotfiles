@@ -138,11 +138,9 @@ startnb-miniconda:
 #---------------------------------------------
 # Testing
 #---------------------------------------------
-test-emacs:
-test-emacs:
+tests-emacs: ## Test emacs setup
+tests-emacs:
 	-@(echo "Testing emacs" \
-	&& emacs --version \
-	&& emacs --batch --eval '(message "Hello, Emacs")' \
 	&& bash tests/tests-emacs.bash \
 	)
 #---------------------------------------------

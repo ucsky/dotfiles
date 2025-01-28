@@ -142,33 +142,30 @@ startnb-miniconda:
 
 test-config-emacs: ## Test emacs setup
 test-config-emacs: tests/config/emacs/test_emacs.bash
-	-@(echo "Testing emacs configuration" \
-	&& bash  $< \
-	)
+	echo "Testing emacs configuration" \
+	&& bash  $<
 
 test-script-bash: ## Test bash script
 test-script-bash:
-	-@(echo "Testing bash script" \
+	echo "Testing bash script" \
 	&& for i in tests/script/bash/*.*;do \
 		echo "Testing $$i";\
 		./$$i; \
-		done \
-	)
+		done
 
 test-script-python3: ## Test python3 script
 test-script-python3:
-	-@(echo "Testing python3 script" \
+	echo "Testing python3 script" \
 	&& workon $(NAME_PYTHON_VENV) &> /dev/null \
 	&& for i in tests/script/python3/*.*;do \
 		echo "Testing $$i";\
 		./$$i; \
-		done \
-	)
+		done
 
 .PHONY: tests
 tests: ## Run all tests
 tests: tests/test_makefile.bash
-	-@(bash tests/test_makefile.bash)
+	-bash tests/test_makefile.bash
 #---------------------------------------------
 # Cleaning
 #---------------------------------------------

@@ -9,7 +9,8 @@ OS ?= $(shell uname -s | tr '[:upper:]' '[:lower:]')
 ifeq ($(OS),linux)
 	SETUP_SCRIPT := setup/$(OS)/setup.bash
 endif
-
+PYTHONPATH := $(PWD)/script/python3
+export
 #---------------------------------------------
 # Hack for displaying help message in Makefile
 #---------------------------------------------
@@ -138,11 +139,36 @@ startnb-miniconda:
 #---------------------------------------------
 # Testing
 #---------------------------------------------
-tests-emacs: ## Test emacs setup
-tests-emacs:
-	-@(echo "Testing emacs" \
-	&& bash tests/tests-emacs.bash \
+
+test-config-emacs: ## Test emacs setup
+test-config-emacs: tests/config/emacs/test_emacs.bash
+	-@(echo "Testing emacs configuration" \
+	&& bash  $< \
 	)
+
+test-script-bash: ## Test bash script
+test-script-bash:
+	-@(echo "Testing bash script" \
+	&& for i in tests/script/bash/*.*;do \
+		echo "Testing $$i";\
+		./$$i; \
+		done \
+	)
+
+test-script-python3: ## Test python3 script
+test-script-python3:
+	-@(echo "Testing python3 script" \
+	&& workon $(NAME_PYTHON_VENV) &> /dev/null \
+	&& for i in tests/script/python3/*.*;do \
+		echo "Testing $$i";\
+		./$$i; \
+		done \
+	)
+
+
+tests-all: ## Run all tests
+tests-all: tests/test_makefile.bash
+	-@(bash tests/test_makefile.bash)
 #---------------------------------------------
 # Cleaning
 #---------------------------------------------

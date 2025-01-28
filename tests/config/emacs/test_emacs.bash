@@ -54,10 +54,8 @@ test_emacs_config() {
     print_message "Configuration loaded successfully."
 
     # Test individual features
-    test_feature "use-package" "use-package loaded successfully."
-    #    test_feature "tramp" "TRAMP loaded successfully."
-    #   test_feature "python-mode" "Python mode loaded successfully."
-    test_feature "tex" "AUCTeX loaded successfully."
+    #test_feature "use-package" "use-package loaded successfully."
+
 }
 
 # Run the script

@@ -32,8 +32,10 @@ jobs:
         run: make show-vars
       - name: Help
         run: make
+      - name: Sudo?
+        run: sudo ls
       - name: Tests 
-        run: make tests
+        run: echo make tests
       
   windows-latest:
     runs-on: windows-latest

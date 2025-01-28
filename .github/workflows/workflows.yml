@@ -29,7 +29,7 @@ jobs:
       - name: "Hello world"
         run: echo "🍏 This job's status is ${{ job.status }}."
       - name: Tests 
-        run: echo make tests
+        run: make tests
       
   windows-latest:
     runs-on: windows-latest

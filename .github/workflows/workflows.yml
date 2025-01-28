@@ -33,7 +33,7 @@ jobs:
       - name: Help
         run: make
       - name: Tests 
-        run: make test-all
+        run: make tests
       
   windows-latest:
     runs-on: windows-latest

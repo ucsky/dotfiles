@@ -32,16 +32,8 @@ jobs:
         run: make show-vars
       - name: Help
         run: make
-      - name: Setup
-        run: make setup
-      - name: Tests bash
-        run: bash tests/tests.bash
-      - name: Tests check_nb_params.py
-        run: echo ".venv/main/bin/activate && python tests/test_check_nb_params.py"
-      - name: Tests emacs config
-        run: echo "./tests/tests-emacs.bash"
-      - name: Tests Makefile
-        run: ./tests/test_makefile.bash
+      - name: Tests 
+        run: make test-all
       
   windows-latest:
     runs-on: windows-latest

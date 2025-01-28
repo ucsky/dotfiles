@@ -136,6 +136,16 @@ startnb-miniconda:
 	)
 
 #---------------------------------------------
+# Testing
+#---------------------------------------------
+test-emacs:
+test-emacs:
+	-@(echo "Testing emacs" \
+	&& emacs --version \
+	&& emacs --batch --eval '(message "Hello, Emacs")' \
+	&& bash tests/tests-emacs.bash \
+	)
+#---------------------------------------------
 # Cleaning
 #---------------------------------------------
 clean-nb-output: ## Clear all notebooks

@@ -39,7 +39,7 @@ jobs:
       - name: Tests check_nb_params.py
         run: echo ".venv/main/bin/activate && python tests/test_check_nb_params.py"
       - name: Tests emacs config
-        run: echo "./tests/config/tests-emacs.bash"
+        run: echo "./tests/tests-emacs.bash"
       - name: Tests Makefile
         run: ./tests/test_makefile.bash
       

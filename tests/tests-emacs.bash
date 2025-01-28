@@ -1,64 +1,63 @@
 #!/bin/bash
 
-# Define the Emacs configuration file to test
-CONFIG_FILE="$HOME/.dotfiles/config/emacs/emacs"
-
-# Log file for Emacs output
-LOG_FILE="emacs-test.log"
-
-# Exit immediately if any command fails
+# Exit on any error
 set -e
 
-echo "Testing Emacs configuration..."
+# Paths
+CONFIG_FILE="$HOME/.dotfiles/config/emacs/emacs"
+LOG_FILE="emacs-test.log"
 
-# Check if Emacs is installed
-if ! command -v emacs &> /dev/null; then
-    echo "Error: Emacs is not installed. Please install Emacs first."
-    exit 1
-fi
+# Function to print messages with formatting
+print_message() {
+    echo -e "\n[INFO] $1\n"
+}
 
-# Run Emacs in batch mode to load the configuration
-emacs --batch \
-    -l "$CONFIG_FILE" \
-    --eval "(progn (message \"Configuration loaded successfully.\") (kill-emacs 0))" \
-    > "$LOG_FILE" 2>&1
+# Function to test a specific feature or module
+test_feature() {
+    local feature="$1"
+    local message="$2"
+    emacs --batch \
+        -l "$CONFIG_FILE" \
+        --eval "(progn (require '$feature) (message \"$message\") (kill-emacs 0))" \
+        >> "$LOG_FILE" 2>&1 || {
+        echo "[ERROR] Failed to load $feature. Check $LOG_FILE for details."
+        exit 1
+    }
+    print_message "$message"
+}
 
-# Check the exit code of Emacs
-if [ $? -eq 0 ]; then
-    echo "Emacs configuration loaded successfully."
-    echo "Logs can be found in $LOG_FILE"
-else
-    echo "Error: Failed to load Emacs configuration."
-    echo "Check the logs in $LOG_FILE for more details."
-    exit 1
-fi
+# Function to check if Emacs is installed
+check_emacs_installed() {
+    if ! command -v emacs &> /dev/null; then
+        echo "[ERROR] Emacs is not installed. Please install it before running this script."
+        exit 1
+    fi
+}
 
-# Optional: Test specific features in the configuration
-echo "Running feature tests..."
+# Main function to test the configuration
+test_emacs_config() {
+    print_message "Testing Emacs configuration..."
 
-# Test if use-package is available
-emacs --batch \
-    -l "$CONFIG_FILE" \
-    --eval "(progn (require 'use-package) (message \"use-package loaded successfully.\") (kill-emacs 0))" \
-    >> "$LOG_FILE" 2>&1
+    # Test loading the configuration
+    emacs --batch \
+        -l "$CONFIG_FILE" \
+        --eval "(progn (message \"Configuration loaded successfully.\") (kill-emacs 0))" \
+        > "$LOG_FILE" 2>&1 || {
+        echo "[ERROR] Failed to load Emacs configuration. Check $LOG_FILE for details."
+        exit 1
+    }
+    print_message "Configuration loaded successfully."
 
-# Test TRAMP configuration
-emacs --batch \
-    -l "$CONFIG_FILE" \
-    --eval "(progn (require 'tramp) (message \"TRAMP loaded successfully.\") (kill-emacs 0))" \
-    >> "$LOG_FILE" 2>&1
+    # Test individual features
+    test_feature "use-package" "use-package loaded successfully."
+    test_feature "tramp" "TRAMP loaded successfully."
+    test_feature "python-mode" "Python mode loaded successfully."
+    test_feature "tex" "AUCTeX loaded successfully."
+}
 
-# Test Python mode configuration
-emacs --batch \
-    -l "$CONFIG_FILE" \
-    --eval "(progn (require 'python-mode) (message \"Python mode loaded successfully.\") (kill-emacs 0))" \
-    >> "$LOG_FILE" 2>&1
-
-# Test AUCTeX for LaTeX
-emacs --batch \
-    -l "$CONFIG_FILE" \
-    --eval "(progn (require 'tex) (message \"AUCTeX loaded successfully.\") (kill-emacs 0))" \
-    >> "$LOG_FILE" 2>&1
+# Run the script
+check_emacs_installed
+test_emacs_config
 
 # Final success message
-echo "All tests passed successfully!"
+print_message "All tests passed successfully! Logs available in $LOG_FILE."

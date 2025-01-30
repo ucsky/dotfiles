@@ -46,9 +46,10 @@
                                indent-tabs-mode nil))))
 
 ;; ---  Virtual Environment ---
-(require 'pyvenv)
-(setenv "WORKON_HOME" "~/.virtualenvs")
-(add-hook 'python-mode-hook 'pyvenv-mode)
+(use-package pyenv-mode
+  :config
+  (setenv "WORKON_HOME" "~/.virtualenvs")
+  :hook (python-mode . pyenv-mode))
 
 ;; --- LSP Configuration ---
 ;; Enable LSP (Language Server Protocol) for Python with Pyright as the server
@@ -121,7 +122,7 @@
 ;; ---------------------------------------------------
 ;; ---           Keybinding Discovery              ---
 ;; ---------------------------------------------------
-;; Description: which-key help discover keybindings
+;; Description: which-key helps discover keybindings
 ;; Sources: https://github.com/justbur/emacs-which-key
 ;; Information:
 ;; - https://systemhalted.in/emacs/emacs-which-key

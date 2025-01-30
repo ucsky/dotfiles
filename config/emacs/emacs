@@ -65,6 +65,20 @@
                          (require 'lsp-pyright)
                          (lsp))))  ;; Use Pyright as the LSP server
 
+;; --- Company Mode (Autocompletion) ---
+(use-package company
+  :hook (prog-mode . company-mode) ;; Enable company-mode in all programming modes
+  :custom
+  (company-idle-delay 0.2)        ;; Delay before suggestions appear
+  (company-minimum-prefix-length 2) ;; Minimum characters before autocompletion starts
+  (company-tooltip-align-annotations t) ;; Align documentation in tooltip
+  (company-selection-wrap-around t)  ;; Wrap selection in completion menu
+  (company-show-numbers t) ;; Show numbers for quick selection
+  :bind (:map company-active-map
+              ("<tab>" . company-complete-selection) ;; Complete with TAB
+              ("C-n" . company-select-next)
+              ("C-p" . company-select-previous)))
+
 ;; --- Flycheck ---
 ;; Enable Flycheck for syntax checking
 (use-package flycheck
@@ -119,13 +133,8 @@
   :config
   (global-set-key (kbd "C-x g") 'magit-status))
 
-;; ---------------------------------------------------
-;; ---           Keybinding Discovery              ---
-;; ---------------------------------------------------
-;; Description: which-key helps discover keybindings
-;; Sources: https://github.com/justbur/emacs-which-key
-;; Information:
-;; - https://systemhalted.in/emacs/emacs-which-key
+;; --- Keybinding Discovery ---
+;; Add which-key to help discover keybindings
 (use-package which-key
   :config
   (which-key-mode))

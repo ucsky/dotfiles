@@ -19,6 +19,13 @@ echo "HAS_SUDO=${HAS_SUDO}"
 command -v apt >> /dev/null && HAS_APT=1 || HAS_APT=0
 echo "HAS_APT=${HAS_APT}"
 
+# Run all linux bash sub-setup
+for i_setup in setup/linux/setup-*.bash; do
+    echo "Running $i_setup"
+    test -f $i_setup && ./$i_setup || true
+done
+
+
 # Install package with apt
 if [[ $HAS_SUDO == "1" && $HAS_APT == "1" ]];then
     for i_setup in setup/linux/with_apt/setup-*.bash;do

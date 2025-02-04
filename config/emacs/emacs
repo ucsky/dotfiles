@@ -56,11 +56,21 @@
 
 ;; --- LSP Configuration ---
 ;; Enable LSP (Language Server Protocol) for Python with Pyright as the server
+
 (use-package lsp-mode
   :hook (python-mode . lsp)  ;; Enable LSP when python-mode starts
   :custom
   (lsp-pyright-multi-root nil)  ;; Optimization for Pyright (disables multi-root support)
-  (lsp-enable-snippet nil))     ;; Disable automatic snippets provided by LSP
+  (lsp-enable-snippet nil)     ;; Disable automatic snippets provided by LSP
+  (lsp-pyright-venv-path "~/.virtualenvs")  ;; Ensure LSP looks for virtual environments
+  (lsp-pyright-python-executable-cmd "python")  ;; Ensure LSP detects the right Python
+)
+
+;;(use-package lsp-mode
+;;  :hook (python-mode . lsp)  ;; Enable LSP when python-mode starts
+;;  :custom
+;;  (lsp-pyright-multi-root nil)  ;; Optimization for Pyright (disables multi-root support)
+;;  (lsp-enable-snippet nil))     ;; Disable automatic snippets provided by LSP
 
 (use-package lsp-pyright
   :after lsp-mode

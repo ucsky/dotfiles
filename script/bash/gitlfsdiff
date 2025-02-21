@@ -1,0 +1,63 @@
+#!/bin/bash
+# gitlfsdiff: Compare two revisions of a Git LFS–tracked file.
+# Compares the file in HEAD (new) and HEAD~1 (old).
+#
+# Usage: gitlfsdiff <file-path>
+
+# Exit immediately if a command fails.
+set -e
+
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 <file-path>"
+    exit 1
+fi
+
+FILE="$1"
+
+# Verify the file exists in the current HEAD.
+if ! git ls-tree -r HEAD -- "$FILE" > /dev/null 2>&1; then
+    echo "Error: File '$FILE' not found in HEAD."
+    exit 1
+fi
+
+# Verify that the file is tracked by Git LFS.
+if ! git lfs ls-files | grep -q "$FILE"; then
+    echo "Error: '$FILE' is not tracked by Git LFS."
+    exit 1
+fi
+
+# Define the commit revisions to compare.
+NEW_COMMIT="HEAD"
+OLD_COMMIT="HEAD~1"
+
+# Create temporary files for the old and new file contents.
+OLD_TMP=$(mktemp)
+NEW_TMP=$(mktemp)
+
+# Function to clean up temporary files on exit.
+cleanup() {
+    rm -f "$OLD_TMP" "$NEW_TMP"
+}
+trap cleanup EXIT
+
+# Extract file content for each commit.
+# The command "git show <commit>:<file>" retrieves the pointer file,
+# and piping it through "git lfs smudge" replaces it with the actual content.
+if ! git show "$OLD_COMMIT:$FILE" | git lfs smudge > "$OLD_TMP" 2>/dev/null; then
+    echo "Error: Unable to retrieve '$FILE' from $OLD_COMMIT. It may not exist in that commit."
+    exit 1
+fi
+
+if ! git show "$NEW_COMMIT:$FILE" | git lfs smudge > "$NEW_TMP" 2>/dev/null; then
+    echo "Error: Unable to retrieve '$FILE' from $NEW_COMMIT."
+    exit 1
+fi
+
+# Determine if the file is text.
+if file "$OLD_TMP" | grep -qi "text"; then
+    echo "Text file detected. Showing unified diff:"
+    diff -u "$OLD_TMP" "$NEW_TMP"
+else
+    echo "Binary file detected. Showing hex diff:"
+    diff <(xxd "$OLD_TMP") <(xxd "$NEW_TMP")
+fi

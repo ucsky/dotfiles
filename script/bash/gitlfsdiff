@@ -1,61 +1,51 @@
 #!/bin/bash
-# gitlfsdiff: Compare two revisions (HEAD and HEAD~1) of a Git LFS–tracked file.
-# Usage: gitlfsdiff <file-path>
+# gitlfsdiff: Compare la version modifiée (non ajoutée) d'un fichier suivi par Git LFS
+# avec la version dans HEAD (la branche de travail).
+# Utilisation : gitlfsdiff <chemin_du_fichier>
 
 set -e
 
 if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 <file-path>"
+    echo "Usage: $0 <chemin_du_fichier>"
     exit 1
 fi
 
-# Determine the repository root
+# Déterminer la racine du dépôt Git
 REPO_ROOT=$(git rev-parse --show-toplevel)
 
-# Convert the provided file path to an absolute path and then to a repo-relative path
+# Normaliser le chemin du fichier
 FILE_ABS=$(realpath "$1")
 FILE_REL=$(realpath --relative-to="$REPO_ROOT" "$FILE_ABS")
 
-# Verify that the file exists in HEAD
+# Vérifier que le fichier existe dans HEAD
 if ! git ls-tree -r HEAD -- "$FILE_REL" > /dev/null 2>&1; then
-    echo "Error: File '$FILE_REL' not found in HEAD."
+    echo "Erreur : Le fichier '$FILE_REL' n'existe pas dans HEAD."
     exit 1
 fi
 
-# Verify that the file is tracked by Git LFS
+# Vérifier que le fichier est suivi par Git LFS
 if ! git lfs ls-files | grep -q "$FILE_REL"; then
-    echo "Error: '$FILE_REL' is not tracked by Git LFS."
+    echo "Erreur : '$FILE_REL' n'est pas suivi par Git LFS."
     exit 1
 fi
 
-NEW_COMMIT="HEAD"
-OLD_COMMIT="HEAD~1"
+# Créer un fichier temporaire pour stocker la version HEAD
+HEAD_TMP=$(mktemp)
 
-OLD_TMP=$(mktemp)
-NEW_TMP=$(mktemp)
-
-# Ensure temporary files are removed on exit
-cleanup() {
-    rm -f "$OLD_TMP" "$NEW_TMP"
-}
-trap cleanup EXIT
-
-# Retrieve file content from the two revisions using git lfs smudge to restore actual content.
-if ! git show "$OLD_COMMIT:$FILE_REL" | git lfs smudge > "$OLD_TMP" 2>/dev/null; then
-    echo "Error: Unable to retrieve '$FILE_REL' from $OLD_COMMIT. It may not exist in that commit."
+# Récupérer le contenu du fichier dans HEAD et le passer par le filtre smudge pour obtenir le contenu réel
+if ! git show HEAD:"$FILE_REL" | git lfs smudge > "$HEAD_TMP" 2>/dev/null; then
+    echo "Erreur : Impossible de récupérer '$FILE_REL' depuis HEAD."
+    rm -f "$HEAD_TMP"
     exit 1
 fi
 
-if ! git show "$NEW_COMMIT:$FILE_REL" | git lfs smudge > "$NEW_TMP" 2>/dev/null; then
-    echo "Error: Unable to retrieve '$FILE_REL' from $NEW_COMMIT."
-    exit 1
-fi
-
-# Determine if the file is text or binary and display an appropriate diff.
-if file "$OLD_TMP" | grep -qi "text"; then
-    echo "Text file detected. Showing unified diff:"
-    diff -u "$OLD_TMP" "$NEW_TMP"
+# Comparer la version HEAD (dans $HEAD_TMP) avec le fichier modifié du répertoire de travail ($FILE_ABS)
+if file "$FILE_ABS" | grep -qi "text"; then
+    echo "Fichier texte détecté. Différence unifiée :"
+    diff -u "$HEAD_TMP" "$FILE_ABS"
 else
-    echo "Binary file detected. Showing hex diff:"
-    diff <(xxd "$OLD_TMP") <(xxd "$NEW_TMP")
+    echo "Fichier binaire détecté. Différence hexadécimale :"
+    diff <(xxd "$HEAD_TMP") <(xxd "$FILE_ABS")
 fi
+
+rm -f "$HEAD_TMP"

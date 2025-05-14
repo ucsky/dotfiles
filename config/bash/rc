@@ -44,3 +44,10 @@ function blockinfile() {
     #   EOF
     sed -i -ne '/'"${1//\//\\/}"'/{r/dev/stdin' -e ':a;n;/'"${2//\//\\/}"'/{:b;n;p;bb};ba};p;$r/dev/stdin' "$3" ;
 }
+
+autoload_dotenv() {
+  local env_file=".env"
+  if [ -f "$env_file" ]; then
+    export $(grep -v '^#' "$env_file" | xargs)
+  fi
+}

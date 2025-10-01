@@ -2,7 +2,7 @@
 '''
 Convert a json file into a csv file using pandas.
 
-Givin researcher.json as
+Given researcher.json as
 
 
 [

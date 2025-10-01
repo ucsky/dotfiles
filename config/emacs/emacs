@@ -1,153 +1,130 @@
 ;; --- Package Initialization ---
-;; Initialize the package manager and add MELPA and GNU ELPA repositories
 (require 'package)
-(package-initialize)
-(setq package-install-upgrade-built-in t)
-(setq package-archives '(
-			 ("melpa" . "https://melpa.org/packages/")
-			 ("gnu" . "https://elpa.gnu.org/packages/")
-			 ))
+(setq package-archives
+      '(("melpa" . "https://melpa.org/packages/")
+        ("gnu"   . "https://elpa.gnu.org/packages/")))
 (unless (bound-and-true-p package--initialized)
   (package-initialize))
-
-;; Bootstrap 'use-package'
-;; Ensure the "use-package" package is installed, which simplifies the management of other packages
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
-
-(eval-when-compile
-  (require 'use-package))
+(eval-when-compile (require 'use-package))
 (require 'bind-key)
-(setq use-package-always-ensure t) ;; Automatically install packages defined with use-package
+(setq use-package-always-ensure t)
 
 ;; --- TRAMP Optimization ---
-;; Configure TRAMP to use SSH as the default method
 (setq tramp-default-method "ssh")
 (setq tramp-ssh-controlmaster-options
       "-o ControlMaster=auto -o ControlPersist=yes -o ControlPath='~/.ssh/control-%%r@%%h:%%p'")
-(setq tramp-copy-size-limit 1000000) ;; Increase limit for file copy
+(setq tramp-copy-size-limit 1000000)
+(setq tramp-verbose 1
+      create-lockfiles nil
+      tramp-auto-save-directory "~/.emacs.d/tramp-autosave")
+(setq vc-ignore-dir-regexp
+      (format "\\(%s\\)\\|\\(%s\\)"
+              vc-ignore-dir-regexp
+              tramp-file-name-regexp))
 
 ;; --- Line Truncation ---
-;; Enable line truncation (useful to avoid line wrapping in some views)
 (set-default 'truncate-lines t)
 
 ;; --- Auto-mode Settings ---
-;; Associate specific file types with major modes
-(add-to-list 'auto-mode-alist '(".*/bash/rc\\'" . sh-mode))       ;; Bash rc files -> sh-mode
-(add-to-list 'auto-mode-alist '(".*/bash/profile\\'" . sh-mode))  ;; Bash profile files -> sh-mode
-(add-to-list 'auto-mode-alist '(".*\\.tex\\.mustache\\'" . latex-mode)) ;; LaTeX Mustache files -> latex-mode
-(add-to-list 'auto-mode-alist '(".*\\.tex\\.jinja2\\'" . latex-mode))  ;; LaTeX Jinja2 files -> latex-mode
-(add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))    ;; Python files -> python-mode
+(add-to-list 'auto-mode-alist '(".*/bash/rc\\'" . sh-mode))
+(add-to-list 'auto-mode-alist '(".*/bash/profile\\'" . sh-mode))
+(add-to-list 'auto-mode-alist '(".*\\.tex\\.mustache\\'" . latex-mode))
+(add-to-list 'auto-mode-alist '(".*\\.tex\\.jinja2\\'" . latex-mode))
+(add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
 
-;; --- General Python Configuration ---
-;; Basic configuration for Python, such as indentation and using spaces instead of tabs
+;; --- Python Mode ---
 (use-package python-mode
   :hook (python-mode . (lambda ()
                          (setq python-indent-offset 4
                                tab-width 4
                                indent-tabs-mode nil))))
 
-;; ---  Virtual Environment ---
+;; --- Pyenv ---
 (use-package pyenv-mode
-  :config
-  (setenv "WORKON_HOME" "~/.virtualenvs")
+  :config (setenv "WORKON_HOME" "~/.virtualenvs")
   :hook (python-mode . pyenv-mode))
 
-;; --- LSP Configuration ---
-;; Enable LSP (Language Server Protocol) for Python with Pyright as the server
-
+;; --- LSP Mode (disabled on remote) ---
 (use-package lsp-mode
-  :hook (python-mode . lsp)  ;; Enable LSP when python-mode starts
+  :hook (python-mode . (lambda ()
+                         (unless (file-remote-p (or buffer-file-name default-directory))
+                           (lsp-deferred))))
   :custom
-  (lsp-pyright-multi-root nil)  ;; Optimization for Pyright (disables multi-root support)
-  (lsp-enable-snippet nil)     ;; Disable automatic snippets provided by LSP
-  (lsp-pyright-venv-path "~/.virtualenvs")  ;; Ensure LSP looks for virtual environments
-  (lsp-pyright-python-executable-cmd "python")  ;; Ensure LSP detects the right Python
-)
-
-;;(use-package lsp-mode
-;;  :hook (python-mode . lsp)  ;; Enable LSP when python-mode starts
-;;  :custom
-;;  (lsp-pyright-multi-root nil)  ;; Optimization for Pyright (disables multi-root support)
-;;  (lsp-enable-snippet nil))     ;; Disable automatic snippets provided by LSP
+  (lsp-enable-file-watchers nil)
+  (lsp-file-watch-threshold 10000)
+  (lsp-pyright-multi-root nil)
+  (lsp-enable-snippet nil)
+  (lsp-pyright-venv-path "~/.virtualenvs")
+  (lsp-pyright-python-executable-cmd "python"))
 
 (use-package lsp-pyright
   :after lsp-mode
   :hook (python-mode . (lambda ()
-                         (require 'lsp-pyright)
-                         (lsp))))  ;; Use Pyright as the LSP server
+                         (unless (file-remote-p (or buffer-file-name default-directory))
+                           (require 'lsp-pyright)
+                           (lsp)))))
 
-;; --- Company Mode (Autocompletion) ---
+;; --- Company Mode ---
 (use-package company
-  :hook (prog-mode . company-mode) ;; Enable company-mode in all programming modes
+  :hook (prog-mode . company-mode)
   :custom
-  (company-idle-delay 0.2)        ;; Delay before suggestions appear
-  (company-minimum-prefix-length 2) ;; Minimum characters before autocompletion starts
-  (company-tooltip-align-annotations t) ;; Align documentation in tooltip
-  (company-selection-wrap-around t)  ;; Wrap selection in completion menu
-  (company-show-numbers t) ;; Show numbers for quick selection
+  (company-idle-delay 0.2)
+  (company-minimum-prefix-length 2)
+  (company-tooltip-align-annotations t)
+  (company-selection-wrap-around t)
+  (company-show-numbers t)
   :bind (:map company-active-map
-              ("<tab>" . company-complete-selection) ;; Complete with TAB
-              ("C-n" . company-select-next)
-              ("C-p" . company-select-previous)))
+              ("<tab>" . company-complete-selection)
+              ("C-n"   . company-select-next)
+              ("C-p"   . company-select-previous)))
 
 ;; --- Flycheck ---
-;; Enable Flycheck for syntax checking
 (use-package flycheck
   :hook (python-mode . flycheck-mode))
 
-;; --- Black Formatter ---
-;; Enable Black for automatic code formatting in Python
+;; --- Black + isort (disabled on remote) ---
+(defun my/python-before-save-local ()
+  (unless (file-remote-p (or buffer-file-name default-directory))
+    (when (boundp 'blacken-mode) (blacken-buffer))
+    (when (boundp 'isortify-mode) (isortify-buffer))))
+
 (use-package blacken
   :hook (python-mode . blacken-mode))
 
-;; --- isort ---
-;; Enable isort for automatically sorting Python imports
 (use-package isortify
   :hook (python-mode . isortify-mode))
 
-;; Format Python code with Black before saving
 (add-hook 'python-mode-hook
           (lambda ()
-            (add-hook 'before-save-hook 'blacken-buffer nil t)))
-;; Automatically format code with isort before each save
-(add-hook 'python-mode-hook
-          (lambda ()
-            (add-hook 'before-save-hook 'isortify-buffer nil t)))
+            (add-hook 'before-save-hook #'my/python-before-save-local nil t)))
 
-;; --- Appearance and Utility ---
-;; Globally display line numbers
+;; --- Appearance ---
 (global-display-line-numbers-mode t)
+(setq dired-listing-switches "-1")
 
-;; ANSI Colors in Buffers
-;; Add ANSI colors to compilation buffers and shells
+;; --- ANSI Colors ---
 (use-package ansi-color
   :config
   (defun colorize-compilation-buffer ()
     (ansi-color-apply-on-region compilation-filter-start (point-max)))
   (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
-
-  (defun my-shell-mode-hook ()
-    (ansi-color-for-comint-mode-on))
+  (defun my-shell-mode-hook () (ansi-color-for-comint-mode-on))
   (add-hook 'shell-mode-hook 'my-shell-mode-hook))
 
-;; --- LaTeX Configuration ---
-;; Configure AUCTeX for editing LaTeX files with PDF output as default
+;; --- LaTeX ---
 (use-package tex
   :ensure auctex
-  :hook (latex-mode . (lambda ()
-                        (setq TeX-PDF-mode t))))
+  :hook (latex-mode . (lambda () (setq TeX-PDF-mode t))))
 
-;; --- Git Integration ---
-;; Add Magit for Git operations
+;; --- Magit ---
 (use-package magit
   :commands magit-status
   :config
   (global-set-key (kbd "C-x g") 'magit-status))
 
-;; --- Keybinding Discovery ---
-;; Add which-key to help discover keybindings
+;; --- Which-key ---
 (use-package which-key
-  :config
-  (which-key-mode))
+  :config (which-key-mode))

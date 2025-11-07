@@ -49,8 +49,8 @@ format-req:
 
 setup-venv: ## Create Python virtualenv for DOTFILES.
 setup-venv:
-	-(test -d $(PATH_PYTHON_VENV)/$(NAME_PYTHON_ENV) || python3 -m venv $(PATH_PYTHON_VENV)/$(NAME_PYTHON_ENV))
-	-(. $(PATH_PYTHON_VENV)/$(NAME_PYTHON_ENV)/bin/activate \
+	-(test -d $(PATH_PYTHON_VENV) || python3 -m venv $(PATH_PYTHON_VENV))
+	-(. $(PATH_PYTHON_VENV)/bin/activate \
 	&& pip install -U pip \
 	&& pip install -r requirements.txt \
 	)
@@ -58,7 +58,7 @@ setup-venv:
 
 setup-workon: ## Setup dotfiles project using virtualenv wrapper.
 setup-workon:
-	-@($(HOME)/.dotfiles/setup/linux/with_apt/virtualenvwrapper/setup.bash)
+	-@($(HOME)/.dotfiles/setup/linux/with_apt/setup-virtualenvwrapper.bash)
 	-@(command -v workon &> /dev/null \
 	&& \
 		(\
@@ -86,16 +86,18 @@ setup-workon:
 
 setup-miniconda: ## Install using miniconda env dotfiles.
 setup-miniconda:
-	-@(\
-	conda env list \
+	-@(command -v conda >> /dev/null && (\
+	conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main 2>/dev/null || true \
+	&& conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r 2>/dev/null || true \
+	&& conda env list \
 	| egrep '^$(NAME_PYTHON_VENV)\s+/' \
 	&& conda activate $(NAME_PYTHON_VENV) \
 	|| conda create --name $(NAME_PYTHON_VENV) python=3.10 -y \
-	)
-	-@(conda activate $(NAME_PYTHON_VENV) \
+	) || true)
+	-@(command -v conda >> /dev/null && (conda activate $(NAME_PYTHON_VENV) \
 	&&  conda install anaconda::pip -y \
 	&& pip install -r requirements.txt \
-	)
+	) || true)
 
 .PHONY: setup
 setup:  ## Setup dotfiles
@@ -109,7 +111,7 @@ setup: $(SETUP_SCRIPT) setup-venv setup-workon setup-miniconda
 startlab-venv: ## Start jupyter lab with DOTFILES.
 startlab-venv:
 	(echo "Starting lab with venv dotfiles" \
-	&& . $(PATH_PYTHON_VENV)/$(NAME_PYTHON_ENV)/bin/activate \
+	&& . $(PATH_PYTHON_VENV)/bin/activate \
 	&& jupyter lab --no-browser \
 	)
 
@@ -117,7 +119,7 @@ startlab-venv:
 startnb-venv: ## Start jupyter notebook with DOTFILES.
 startnb-venv:
 	(echo "Staring nb with venv dotfiles" \
-	&& . $(PATH_PYTHON_VENV)/$(NAME_PYTHON_ENV)/bin/activate \
+	&& . $(PATH_PYTHON_VENV)/bin/activate \
 	&& jupyter notebook --no-browser \
 	)
 
@@ -196,11 +198,11 @@ clean-workon:
 
 clean-venv: ## Clean venv DOTFILES
 clean-venv:
-	@(rm -rf $(PATH_PYTHON_VENV)/$(NAME_PYTHON_ENV))
+	@(rm -rf $(PATH_PYTHON_VENV))
 
 clean-miniconda: ## Clean miniconda env dotfiles.
 clean-miniconda:
-	-@(conda env remove --name $(NAME_PYTHON_ENV))	
+	-@(conda env remove --name $(NAME_PYTHON_VENV))	
 
 clean: ## Cleaning this directory
 clean: clean-venv clean-miniconda

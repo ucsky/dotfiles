@@ -6,8 +6,14 @@ export ROOT_DOTFILES=$HOME/.dotfiles
 # Cleaning.
 alias c='rm -f *~'
 
-# Dotfiles scripts.
-[[ ":$PATH:" != *":$HOME/.dotfiles/script/sh:"* ]] && PATH="$HOME/.dotfiles/script/sh:${PATH}"
-[[ ":$PATH:" != *":$HOME/.dotfiles/script/bash:"* ]] && PATH="$HOME/.dotfiles/script/bash:${PATH}"
-[[ ":$PATH:" != *":$HOME/.dotfiles/script/python3:"* ]] && PATH="$HOME/.dotfiles/script/python3:${PATH}"
-export PATH
+
+# Ajout de chemins Ã  PATH seulement s'ils ne sont pas dÃ©jÃ  prÃ©sents
+
+# Ajout du rÃ©pertoire .dotfiles/script/sh dans PATH
+echo "$PATH" | grep -q -E "(^|:)$HOME/.dotfiles/script/sh(:|$)" || export PATH="$HOME/.dotfiles/script/sh:$PATH"
+
+# Ajout du rÃ©pertoire .dotfiles/script/bash dans PATH
+echo "$PATH" | grep -q -E "(^|:)$HOME/.dotfiles/script/bash(:|$)" || export PATH="$HOME/.dotfiles/script/bash:$PATH"
+
+# Ajout du rÃ©pertoire .dotfiles/script/python3 dans PATH
+echo "$PATH" | grep -q -E "(^|:)$HOME/.dotfiles/script/python3(:|$)" || export PATH="$HOME/.dotfiles/script/python3:$PATH"

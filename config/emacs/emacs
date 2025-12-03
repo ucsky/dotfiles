@@ -1,16 +1,31 @@
 ;; --- Package Initialization ---
+;; Suppress compilation warnings (including docstring warnings)
+(setq byte-compile-warnings nil)
+(setq native-comp-async-report-warnings-errors nil)
+(setq native-comp-async-query-on-exit nil)
+(setq warning-suppress-types '((comp)))
 (require 'package)
 (setq package-archives
       '(("melpa" . "https://melpa.org/packages/")
         ("gnu"   . "https://elpa.gnu.org/packages/")))
 (unless (bound-and-true-p package--initialized)
   (package-initialize))
+;; Refresh package contents to avoid stale cache errors
+;; Only refresh if cache is missing or very old (older than 1 day)
+(let ((archive-file (expand-file-name "~/.emacs.d/elpa/archives/melpa/archive-contents")))
+  (when (or (not (file-exists-p archive-file))
+            (let ((file-time (file-attribute-modification-time (file-attributes archive-file))))
+              (> (- (float-time) (float-time file-time)) 86400)))
+    (message "Refreshing package archives...")
+    (package-refresh-contents)))
 (unless (package-installed-p 'use-package)
-  (package-refresh-contents)
   (package-install 'use-package))
 (eval-when-compile (require 'use-package))
 (require 'bind-key)
 (setq use-package-always-ensure t)
+;; Handle package installation errors gracefully
+(setq use-package-verbose nil)
+(setq use-package-minimum-reported-time 0)
 
 ;; --- TRAMP Optimization ---
 (setq tramp-default-method "ssh")
@@ -37,10 +52,15 @@
 
 ;; --- Python Mode ---
 (use-package python-mode
+  :ensure t
+  :defer t
   :hook (python-mode . (lambda ()
                          (setq python-indent-offset 4
                                tab-width 4
-                               indent-tabs-mode nil))))
+                               indent-tabs-mode nil)))
+  :config
+  (when (not (package-installed-p 'python-mode))
+    (message "Warning: python-mode not installed, using built-in python.el")))
 
 ;; --- Pyenv ---
 (use-package pyenv-mode
@@ -61,11 +81,16 @@
   (lsp-pyright-python-executable-cmd "python"))
 
 (use-package lsp-pyright
+  :ensure t
   :after lsp-mode
   :hook (python-mode . (lambda ()
                          (unless (file-remote-p (or buffer-file-name default-directory))
-                           (require 'lsp-pyright)
-                           (lsp)))))
+                           (when (package-installed-p 'lsp-pyright)
+                             (require 'lsp-pyright)
+                             (lsp)))))
+  :config
+  (when (not (package-installed-p 'lsp-pyright))
+    (message "Warning: lsp-pyright not installed")))
 
 ;; --- Company Mode ---
 (use-package company
@@ -83,7 +108,11 @@
 
 ;; --- Flycheck ---
 (use-package flycheck
-  :hook (python-mode . flycheck-mode))
+  :ensure t
+  :hook (python-mode . flycheck-mode)
+  :config
+  (when (not (package-installed-p 'flycheck))
+    (message "Warning: flycheck not installed")))
 
 ;; --- Black + isort (disabled on remote) ---
 (defun my/python-before-save-local ()
@@ -92,7 +121,11 @@
     (when (boundp 'isortify-mode) (isortify-buffer))))
 
 (use-package blacken
-  :hook (python-mode . blacken-mode))
+  :ensure t
+  :hook (python-mode . blacken-mode)
+  :config
+  (when (not (package-installed-p 'blacken))
+    (message "Warning: blacken not installed")))
 
 (use-package isortify
   :hook (python-mode . isortify-mode))
@@ -121,10 +154,29 @@
 
 ;; --- Magit ---
 (use-package magit
+  :ensure t
   :commands magit-status
   :config
-  (global-set-key (kbd "C-x g") 'magit-status))
+  (global-set-key (kbd "C-x g") 'magit-status)
+  (when (not (package-installed-p 'magit))
+    (message "Warning: magit not installed")))
 
 ;; --- Which-key ---
 (use-package which-key
-  :config (which-key-mode))
+  :ensure t
+  :config (which-key-mode)
+  :init
+  (when (not (package-installed-p 'which-key))
+    (message "Warning: which-key not installed, disabling which-key-mode")
+    (setq which-key-mode nil)))
+
+;; --- Clipboard Configuration ---
+;; Ensure clipboard integration works properly
+(when (display-graphic-p)
+  (setq x-select-enable-clipboard t)
+  (setq x-select-enable-primary t)
+  (setq save-interprogram-paste-before-kill t)
+  (setq mouse-drag-copy-region t)
+  (setq select-enable-clipboard t)
+  (setq interprogram-cut-function 'x-select-text)
+  (setq interprogram-paste-function 'x-cut-buffer-or-selection-value))

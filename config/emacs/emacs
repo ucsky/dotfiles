@@ -1,98 +1,138 @@
-;; --- Package Initialization ---
-;; Suppress compilation warnings (including docstring warnings)
+;;; ~/.dotfiles/config/emacs/emacs --- Robust, cross-machine Emacs configuration -*- lexical-binding: t; -*-
+;;; Commentary:
+;; This file is designed to be:
+;; - Robust across multiple machines
+;; - Fast on startup (avoids unnecessary package refresh)
+;; - Safe with TRAMP
+;; - Reliable for clipboard copy/paste in GUI (Wayland/X11) on Pop!_OS 24.04
+;;
+;; Notes:
+;; - Do NOT force `interprogram-cut-function` / `interprogram-paste-function`.
+;;   Emacs selects the correct backend depending on X11/Wayland/GTK.
+;; - If you use Emacs in terminal mode, clipboard integration is a separate topic
+;;   (wl-clipboard / xclip / xsel). This file targets GUI reliability first.
+
+;;; Code:
+
+;; ============================================================
+;; 0) Reduce noisy compilation warnings (optional)
+;; ============================================================
 (setq byte-compile-warnings nil)
+(setq warning-suppress-types '((comp)))
 (setq native-comp-async-report-warnings-errors nil)
 (setq native-comp-async-query-on-exit nil)
-(setq warning-suppress-types '((comp)))
+
+;; ============================================================
+;; 1) Package system (GNU ELPA + MELPA) + use-package bootstrap
+;; ============================================================
 (require 'package)
+
 (setq package-archives
-      '(("melpa" . "https://melpa.org/packages/")
-        ("gnu"   . "https://elpa.gnu.org/packages/")))
+      '(("gnu"   . "https://elpa.gnu.org/packages/")
+        ("melpa" . "https://melpa.org/packages/")))
+
+;; Initialize packages once
 (unless (bound-and-true-p package--initialized)
   (package-initialize))
-;; Refresh package contents to avoid stale cache errors
-;; Only refresh if cache is missing or very old (older than 1 day)
-(let ((archive-file (expand-file-name "~/.emacs.d/elpa/archives/melpa/archive-contents")))
-  (when (or (not (file-exists-p archive-file))
-            (let ((file-time (file-attribute-modification-time (file-attributes archive-file))))
-              (> (- (float-time) (float-time file-time)) 86400)))
-    (message "Refreshing package archives...")
-    (package-refresh-contents)))
+
+;; Refresh package metadata only when needed.
+;; Rationale:
+;; - Refreshing on every startup is slow and brittle on laptops/offline.
+;; - If `use-package` is missing, we refresh once to be able to install it.
 (unless (package-installed-p 'use-package)
+  (message "[init] Refreshing package archives (first install of use-package)...")
+  (package-refresh-contents)
   (package-install 'use-package))
-(eval-when-compile (require 'use-package))
+
+(eval-when-compile
+  (require 'use-package))
+
 (require 'bind-key)
 (setq use-package-always-ensure t)
-;; Handle package installation errors gracefully
+
+;; Less verbose package logging during init
 (setq use-package-verbose nil)
 (setq use-package-minimum-reported-time 0)
 
-;; --- TRAMP Optimization ---
+;; ============================================================
+;; 2) TRAMP (remote editing) optimizations & safety
+;; ============================================================
+;; Default remote method (ssh)
 (setq tramp-default-method "ssh")
-(setq tramp-ssh-controlmaster-options
-      "-o ControlMaster=auto -o ControlPersist=yes -o ControlPath='~/.ssh/control-%%r@%%h:%%p'")
-(setq tramp-copy-size-limit 1000000)
-(setq tramp-verbose 1
-      create-lockfiles nil
-      tramp-auto-save-directory "~/.emacs.d/tramp-autosave")
+
+;; Make TRAMP more responsive:
+;; - lower verbosity (0..10). 1 is “light”.
+;; - avoid lockfiles over slow links.
+;; - store TRAMP autosaves locally.
+(setq tramp-verbose 1)
+(setq create-lockfiles nil)
+(setq tramp-auto-save-directory (expand-file-name "tramp-autosave/" user-emacs-directory))
+
+;; If you use ControlMaster, TRAMP can reuse SSH connections.
+;; Note: ControlPath must be short enough on some systems.
+;; Also, create the directory to avoid SSH errors.
+(let ((cm-dir (expand-file-name "controlmasters/" (or (getenv "XDG_RUNTIME_DIR")
+                                                     (expand-file-name "~/.cache/")))))
+  (unless (file-directory-p cm-dir)
+    (make-directory cm-dir t))
+  (setq tramp-ssh-controlmaster-options
+        (format (concat "-o ControlMaster=auto "
+                        "-o ControlPersist=10m "
+                        "-o ControlPath=%s/%%r@%%h:%%p")
+                cm-dir)))
+
+;; Avoid copying huge files over TRAMP by accident
+(setq tramp-copy-size-limit 1000000) ;; ~1MB
+
+;; Improve VC performance with TRAMP (avoid VC scanning remote paths)
 (setq vc-ignore-dir-regexp
       (format "\\(%s\\)\\|\\(%s\\)"
               vc-ignore-dir-regexp
               tramp-file-name-regexp))
 
-;; --- Line Truncation ---
+;; ============================================================
+;; 3) Editing defaults
+;; ============================================================
+;; Truncate long lines by default (fast rendering, convenient for logs)
 (set-default 'truncate-lines t)
 
-;; --- Auto-mode Settings ---
+;; Show line numbers globally (you can disable in some modes if desired)
+(global-display-line-numbers-mode 1)
+
+;; Dired listing: show human sizes, classify, etc.
+(setq dired-listing-switches "-alh")
+
+;; ============================================================
+;; 4) File type associations
+;; ============================================================
 (add-to-list 'auto-mode-alist '(".*/bash/rc\\'" . sh-mode))
 (add-to-list 'auto-mode-alist '(".*/bash/profile\\'" . sh-mode))
 (add-to-list 'auto-mode-alist '(".*\\.tex\\.mustache\\'" . latex-mode))
 (add-to-list 'auto-mode-alist '(".*\\.tex\\.jinja2\\'" . latex-mode))
-(add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
+(add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode)) ;; built-in python.el
 
-;; --- Python Mode ---
-(use-package python-mode
-  :ensure t
-  :defer t
+;; ============================================================
+;; 5) Python tooling
+;; ============================================================
+;; IMPORTANT:
+;; - Prefer Emacs built-in python.el for robustness.
+;; - Avoid installing external `python-mode` unless you explicitly need it,
+;;   because it can override python.el and create confusion.
+(use-package python
+  :ensure nil
   :hook (python-mode . (lambda ()
                          (setq python-indent-offset 4
                                tab-width 4
-                               indent-tabs-mode nil)))
-  :config
-  (when (not (package-installed-p 'python-mode))
-    (message "Warning: python-mode not installed, using built-in python.el")))
+                               indent-tabs-mode nil))))
 
-;; --- Pyenv ---
+;; pyenv-mode: per-buffer Python environment selection
 (use-package pyenv-mode
-  :config (setenv "WORKON_HOME" "~/.virtualenvs")
+  :config
+  ;; Common convention if you use virtualenvwrapper
+  (setenv "WORKON_HOME" (expand-file-name "~/.virtualenvs"))
   :hook (python-mode . pyenv-mode))
 
-;; --- LSP Mode (disabled on remote) ---
-(use-package lsp-mode
-  :hook (python-mode . (lambda ()
-                         (unless (file-remote-p (or buffer-file-name default-directory))
-                           (lsp-deferred))))
-  :custom
-  (lsp-enable-file-watchers nil)
-  (lsp-file-watch-threshold 10000)
-  (lsp-pyright-multi-root nil)
-  (lsp-enable-snippet nil)
-  (lsp-pyright-venv-path "~/.virtualenvs")
-  (lsp-pyright-python-executable-cmd "python"))
-
-(use-package lsp-pyright
-  :ensure t
-  :after lsp-mode
-  :hook (python-mode . (lambda ()
-                         (unless (file-remote-p (or buffer-file-name default-directory))
-                           (when (package-installed-p 'lsp-pyright)
-                             (require 'lsp-pyright)
-                             (lsp)))))
-  :config
-  (when (not (package-installed-p 'lsp-pyright))
-    (message "Warning: lsp-pyright not installed")))
-
-;; --- Company Mode ---
+;; Company: completion UI
 (use-package company
   :hook (prog-mode . company-mode)
   :custom
@@ -106,77 +146,128 @@
               ("C-n"   . company-select-next)
               ("C-p"   . company-select-previous)))
 
-;; --- Flycheck ---
+;; Flycheck: on-the-fly diagnostics (works well with Python)
 (use-package flycheck
-  :ensure t
-  :hook (python-mode . flycheck-mode)
-  :config
-  (when (not (package-installed-p 'flycheck))
-    (message "Warning: flycheck not installed")))
+  :hook (prog-mode . flycheck-mode))
 
-;; --- Black + isort (disabled on remote) ---
-(defun my/python-before-save-local ()
-  (unless (file-remote-p (or buffer-file-name default-directory))
-    (when (boundp 'blacken-mode) (blacken-buffer))
-    (when (boundp 'isortify-mode) (isortify-buffer))))
+;; LSP:
+;; - Enable only for local files (LSP over TRAMP is often slow/unreliable).
+;; - lsp-pyright provides Python language features (type checking, completions).
+(use-package lsp-mode
+  :commands (lsp lsp-deferred)
+  :hook (python-mode . (lambda ()
+                         ;; Do not run LSP on remote buffers
+                         (unless (file-remote-p (or buffer-file-name default-directory))
+                           (lsp-deferred))))
+  :custom
+  ;; Reduce file watcher overhead on large repos
+  (lsp-enable-file-watchers nil)
+  (lsp-file-watch-threshold 10000)
+  ;; Optional: disable snippets if you dislike them
+  (lsp-enable-snippet nil))
 
+(use-package lsp-pyright
+  :after lsp-mode
+  :hook (python-mode . (lambda ()
+                         (unless (file-remote-p (or buffer-file-name default-directory))
+                           (require 'lsp-pyright))))
+  :custom
+  ;; Point pyright to your venv location (adjust if needed)
+  (lsp-pyright-venv-path (expand-file-name "~/.virtualenvs"))
+  ;; If you want to force python executable:
+  ;; (lsp-pyright-python-executable-cmd "python")
+  )
+
+;; Formatting:
+;; - blacken formats Python code with Black.
+;; - isortify sorts imports.
+;; This setup runs both on save for local files only.
 (use-package blacken
-  :ensure t
-  :hook (python-mode . blacken-mode)
-  :config
-  (when (not (package-installed-p 'blacken))
-    (message "Warning: blacken not installed")))
+  :hook (python-mode . blacken-mode))
 
 (use-package isortify
   :hook (python-mode . isortify-mode))
 
+(defun my/python-format-before-save ()
+  "Format Python buffers before save (local files only).
+Runs Black and isort when the corresponding packages are available."
+  (unless (file-remote-p (or buffer-file-name default-directory))
+    ;; Black
+    (when (fboundp 'blacken-buffer)
+      (blacken-buffer))
+    ;; isort
+    (when (fboundp 'isortify-buffer)
+      (isortify-buffer))))
+
 (add-hook 'python-mode-hook
           (lambda ()
-            (add-hook 'before-save-hook #'my/python-before-save-local nil t)))
+            ;; Buffer-local before-save hook
+            (add-hook 'before-save-hook #'my/python-format-before-save nil t)))
 
-;; --- Appearance ---
-(global-display-line-numbers-mode t)
-(setq dired-listing-switches "-1")
-
-;; --- ANSI Colors ---
+;; ============================================================
+;; 6) ANSI colors in compilation and shells
+;; ============================================================
 (use-package ansi-color
+  :ensure nil
   :config
-  (defun colorize-compilation-buffer ()
+  (defun my/colorize-compilation-buffer ()
     (ansi-color-apply-on-region compilation-filter-start (point-max)))
-  (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
-  (defun my-shell-mode-hook () (ansi-color-for-comint-mode-on))
-  (add-hook 'shell-mode-hook 'my-shell-mode-hook))
+  (add-hook 'compilation-filter-hook #'my/colorize-compilation-buffer)
 
-;; --- LaTeX ---
+  (defun my/shell-color-setup ()
+    (ansi-color-for-comint-mode-on))
+  (add-hook 'shell-mode-hook #'my/shell-color-setup))
+
+;; ============================================================
+;; 7) LaTeX (AUCTeX)
+;; ============================================================
 (use-package tex
   :ensure auctex
-  :hook (latex-mode . (lambda () (setq TeX-PDF-mode t))))
+  :hook (latex-mode . (lambda ()
+                        ;; Compile to PDF by default
+                        (setq TeX-PDF-mode t))))
 
-;; --- Magit ---
+;; ============================================================
+;; 8) Git
+;; ============================================================
 (use-package magit
-  :ensure t
   :commands magit-status
-  :config
-  (global-set-key (kbd "C-x g") 'magit-status)
-  (when (not (package-installed-p 'magit))
-    (message "Warning: magit not installed")))
+  :bind (("C-x g" . magit-status)))
 
-;; --- Which-key ---
+;; ============================================================
+;; 9) Which-key (keybinding discovery)
+;; ============================================================
 (use-package which-key
-  :ensure t
-  :config (which-key-mode)
-  :init
-  (when (not (package-installed-p 'which-key))
-    (message "Warning: which-key not installed, disabling which-key-mode")
-    (setq which-key-mode nil)))
+  :config
+  (which-key-mode 1))
 
-;; --- Clipboard Configuration ---
-;; Ensure clipboard integration works properly
+;; ============================================================
+;; 10) Clipboard / Copy-Paste (GUI-safe)
+;; ============================================================
+;; On Pop!_OS 24.04 you may be on Wayland (often) or X11 (sometimes).
+;; Emacs GUI supports both, but the correct integration depends on the backend.
+;;
+;; Rule:
+;; - DO NOT force interprogram-* functions.
+;; - Enable standard clipboard variables, and let Emacs choose the backend.
+;;
+;; This is typically the most reliable cross-machine setup.
 (when (display-graphic-p)
-  (setq x-select-enable-clipboard t)
-  (setq x-select-enable-primary t)
-  (setq save-interprogram-paste-before-kill t)
-  (setq mouse-drag-copy-region t)
+  ;; Use system clipboard for kill/yank
   (setq select-enable-clipboard t)
-  (setq interprogram-cut-function 'x-select-text)
-  (setq interprogram-paste-function 'x-cut-buffer-or-selection-value))
+  ;; Also integrate primary selection (useful on X11, harmless elsewhere)
+  (setq select-enable-primary t)
+  ;; Helps when external clipboard changes
+  (setq save-interprogram-paste-before-kill t)
+  ;; Make mouse dragging copy the region
+  (setq mouse-drag-copy-region t)
+
+  ;; IMPORTANT: ensure no manual override remains
+  (setq interprogram-cut-function nil)
+  (setq interprogram-paste-function nil))
+
+;; ============================================================
+;; End
+;; ============================================================
+(provide 'init)
+;;; ~/.dotfiles/config/emacs/emacs ends here

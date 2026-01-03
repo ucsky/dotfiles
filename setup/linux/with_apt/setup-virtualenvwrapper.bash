@@ -1,4 +1,4 @@
-#!/bin/bash -i
+#!/bin/bash
 
 # Test if workon is already installed
 command -v workon >> /dev/null && HAS_WORKON=1 || HAS_WORKON=0

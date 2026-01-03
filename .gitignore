@@ -5,3 +5,4 @@ __pycache__
 # Python venv
 /venv/
 /emacs-test.log
+/logs/

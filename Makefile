@@ -59,43 +59,34 @@ setup-venv:
 setup-workon: ## Setup dotfiles project using virtualenv wrapper.
 setup-workon:
 	-@($(HOME)/.dotfiles/setup/linux/with_apt/setup-virtualenvwrapper.bash)
-	-@(command -v workon &> /dev/null \
-	&& \
-		(\
-		echo "Using workon for install the dotfiles." \
-		&& \
-			( \
-			workon $(NAME_PYTHON_VENV) &> /dev/null \
-			&& echo "Virutal env $(NAME_PYTHON_VENV) already created."\
-			|| (echo "Creating $(NAME_PYTHON_VENV)" && mkvirtualenv $(NAME_PYTHON_VENV)) \
-			) \
-		&& \
-			( \
-			workon $(NAME_PYTHON_VENV) \
-			&& pip install -U pip \
-			&& pip install -r requirements.txt \
-			) \
-		) \
-	|| \
-		(\
-		echo "ERROR: please install Virtualenv Wrapper." \
-		) \
-	)
+	-@(if command -v workon &> /dev/null; then \
+		export WORKON_HOME=$$HOME/.virtualenvs \
+		&& export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3 \
+		&& source /usr/share/virtualenvwrapper/virtualenvwrapper.sh 2>/dev/null \
+		&& echo "Using workon for install the dotfiles." \
+		&& (workon $(NAME_PYTHON_VENV) &> /dev/null \
+			&& echo "Virtual env $(NAME_PYTHON_VENV) already created." \
+			|| (echo "Creating $(NAME_PYTHON_VENV)" && mkvirtualenv $(NAME_PYTHON_VENV))) \
+		&& workon $(NAME_PYTHON_VENV) \
+		&& pip install -U pip \
+		&& pip install -r requirements.txt; \
+	else \
+		echo "Note: Virtualenv Wrapper not available, using standard venv instead."; \
+	fi)
 
 
 
 setup-miniconda: ## Install using miniconda env dotfiles.
 setup-miniconda:
 	-@(command -v conda >> /dev/null && (\
-	conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main 2>/dev/null || true \
+	CONDA_BASE=$$(conda info --base) \
+	&& source $$CONDA_BASE/etc/profile.d/conda.sh \
+	&& conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main 2>/dev/null || true \
 	&& conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r 2>/dev/null || true \
-	&& conda env list \
-	| egrep '^$(NAME_PYTHON_VENV)\s+/' \
+	&& (conda env list | egrep '^$(NAME_PYTHON_VENV)\s+/' > /dev/null \
+		|| conda create --name $(NAME_PYTHON_VENV) python=3.10 -y) \
 	&& conda activate $(NAME_PYTHON_VENV) \
-	|| conda create --name $(NAME_PYTHON_VENV) python=3.10 -y \
-	) || true)
-	-@(command -v conda >> /dev/null && (conda activate $(NAME_PYTHON_VENV) \
-	&&  conda install anaconda::pip -y \
+	&& conda install anaconda::pip -y \
 	&& pip install -r requirements.txt \
 	) || true)
 
@@ -142,23 +133,37 @@ startnb-miniconda:
 # Testing
 #---------------------------------------------
 
+# Create logs directory
+LOGS_DIR := logs
+
 test-config-emacs: ## Test emacs setup
 test-config-emacs: tests/config/emacs/test_emacs.bash
-	-@(echo "Testing emacs configuration" \
-	&& ./$<)
+	@mkdir -p $(LOGS_DIR)
+	@TIMESTAMP=$$(date +%Y%m%dT%H%M%S); \
+	LOG_FILE="$(LOGS_DIR)/test-config-emacs_$$TIMESTAMP.log"; \
+	echo "Testing emacs configuration (log: $$LOG_FILE)"; \
+	(echo "Testing emacs configuration" && ./$<) 2>&1 | tee $$LOG_FILE
 
 test-script-bash: ## Test bash script
 test-script-bash:
-	-@(echo "Testing bash script" \
-	&& for i in tests/script/bash/*.*;do \
+	@mkdir -p $(LOGS_DIR)
+	@TIMESTAMP=$$(date +%Y%m%dT%H%M%S); \
+	LOG_FILE="$(LOGS_DIR)/test-script-bash_$$TIMESTAMP.log"; \
+	echo "Testing bash script (log: $$LOG_FILE)"; \
+	(echo "Testing bash script"; \
+	for i in tests/script/bash/*.*;do \
 		echo "Testing $$i";\
 		./$$i; \
-		done)
+	done) 2>&1 | tee $$LOG_FILE
 
 test-script-python3: ## Test python3 script
 test-script-python3:
-	-@(echo "Testing python3 script" \
-	&& if [ -d $(PATH_PYTHON_VENV) ]; then \
+	@mkdir -p $(LOGS_DIR)
+	@TIMESTAMP=$$(date +%Y%m%dT%H%M%S); \
+	LOG_FILE="$(LOGS_DIR)/test-script-python3_$$TIMESTAMP.log"; \
+	echo "Testing python3 script (log: $$LOG_FILE)"; \
+	(echo "Testing python3 script"; \
+	if [ -d $(PATH_PYTHON_VENV) ]; then \
 		. $(PATH_PYTHON_VENV)/bin/activate \
 		&& for i in tests/script/python3/*.*;do \
 			echo "Testing $$i";\
@@ -172,7 +177,9 @@ test-script-python3:
 			./$$i; \
 		done; \
 	elif command -v conda &> /dev/null; then \
-		conda activate $(NAME_PYTHON_VENV) 2>/dev/null \
+		CONDA_BASE=$$(conda info --base 2>/dev/null) \
+		&& source $$CONDA_BASE/etc/profile.d/conda.sh 2>/dev/null \
+		&& conda activate $(NAME_PYTHON_VENV) 2>/dev/null \
 		&& for i in tests/script/python3/*.*;do \
 			echo "Testing $$i";\
 			./$$i; \
@@ -183,11 +190,13 @@ test-script-python3:
 			echo "Testing $$i";\
 			./$$i; \
 		done; \
-	fi)
+	fi) 2>&1 | tee $$LOG_FILE
 
 .PHONY: tests
 tests: ## Run all tests
 tests: test-config-emacs test-script-bash test-script-python3
+	@echo ""
+	@echo "All tests completed. Logs available in $(LOGS_DIR)/"
 
 #---------------------------------------------
 # Cleaning

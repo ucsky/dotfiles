@@ -62,7 +62,9 @@ setup-workon:
 	-@(if command -v workon &> /dev/null; then \
 		export WORKON_HOME=$$HOME/.virtualenvs \
 		&& export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3 \
-		&& source /usr/share/virtualenvwrapper/virtualenvwrapper.sh 2>/dev/null \
+		&& (source /usr/share/virtualenvwrapper/virtualenvwrapper.sh 2>/dev/null \
+			|| source /usr/local/bin/virtualenvwrapper.sh 2>/dev/null \
+			|| source $$HOME/.local/bin/virtualenvwrapper.sh 2>/dev/null) \
 		&& echo "Using workon for install the dotfiles." \
 		&& (workon $(NAME_PYTHON_VENV) &> /dev/null \
 			&& echo "Virtual env $(NAME_PYTHON_VENV) already created." \
@@ -170,7 +172,11 @@ test-script-python3:
 			./$$i; \
 		done; \
 	elif command -v workon &> /dev/null; then \
-		source /usr/share/virtualenvwrapper/virtualenvwrapper.sh 2>/dev/null \
+		export WORKON_HOME=$$HOME/.virtualenvs \
+		&& export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3 \
+		&& (source /usr/share/virtualenvwrapper/virtualenvwrapper.sh 2>/dev/null \
+			|| source /usr/local/bin/virtualenvwrapper.sh 2>/dev/null \
+			|| source $$HOME/.local/bin/virtualenvwrapper.sh 2>/dev/null) \
 		&& workon $(NAME_PYTHON_VENV) 2>/dev/null \
 		&& for i in tests/script/python3/*.*;do \
 			echo "Testing $$i";\

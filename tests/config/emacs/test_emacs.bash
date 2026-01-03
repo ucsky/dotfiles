@@ -5,7 +5,10 @@ set -e
 
 # Paths
 CONFIG_FILE="$HOME/.dotfiles/config/emacs/emacs"
-LOG_FILE="emacs-test.log"
+LOGS_DIR="${LOGS_DIR:-logs}"
+mkdir -p "$LOGS_DIR"
+TIMESTAMP=$(date +%Y%m%dT%H%M%S)
+LOG_FILE="$LOGS_DIR/emacs-test_${TIMESTAMP}.log"
 
 
 # emacs version

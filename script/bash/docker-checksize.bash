@@ -21,23 +21,42 @@ fi
 
 command -v docker >> /dev/null && HAS_DOCKER=1 || HAS_DOCKER=0
 if [ "$HAS_DOCKER" == 0 ];then
-    echo "WARNING: docker not found on `hostname`."
+    echo "WARNING: docker not found on $(hostname)."
     exit 0
 fi
 
+# Check if docker daemon is running
+if ! docker info > /dev/null 2>&1; then
+    echo "WARNING: docker daemon is not running or not accessible."
+    exit 0
+fi
 
-if test -x /var/lib/docker;then
+# Check if /var/lib/docker exists and is accessible
+if [ ! -d /var/lib/docker ]; then
+    echo "WARNING: /var/lib/docker does not exist."
+    exit 0
+fi
+
+# Check if we have read permission on the directory
+if [ ! -r /var/lib/docker ]; then
+    echo "WARNING: do not have permission to access /var/lib/docker"
+    exit 0
+fi
+
 # change directory to /var/lib/docker
-pushd /var/lib/docker > /dev/null
+pushd /var/lib/docker > /dev/null || {
+    echo "WARNING: do not have permission to access /var/lib/docker"
+    exit 0
+}
 
 # loop through each file and directory in /var/lib/docker
-for i in `ls`; do
+# Use proper quoting to handle spaces in filenames
+for i in *; do
+    # Skip if no files found (glob expansion)
+    [ -e "$i" ] || continue
     # display the disk usage of the current file or directory in a human-readable format
-    du -sh $i
+    du -sh "$i"
 done
 
 # change back to the previous directory
 popd > /dev/null
-else
-    echo "WARNING: do not have permision to go in /var/lib/docker"
-fi

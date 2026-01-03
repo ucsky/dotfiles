@@ -170,7 +170,7 @@ test-script-python3:
 			./$$i; \
 		done; \
 	elif command -v workon &> /dev/null; then \
-		source $$(which virtualenvwrapper.sh) 2>/dev/null \
+		source /usr/share/virtualenvwrapper/virtualenvwrapper.sh 2>/dev/null \
 		&& workon $(NAME_PYTHON_VENV) 2>/dev/null \
 		&& for i in tests/script/python3/*.*;do \
 			echo "Testing $$i";\

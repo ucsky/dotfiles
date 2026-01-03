@@ -3,6 +3,7 @@ black
 ipython>8.10.0
 jupyter
 jupyterlab
+nbformat
 jupyterlab-git
 jupyterlab-lsp
 jupyter-lsp

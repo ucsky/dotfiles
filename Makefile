@@ -1,4 +1,4 @@
-SHELL := /bin/bash -i # Bourne-Again SHell is a widly used command-line interpreter on Linux.
+SHELL := /bin/bash # Bourne-Again SHell is a widly used command-line interpreter on Linux.
 CODENAME := $(shell echo "`lsb_release --id --short | tr '[:upper:]' '[:lower:]'`-`lsb_release --release --short`")
 PATH_PYTHON_VENV := $(HOME)/.venv
 PATH_PYTHON_VIRTUALENV := $(HOME)/.virtualenvs
@@ -144,30 +144,50 @@ startnb-miniconda:
 
 test-config-emacs: ## Test emacs setup
 test-config-emacs: tests/config/emacs/test_emacs.bash
-	@echo "Testing emacs configuration" \
-	&& bash  $<
+	-@(echo "Testing emacs configuration" \
+	&& ./$<)
 
 test-script-bash: ## Test bash script
 test-script-bash:
-	@echo "Testing bash script" \
+	-@(echo "Testing bash script" \
 	&& for i in tests/script/bash/*.*;do \
 		echo "Testing $$i";\
 		./$$i; \
-		done
+		done)
 
 test-script-python3: ## Test python3 script
 test-script-python3:
-	@echo "Testing python3 script" \
-	&& workon $(NAME_PYTHON_VENV) &> /dev/null \
-	&& for i in tests/script/python3/*.*;do \
-		echo "Testing $$i";\
-		./$$i; \
-		done
+	-@(echo "Testing python3 script" \
+	&& if [ -d $(PATH_PYTHON_VENV) ]; then \
+		. $(PATH_PYTHON_VENV)/bin/activate \
+		&& for i in tests/script/python3/*.*;do \
+			echo "Testing $$i";\
+			./$$i; \
+		done; \
+	elif command -v workon &> /dev/null; then \
+		source $$(which virtualenvwrapper.sh) 2>/dev/null \
+		&& workon $(NAME_PYTHON_VENV) 2>/dev/null \
+		&& for i in tests/script/python3/*.*;do \
+			echo "Testing $$i";\
+			./$$i; \
+		done; \
+	elif command -v conda &> /dev/null; then \
+		conda activate $(NAME_PYTHON_VENV) 2>/dev/null \
+		&& for i in tests/script/python3/*.*;do \
+			echo "Testing $$i";\
+			./$$i; \
+		done; \
+	else \
+		echo "Warning: No Python virtual environment found. Trying system Python."; \
+		for i in tests/script/python3/*.*;do \
+			echo "Testing $$i";\
+			./$$i; \
+		done; \
+	fi)
 
 .PHONY: tests
 tests: ## Run all tests
-tests: tests/test_makefile.bash
-	@./$<
+tests: test-config-emacs test-script-bash test-script-python3
 
 #---------------------------------------------
 # Cleaning

@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Check if 7z command is available
+if ! command -v 7z &> /dev/null; then
+    echo "Skipping test: 7z command not found. Install p7zip-full to run this test."
+    exit 0
+fi
+
 # Define the test input and output
 test_file="test_input_file.txt"
 output_file="test_input_file.txt.7z"
@@ -14,18 +20,21 @@ exit_code=$?
 # Check if the script ran successfully
 if [ $exit_code -ne 0 ]; then
     echo "Test failed: 7zmax script returned an error."
+    rm -f "$test_file" "$output_file"
     exit 1
 fi
 
 # Check if the output file was created
 if [ ! -f "$output_file" ]; then
     echo "Test failed: Output file $output_file was not created."
+    rm -f "$test_file" "$output_file"
     exit 1
 fi
 
 # Check if the output file is not empty
 if [ ! -s "$output_file" ]; then
     echo "Test failed: Output file $output_file is empty."
+    rm -f "$test_file" "$output_file"
     exit 1
 fi
 

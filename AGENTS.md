@@ -1,4 +1,4 @@
-# Agent instructions (Cursor / AI IDE)
+# Agent instructions (AI IDE)
 
 This repository is a personal `dotfiles` and utilities collection.
 

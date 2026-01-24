@@ -64,6 +64,87 @@ detect_vbox() {
 
 os="$(uname -s | tr '[:upper:]' '[:lower:]')"
 
+setup_venv() {
+  local env_name="${NAME_PYTHON_VENV:-dotfiles51}"
+  local venv_root="${HOME}/.venv"
+  local venv_path="${venv_root}/${env_name}"
+  mkdir -p "$venv_root"
+  if [ ! -d "$venv_path" ]; then
+    echo "Creating venv: $venv_path"
+    python3 -m venv "$venv_path"
+  fi
+  # Install/update requirements (idempotent)
+  # shellcheck disable=SC1090
+  . "$venv_path/bin/activate"
+  pip install -U pip
+  pip install -r "$REPO_ROOT/requirements.txt"
+  deactivate || true
+}
+
+setup_workon() {
+  local env_name="${NAME_PYTHON_VENV:-dotfiles51}"
+  export WORKON_HOME="${HOME}/.virtualenvs"
+
+  if ! command -v workon >/dev/null 2>&1; then
+    echo "INFO: virtualenvwrapper not available; skipping workon env setup."
+    return 0
+  fi
+
+  # shellcheck disable=SC1091
+  source /usr/share/virtualenvwrapper/virtualenvwrapper.sh 2>/dev/null \
+    || source /usr/local/bin/virtualenvwrapper.sh 2>/dev/null \
+    || source "$HOME/.local/bin/virtualenvwrapper.sh" 2>/dev/null \
+    || true
+
+  if ! command -v workon >/dev/null 2>&1; then
+    echo "INFO: virtualenvwrapper init not found after sourcing; skipping workon env setup."
+    return 0
+  fi
+
+  if ! workon "$env_name" >/dev/null 2>&1; then
+    echo "Creating virtualenvwrapper env: $env_name"
+    mkvirtualenv "$env_name"
+  fi
+  workon "$env_name"
+  pip install -U pip
+  pip install -r "$REPO_ROOT/requirements.txt"
+  deactivate || true
+}
+
+setup_conda() {
+  local env_name="${NAME_PYTHON_VENV:-dotfiles51}"
+
+  if command -v conda >/dev/null 2>&1; then
+    # ok
+    true
+  elif [ -f "$HOME/.miniconda3/etc/profile.d/conda.sh" ]; then
+    # shellcheck disable=SC1090
+    source "$HOME/.miniconda3/etc/profile.d/conda.sh"
+  elif [ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]; then
+    # shellcheck disable=SC1090
+    source "$HOME/miniconda3/etc/profile.d/conda.sh"
+  else
+    echo "INFO: conda not available; skipping conda env setup."
+    return 0
+  fi
+
+  if ! command -v conda >/dev/null 2>&1; then
+    echo "INFO: conda shell not available; skipping conda env setup."
+    return 0
+  fi
+
+  conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main 2>/dev/null || true
+  conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r 2>/dev/null || true
+
+  if ! conda env list | grep -E "^${env_name}[[:space:]]+" >/dev/null 2>&1; then
+    echo "Creating conda env: $env_name"
+    conda create --name "$env_name" python=3.10 -y
+  fi
+  conda activate "$env_name"
+  conda install anaconda::pip -y
+  pip install -r "$REPO_ROOT/requirements.txt"
+}
+
 case "$os" in
   linux)
     if detect_wsl; then
@@ -77,14 +158,18 @@ case "$os" in
       bash "$REPO_ROOT/make/install_bare-ubuntu.bash"
     fi
 
-    # Tooling bootstrap (non-fatal if something is missing)
-    (cd "$REPO_ROOT" && make setup-venv) || true
-    (cd "$REPO_ROOT" && make setup-workon) || true
-    (cd "$REPO_ROOT" && make setup-miniconda) || true
+    # Python environments setup (idempotent)
+    setup_venv
+    setup_workon || true
+    setup_conda || true
     ;;
   darwin)
     echo "Detected OS: macOS"
     zsh "$REPO_ROOT/make/install_bare-macos.zsh"
+    # Python environments setup (idempotent)
+    setup_venv
+    setup_workon || true
+    setup_conda || true
     ;;
   msys*|mingw*|cygwin*)
     if detect_gitbash; then

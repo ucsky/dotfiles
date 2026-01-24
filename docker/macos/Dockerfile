@@ -22,6 +22,6 @@ RUN apt-get update \
 WORKDIR /root/.dotfiles
 COPY . .
 
-RUN make setup-venv && make tests
+RUN make install && make tests
 
 CMD ["/usr/bin/zsh"]

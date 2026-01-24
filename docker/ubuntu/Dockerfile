@@ -18,6 +18,6 @@ WORKDIR /root/.dotfiles
 COPY . .
 
 # Install dependencies into a venv and run tests
-RUN make setup-venv && make tests
+RUN make install && make tests
 
 CMD ["/bin/bash"]

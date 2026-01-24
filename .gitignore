@@ -1,8 +1,11 @@
+# Emacs files
 *~
 \#*
 .#*
 __pycache__
+
 # Python venv
 /venv/
+
 # Test logs (all logs are in logs/ directory)
 /logs/

@@ -1,0 +1,56 @@
+# Configuration for interactive bash shells
+
+# Disk usage on all files (including dotfiles), sorted
+alias dusort='du -sh .[!.]* * | sort -h'
+
+# PATH utilities (see also bash profile)
+pathadd() {
+    if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
+        PATH="${PATH:+"$PATH:"}$1"
+    fi
+    export PATH
+}
+
+pythonpathadd() {
+    if [ -d "$1" ] && [[ ":$PYTHONPATH:" != *":$1:"* ]]; then
+        PYTHONPATH="${PYTHONPATH:+"$PYTHONPATH:"}$1"
+    fi
+    export PYTHONPATH
+}
+
+wk() {
+    # Link task files into $HOME/.wk (idempotent)
+    mkdir -p "$HOME/.wk"
+    for i in "$HOME"/.*files/wk/*; do
+        [ -e "$i" ] || continue
+        j=$(basename "$i")
+        if [ ! -L "$HOME/.wk/$j" ]; then
+            ln -s "$i" "$HOME/.wk/$j"
+        fi
+    done
+    ls -1 "$HOME/.wk"
+}
+
+blockinfile() {
+    #
+    # Description:
+    #   Bash equivalent of Ansible blockinfile.
+    #   Source: https://kkovacs.eu/ansible-lineinfile-blockinfile-in-bash
+    #
+    # Usage:
+    #   blockinfile STARTMARK ENDMARK filename <<EOF
+    #   # STARTMARK
+    #   some text to
+    #   put inside
+    #   # ENDMARK
+    #   EOF
+    sed -i -ne '/'"${1//\//\\/}"'/{r/dev/stdin' -e ':a;n;/'"${2//\//\\/}"'/{:b;n;p;bb};ba};p;$r/dev/stdin' "$3"
+}
+
+autoload_dotenv() {
+  local env_file=".env"
+  if [ -f "$env_file" ]; then
+    # NOTE: This is convenient but can be unsafe if you don't trust the .env file.
+    export $(grep -v '^#' "$env_file" | xargs)
+  fi
+}

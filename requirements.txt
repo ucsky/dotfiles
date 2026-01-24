@@ -19,6 +19,7 @@ pycodestyle
 pydocstyle
 pyflakes
 pylint
+pyyaml
 python-lsp-jsonrpc
 python-lsp-server
 requests>=2.32.2 # not directly required, pinned by Snyk to avoid a vulnerability

@@ -1,0 +1,30 @@
+- [x] Add `AGENTS.md` for AI IDEs (Cursor).
+- [x] Update `README.md` after major changes.
+- [x] Rename `config/` to `configs/` and update dependencies.
+- [x] Fix and test git hooks.
+- [x] Add an example utility notebook.
+- [x] Ensure Python environments work for mkvirtualenv / venv / conda (env name: `dotfiles51`).
+- [x] Rename `script/` to `scripts/`.
+- [x] Setup:
+  - [x] Keep setup scripts wired in `Makefile`.
+  - [x] Add installers under `make/` (`make/install.bash`, `make/uninstall.bash`).
+  - [x] Add per-distribution bare installers:
+    - `make/install_bare-mswin.ps1`
+    - `make/install_bare-linux.bash`
+    - `make/install_bare-macos.zsh`
+  - [x] In `install.bash`, check whether sudo is available.
+- [x] Tests:
+  - [x] Provide tests for scripts and entities (syntax/compile and selected functional tests).
+  - [x] Rename `tests/config/` to `tests/configs/`.
+  - [x] Rename `tests/script/` to `tests/scripts/`.
+  - [x] Test all scripts.
+  - [x] Test all config files.
+  - [x] Test hooks in `tests/hooks/`.
+  - [x] Test notebooks in `tests/notebooks/` (using papermill).
+  - [x] Add infra tests in `tests/infra/` (basic network checks).
+- [x] Docker: add minimal Dockerfiles to validate installation:
+  - [x] `docker/mswin/Dockerfile`
+  - [x] `docker/macos/Dockerfile`
+  - [x] `docker/linux/Dockerfile`
+- [x] Prefix all scripts under `scripts/` with `d51_` and update dependencies accordingly.
+- [x] Update `Makefile` rules accordingly (each script has a Make rule).

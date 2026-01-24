@@ -1,0 +1,23 @@
+# Configuration for non-interactive bash shells
+
+# Environment variables
+export ROOT_DOTFILES="$HOME/.dotfiles"
+
+# Convenience
+alias c='rm -f *~'
+
+# Add dotfiles script directories to PATH (only once)
+case ":$PATH:" in
+  *":$HOME/.dotfiles/scripts/sh:"*) ;;
+  *) export PATH="$HOME/.dotfiles/scripts/sh:$PATH" ;;
+esac
+
+case ":$PATH:" in
+  *":$HOME/.dotfiles/scripts/bash:"*) ;;
+  *) export PATH="$HOME/.dotfiles/scripts/bash:$PATH" ;;
+esac
+
+case ":$PATH:" in
+  *":$HOME/.dotfiles/scripts/python3:"*) ;;
+  *) export PATH="$HOME/.dotfiles/scripts/python3:$PATH" ;;
+esac

@@ -1,0 +1,18 @@
+# Zsh profile (non-interactive)
+
+# PATH utilities
+pathadd() {
+    if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
+        PATH="${PATH:+"$PATH:"}$1"
+    fi
+}
+
+pythonpathadd() {
+    if [ -d "$1" ] && [[ ":$PYTHONPATH:" != *":$1:"* ]]; then
+        PYTHONPATH="${PYTHONPATH:+"$PYTHONPATH:"}$1"
+    fi
+}
+
+pathadd "$HOME/.dotfiles/scripts/sh"
+pathadd "$HOME/.dotfiles/scripts/bash"
+pathadd "$HOME/.dotfiles/scripts/python3"

@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# Description:
+#   Select a GCC/G++ version using update-alternatives.
+#
+# Usage:
+#   d51_g-set-atlternative.sh <version>
+#
+
+if [ -z "$1" ]; then
+    echo "usage: $(basename "$0") <version>" 1>&2
+    exit 1
+fi
+
+if [ ! -f "/usr/bin/gcc-$1" ] || [ ! -f "/usr/bin/g++-$1" ]; then
+    echo "no such gcc/g++ version installed" 1>&2
+    exit 1
+fi
+
+update-alternatives --set gcc "/usr/bin/gcc-$1"
+update-alternatives --set g++ "/usr/bin/g++-$1"

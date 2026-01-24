@@ -2,14 +2,14 @@ SHELL := /bin/bash # Bourne-Again SHell is a widly used command-line interpreter
 CODENAME := $(shell echo "`lsb_release --id --short | tr '[:upper:]' '[:lower:]'`-`lsb_release --release --short`")
 PATH_PYTHON_VENV := $(HOME)/.venv
 PATH_PYTHON_VIRTUALENV := $(HOME)/.virtualenvs
-NAME_PYTHON_VENV := dotfiles
+NAME_PYTHON_VENV := dotfiles51
 .SHELLFLAGS := -e -c
 OS ?= $(shell uname -s | tr '[:upper:]' '[:lower:]')
 
 ifeq ($(OS),linux)
-	SETUP_SCRIPT := setup/$(OS)/setup.bash
+SETUP_SCRIPT := make/install_bare-linux.bash
 endif
-PYTHONPATH := $(PWD)/script/python3
+PYTHONPATH := $(PWD)/scripts/python3
 export
 #---------------------------------------------
 # Hack for displaying help message in Makefile
@@ -58,14 +58,14 @@ setup-venv:
 
 setup-workon: ## Setup dotfiles project using virtualenv wrapper.
 setup-workon:
-	-@($(HOME)/.dotfiles/setup/linux/with_apt/setup-virtualenvwrapper.bash)
+	-@($(HOME)/.dotfiles/make/linux/with_apt/setup-virtualenvwrapper.bash)
 	-@(if command -v workon &> /dev/null; then \
 		export WORKON_HOME=$$HOME/.virtualenvs \
 		&& export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3 \
 		&& (source /usr/share/virtualenvwrapper/virtualenvwrapper.sh 2>/dev/null \
 			|| source /usr/local/bin/virtualenvwrapper.sh 2>/dev/null \
 			|| source $$HOME/.local/bin/virtualenvwrapper.sh 2>/dev/null) \
-		&& echo "Using workon for install the dotfiles." \
+		&& echo "Using workon to install dotfiles." \
 		&& (workon $(NAME_PYTHON_VENV) &> /dev/null \
 			&& echo "Virtual env $(NAME_PYTHON_VENV) already created." \
 			|| (echo "Creating $(NAME_PYTHON_VENV)" && mkvirtualenv $(NAME_PYTHON_VENV))) \
@@ -97,6 +97,13 @@ setup:  ## Setup dotfiles
 setup: $(SETUP_SCRIPT) setup-venv setup-workon setup-miniconda
 	(./$<)
 
+.PHONY: install uninstall
+install: ## Install dotfiles (OS-aware)
+	@bash make/install.bash
+
+uninstall: ## Uninstall dotfiles integration (safe)
+	@bash make/uninstall.bash
+
 #---------------------------------------------
 # Start Jupyter Notebook and Lab
 #---------------------------------------------
@@ -119,7 +126,7 @@ startnb-venv:
 startlab-miniconda: ## Start jupyter lab with DOTFILES.
 startlab-miniconda:
 	(echo "Starting lab with miniconda dotfiles" \
-	&& conda activate dotfiles \
+	&& conda activate $(NAME_PYTHON_VENV) \
 	&& jupyter lab --no-browser \
 	)
 
@@ -127,7 +134,7 @@ startlab-miniconda:
 startnb-miniconda: ## Start jupyter notebook with DOTFILES.
 startnb-miniconda:
 	(echo "Staring nb with miniconda dotfiles" \
-	&& conda activate dotfiles \
+	&& conda activate $(NAME_PYTHON_VENV) \
 	&& jupyter notebook --no-browser \
 	)
 
@@ -139,26 +146,40 @@ startnb-miniconda:
 LOGS_DIR := logs
 
 test-config-emacs: ## Test emacs setup
-test-config-emacs: tests/config/emacs/test_emacs.bash
+test-config-emacs: tests/configs/emacs/test_emacs.bash
 	@mkdir -p $(LOGS_DIR)
 	@TIMESTAMP=$$(date +%Y%m%dT%H%M%S); \
 	LOG_FILE="$(LOGS_DIR)/test-config-emacs_$$TIMESTAMP.log"; \
 	echo "Testing emacs configuration (log: $$LOG_FILE)"; \
 	(echo "Testing emacs configuration" && ./$<) 2>&1 | tee $$LOG_FILE
 
-test-script-bash: ## Test bash script
+test-configs: ## Test all config files
+test-configs:
+	@mkdir -p $(LOGS_DIR)
+	@TIMESTAMP=$$(date +%Y%m%dT%H%M%S); \
+	LOG_FILE="$(LOGS_DIR)/test-configs_$$TIMESTAMP.log"; \
+	echo "Testing configs (log: $$LOG_FILE)"; \
+	(echo "Testing configs"; \
+	if [ -d $(PATH_PYTHON_VENV) ]; then . $(PATH_PYTHON_VENV)/bin/activate; fi; \
+	for i in tests/configs/*/*.*; do \
+		echo "Testing $$i"; \
+		./$$i; \
+	done) 2>&1 | tee $$LOG_FILE
+
+test-script-bash: ## Test bash scripts
 test-script-bash:
 	@mkdir -p $(LOGS_DIR)
 	@TIMESTAMP=$$(date +%Y%m%dT%H%M%S); \
 	LOG_FILE="$(LOGS_DIR)/test-script-bash_$$TIMESTAMP.log"; \
 	echo "Testing bash script (log: $$LOG_FILE)"; \
 	(echo "Testing bash script"; \
-	for i in tests/script/bash/*.*;do \
+	if [ -d $(PATH_PYTHON_VENV) ]; then . $(PATH_PYTHON_VENV)/bin/activate; fi; \
+	for i in tests/scripts/bash/*.*;do \
 		echo "Testing $$i";\
 		./$$i; \
 	done) 2>&1 | tee $$LOG_FILE
 
-test-script-python3: ## Test python3 script
+test-script-python3: ## Test python3 scripts
 test-script-python3:
 	@mkdir -p $(LOGS_DIR)
 	@TIMESTAMP=$$(date +%Y%m%dT%H%M%S); \
@@ -167,7 +188,7 @@ test-script-python3:
 	(echo "Testing python3 script"; \
 	if [ -d $(PATH_PYTHON_VENV) ]; then \
 		. $(PATH_PYTHON_VENV)/bin/activate \
-		&& for i in tests/script/python3/*.*;do \
+		&& for i in tests/scripts/python3/*.*;do \
 			echo "Testing $$i";\
 			./$$i; \
 		done; \
@@ -178,7 +199,7 @@ test-script-python3:
 			|| source /usr/local/bin/virtualenvwrapper.sh 2>/dev/null \
 			|| source $$HOME/.local/bin/virtualenvwrapper.sh 2>/dev/null) \
 		&& workon $(NAME_PYTHON_VENV) 2>/dev/null \
-		&& for i in tests/script/python3/*.*;do \
+		&& for i in tests/scripts/python3/*.*;do \
 			echo "Testing $$i";\
 			./$$i; \
 		done; \
@@ -186,23 +207,84 @@ test-script-python3:
 		CONDA_BASE=$$(conda info --base 2>/dev/null) \
 		&& source $$CONDA_BASE/etc/profile.d/conda.sh 2>/dev/null \
 		&& conda activate $(NAME_PYTHON_VENV) 2>/dev/null \
-		&& for i in tests/script/python3/*.*;do \
+		&& for i in tests/scripts/python3/*.*;do \
 			echo "Testing $$i";\
 			./$$i; \
 		done; \
 	else \
 		echo "Warning: No Python virtual environment found. Trying system Python."; \
-		for i in tests/script/python3/*.*;do \
+		for i in tests/scripts/python3/*.*;do \
 			echo "Testing $$i";\
 			./$$i; \
 		done; \
 	fi) 2>&1 | tee $$LOG_FILE
 
+test-hooks: ## Test git hooks
+test-hooks:
+	@mkdir -p $(LOGS_DIR)
+	@TIMESTAMP=$$(date +%Y%m%dT%H%M%S); \
+	LOG_FILE="$(LOGS_DIR)/test-hooks_$$TIMESTAMP.log"; \
+	echo "Testing hooks (log: $$LOG_FILE)"; \
+	(echo "Testing hooks"; \
+	if [ -d $(PATH_PYTHON_VENV) ]; then . $(PATH_PYTHON_VENV)/bin/activate; fi; \
+	for i in tests/hooks/*.*; do \
+		echo "Testing $$i"; \
+		./$$i; \
+	done) 2>&1 | tee $$LOG_FILE
+
+test-notebooks: ## Test notebooks
+test-notebooks:
+	@mkdir -p $(LOGS_DIR)
+	@TIMESTAMP=$$(date +%Y%m%dT%H%M%S); \
+	LOG_FILE="$(LOGS_DIR)/test-notebooks_$$TIMESTAMP.log"; \
+	echo "Testing notebooks (log: $$LOG_FILE)"; \
+	(echo "Testing notebooks"; \
+	if [ -d $(PATH_PYTHON_VENV) ]; then . $(PATH_PYTHON_VENV)/bin/activate; fi; \
+	for i in tests/notebooks/*.*; do \
+		echo "Testing $$i"; \
+		./$$i; \
+	done) 2>&1 | tee $$LOG_FILE
+
+test-infra: ## Test infra helpers
+test-infra:
+	@mkdir -p $(LOGS_DIR)
+	@TIMESTAMP=$$(date +%Y%m%dT%H%M%S); \
+	LOG_FILE="$(LOGS_DIR)/test-infra_$$TIMESTAMP.log"; \
+	echo "Testing infra (log: $$LOG_FILE)"; \
+	(echo "Testing infra"; \
+	if [ -d $(PATH_PYTHON_VENV) ]; then . $(PATH_PYTHON_VENV)/bin/activate; fi; \
+	for i in tests/infra/*.*; do \
+		echo "Testing $$i"; \
+		./$$i; \
+	done) 2>&1 | tee $$LOG_FILE
+
 .PHONY: tests
 tests: ## Run all tests
-tests: test-config-emacs test-script-bash test-script-python3
+tests: test-configs test-script-bash test-script-python3 test-hooks test-notebooks test-infra
 	@echo ""
 	@echo "All tests completed. Logs available in $(LOGS_DIR)/"
+
+#---------------------------------------------
+# Scripts (each script has a Makefile rule)
+#---------------------------------------------
+
+SCRIPTS_BASH := $(wildcard scripts/bash/*)
+SCRIPTS_PY   := $(wildcard scripts/python3/*)
+SCRIPTS_SH   := $(wildcard scripts/sh/*)
+
+.PHONY: scripts-list
+scripts-list: ## List available scripts
+	@echo "Bash scripts:" && printf "  %s\n" $(SCRIPTS_BASH)
+	@echo "Python scripts:" && printf "  %s\n" $(SCRIPTS_PY)
+	@echo "SH scripts:" && printf "  %s\n" $(SCRIPTS_SH)
+
+.PHONY: $(SCRIPTS_BASH) $(SCRIPTS_PY) $(SCRIPTS_SH)
+$(SCRIPTS_BASH):
+	@bash "$@"
+$(SCRIPTS_PY):
+	@python3 "$@"
+$(SCRIPTS_SH):
+	@sh "$@"
 
 #---------------------------------------------
 # Cleaning

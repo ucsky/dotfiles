@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+"""
+Parse papermill progress logs and convert them to CSV.
+"""
+
+import re
+import sys
+from pathlib import Path
+
+import pandas as pd
+
+
+def main() -> int:
+    if len(sys.argv) != 2:
+        print(f"Usage: {Path(sys.argv[0]).name} <papermill.log>", file=sys.stderr)
+        return 1
+
+    filein = Path(sys.argv[1])
+    if not filein.exists():
+        print(f"ERROR: file not found: {filein}", file=sys.stderr)
+        return 1
+
+    fileout = filein.with_suffix(".csv")
+
+    logs = filein.read_text(encoding="utf-8", errors="replace").splitlines()
+
+    reg = r"^Executing:\s*([0-9]*)%\|.*\|\s*([0-9]+)/([0-9]+)\s*\[\s*([0-9\:]+)<([0-9\:]+)\s*,\s*([0-9\.]*).*cell.*\].*"
+    lines: list[tuple[str, str, str, str, str, str]] = []
+
+    for log in logs:
+        linematch = re.findall(reg, log)
+        if linematch:
+            lines.append(linematch[0])
+
+    df = pd.DataFrame(
+        lines,
+        columns=[
+            "progress",
+            "i_cell",
+            "n_cell",
+            "time_processing",
+            "time_remaining",
+            "time_per_cell",
+        ],
+    )
+    df.to_csv(fileout, index=False)
+    print(f"Wrote: {fileout}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

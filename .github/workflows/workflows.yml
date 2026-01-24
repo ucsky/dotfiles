@@ -1,5 +1,5 @@
-name: Workflows
-run-name: ${{ github.actor }} workflows 🚀
+name: CI
+run-name: ${{ github.actor }} CI
 
 on:
   push:
@@ -8,59 +8,35 @@ on:
     branches: [ "master" ]
 
 jobs:
+  test:
+    name: Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
 
-  ubuntu-latest:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3    
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
-      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
-      - name: Check out repository code
-        uses: actions/checkout@v3
-      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: List files in the repository
-        run: |
-          ls ${{ github.workspace }}
-          ls -la
-          ls -la ../
-          pwd
-          echo "CI=${CI}"
-      - name: "Hello world"
-        run: echo "🍏 This job's status is ${{ job.status }}."
-      - name: "Help"
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Show make help
         run: make help
-      - name: Tests 
-        run: echo make tests
-      
-  windows-latest:
+
+      - name: Install dependencies (venv)
+        run: make setup-venv
+
+      - name: Run tests
+        run: make tests
+
+  windows-smoke:
+    name: Windows smoke
     runs-on: windows-latest
     steps:
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
-      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
-      - name: Check out repository code
-        uses: actions/checkout@v3
-      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: List files in the repository
-        run: |
-          dir ${{ github.workspace }}
-      - run: echo "🍏 This job's status is ${{ job.status }}."
-  
-  macos-latest:
-    runs-on: windows-latest
-    steps:
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
-      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
-      - name: Check out repository code
-        uses: actions/checkout@v3
-      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: List files in the repository
-        run: |
-          ls ${{ github.workspace }}
-          pwd
-      - run: echo "🍏 This job's status is ${{ job.status }}."
+      - uses: actions/checkout@v4
+      - name: List files
+        shell: pwsh
+        run: Get-ChildItem -Force

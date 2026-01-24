@@ -21,13 +21,13 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       # Install the required tool stack (e.g., Node.js, Python, etc.)
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '14'
+          node-version: '20'
 
       # Install CRDA CLI
       - name: Install CRDA CLI

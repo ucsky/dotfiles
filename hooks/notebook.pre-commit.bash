@@ -2,63 +2,40 @@
 #
 # This pre-commit hook clears output cells in Jupyter notebooks.
 
-# setting bash strict mode
+# bash strict mode
 set -o errexit
 set -o pipefail
 set -o nounset
 
 IFS=$'\n\t'
 
-# functions
-function elementIn () {
-  local elem="$1"  # Save first argument in a variable
-  shift            # Shift all arguments to the left (original $1 gets lost)
-  local arr=("$@") # Rebuild the array with rest of arguments
-  if printf '%s\n' "${arr[@]}" | grep -q --line-regexp "${elem}"; then
-    return 0
-  fi
-  return 1
-}
-
-# what commit we should compare against (initial or HEAD)
-if git rev-parse --verify HEAD >/dev/null 2>&1
-then
-	against=HEAD
-else
-	# Initial commit: diff against an empty tree object
-	against=$(git hash-object -t tree /dev/null)
-fi
+# Collect staged files (NUL-delimited for safety)
+STAGED=()
+while IFS= read -r -d '' f; do
+  STAGED+=("$f")
+done < <(git diff --cached --name-only -z --diff-filter=ACMR)
 
 IPYNB_FILES=()
-while IFS='' read -r line; do 
-	IPYNB_FILES+=( "$line" ); 
-# finding all staged *.ipynb files added, copied, modified or renamed since last commit
-done < <(git diff-index --name-only --cached --diff-filter=ACMR "${against}" -- | grep -i \.ipynb$ )
-for FILE in "${IPYNB_FILES[@]}"; do
-	echo "Processing file: '$FILE'"
-	# you may need to provide the full path to 'jupyter' executable
-	# if it is not in the path
-	jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace "$FILE"
-	# echo "Current EXIT_CODE value: $?"
+for f in "${STAGED[@]}"; do
+  case "$f" in
+    *.ipynb|*.IPYNB) IPYNB_FILES+=("$f") ;;
+  esac
 done
 
-MODIFIED_FILES=()
-while IFS='' read -r line; do 
-	MODIFIED_FILES+=( "$line" );
-# list all modified files 
-done < <(git ls-files --modified --exclude-standard)
-AMOUNT=0
-for mfile in "${MODIFIED_FILES[@]}"; do
-	if elementIn "$mfile" "${CONVERTED_FILES[@]}"; then
-		echo "'$mfile' has been modified by pre-commit hook!" 
-		AMOUNT=$((AMOUNT+1))
-	fi
-done
-
-if [[ $AMOUNT -eq 0 ]]; then
-	echo "No ipynb files were modified!"
-	exit 0
-else
-	echo "Pre-commit hook modified $AMOUNT ipynb files!"
-	exit 1
+if [ "${#IPYNB_FILES[@]}" -eq 0 ]; then
+  exit 0
 fi
+
+if ! command -v jupyter >/dev/null 2>&1; then
+  echo "ERROR: 'jupyter' is required to clean notebook outputs." 1>&2
+  echo "Install it (e.g. 'make setup-venv') and retry the commit." 1>&2
+  exit 1
+fi
+
+for file in "${IPYNB_FILES[@]}"; do
+  echo "Clearing outputs in: $file"
+  jupyter nbconvert --ClearOutputPreprocessor.enabled=True --clear-output --inplace "$file"
+  git add "$file"
+done
+
+exit 0

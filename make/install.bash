@@ -28,12 +28,54 @@ if check_admin; then
 fi
 export HAS_ADMIN
 
+detect_wsl() {
+  # WSL exposes these markers in most versions.
+  if [ -n "${WSL_INTEROP:-}" ] || [ -n "${WSL_DISTRO_NAME:-}" ]; then
+    return 0
+  fi
+  if [ -r /proc/version ] && grep -qi "microsoft" /proc/version; then
+    return 0
+  fi
+  return 1
+}
+
+detect_gitbash() {
+  case "$(uname -s 2>/dev/null || true)" in
+    MINGW*|MSYS*|CYGWIN*) return 0 ;;
+  esac
+  return 1
+}
+
+detect_vbox() {
+  # Prefer systemd-detect-virt, otherwise check DMI strings.
+  if command -v systemd-detect-virt >/dev/null 2>&1; then
+    if systemd-detect-virt -v 2>/dev/null | grep -qiE 'oracle|vbox|virtualbox'; then
+      return 0
+    fi
+  fi
+  if [ -r /sys/class/dmi/id/product_name ] && grep -qi "virtualbox" /sys/class/dmi/id/product_name; then
+    return 0
+  fi
+  if [ -r /sys/class/dmi/id/sys_vendor ] && grep -qi "oracle" /sys/class/dmi/id/sys_vendor; then
+    return 0
+  fi
+  return 1
+}
+
 os="$(uname -s | tr '[:upper:]' '[:lower:]')"
 
 case "$os" in
   linux)
-    echo "Detected OS: linux (HAS_ADMIN=$HAS_ADMIN)"
-    bash "$REPO_ROOT/make/install_bare-linux.bash"
+    if detect_wsl; then
+      echo "Detected OS: linux (WSL) (HAS_ADMIN=$HAS_ADMIN)"
+      bash "$REPO_ROOT/make/install_bare-mswin-wsl.bash"
+    elif detect_vbox; then
+      echo "Detected OS: linux (VirtualBox) (HAS_ADMIN=$HAS_ADMIN)"
+      bash "$REPO_ROOT/make/install_vbox-linux.bash"
+    else
+      echo "Detected OS: linux (HAS_ADMIN=$HAS_ADMIN)"
+      bash "$REPO_ROOT/make/install_bare-linux.bash"
+    fi
 
     # Tooling bootstrap (non-fatal if something is missing)
     (cd "$REPO_ROOT" && make setup-venv) || true
@@ -45,8 +87,12 @@ case "$os" in
     zsh "$REPO_ROOT/make/install_bare-macos.zsh"
     ;;
   msys*|mingw*|cygwin*)
-    echo "Detected OS: Windows (MSYS/MINGW/CYGWIN)"
-    echo "Run: powershell -ExecutionPolicy Bypass -File make/install_bare-mswin.ps1"
+    if detect_gitbash; then
+      bash "$REPO_ROOT/make/install_bare-mswin-gitbash.bash"
+    else
+      echo "Detected OS: Windows (MSYS/MINGW/CYGWIN)"
+      echo "Run: powershell -ExecutionPolicy Bypass -File make/install_bare-mswin.ps1"
+    fi
     ;;
   *)
     echo "Unsupported OS: $os" 1>&2

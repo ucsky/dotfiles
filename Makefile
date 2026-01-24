@@ -58,7 +58,6 @@ setup-venv:
 
 setup-workon: ## Setup dotfiles project using virtualenv wrapper.
 setup-workon:
-	-@($(HOME)/.dotfiles/make/linux/with_apt/setup-virtualenvwrapper.bash)
 	-@(if command -v workon &> /dev/null; then \
 		export WORKON_HOME=$$HOME/.virtualenvs \
 		&& export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3 \
@@ -73,7 +72,7 @@ setup-workon:
 		&& pip install -U pip \
 		&& pip install -r requirements.txt; \
 	else \
-		echo "Note: Virtualenv Wrapper not available, using standard venv instead."; \
+		echo "Note: Virtualenvwrapper not available. Run 'make install' with admin privileges to install it, or use 'make setup-venv'."; \
 	fi)
 
 

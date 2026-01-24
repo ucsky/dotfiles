@@ -7,10 +7,10 @@
 - [x] Rename `script/` to `scripts/`.
 - [x] Setup:
   - [x] Keep setup scripts wired in `Makefile`.
-  - [x] Add installers under `make/` (`make/install.bash`, `make/uninstall.bash`).
+- [x] Add installers under `make/` (`make/install.bash`, `make/uninstall.bash`).
   - [x] Add per-distribution bare installers:
     - `make/install_bare-mswin.ps1`
-    - `make/install_bare-linux.bash`
+    - `make/install_bare-ubuntu.bash`
     - `make/install_bare-macos.zsh`
   - [x] In `install.bash`, check whether sudo is available.
 - [x] Tests:
@@ -25,6 +25,6 @@
 - [x] Docker: add minimal Dockerfiles to validate installation:
   - [x] `docker/mswin/Dockerfile`
   - [x] `docker/macos/Dockerfile`
-  - [x] `docker/linux/Dockerfile`
+  - [x] `docker/ubuntu/Dockerfile`
 - [x] Prefix all scripts under `scripts/` with `d51_` and update dependencies accordingly.
 - [x] Update `Makefile` rules accordingly (each script has a Make rule).

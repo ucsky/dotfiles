@@ -15,5 +15,5 @@ echo "Detected environment: WSL"
 echo "Running Linux bare installer with WSL-friendly defaults."
 
 # In WSL, sudo may or may not be available. The Linux installer is already non-fatal without admin.
-bash "$REPO_ROOT/make/install_bare-linux.bash"
+bash "$REPO_ROOT/make/install_bare-ubuntu.bash"
 

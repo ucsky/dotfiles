@@ -1,4 +1,4 @@
-SHELL := /bin/bash # Bourne-Again SHell is a widly used command-line interpreter on Linux.
+SHELL := /bin/bash # Bourne-Again SHell is a widely used command-line interpreter on Linux.
 CODENAME := $(shell echo "`lsb_release --id --short | tr '[:upper:]' '[:lower:]'`-`lsb_release --release --short`")
 PATH_PYTHON_VENV := $(HOME)/.venv
 PATH_PYTHON_VIRTUALENV := $(HOME)/.virtualenvs
@@ -7,7 +7,7 @@ NAME_PYTHON_VENV := dotfiles51
 OS ?= $(shell uname -s | tr '[:upper:]' '[:lower:]')
 
 ifeq ($(OS),linux)
-SETUP_SCRIPT := make/install_bare-linux.bash
+SETUP_SCRIPT := make/install_bare-ubuntu.bash
 endif
 PYTHONPATH := $(PWD)/scripts/python3
 export
@@ -28,9 +28,9 @@ show-vars:
 	-@(echo "PATH_PYTHON_VIRTUALENV=$(PATH_PYTHON_VIRTUALENV)")
 	-@(echo "SHELL=$(SHELL)")
 
-show-workflows:  ## Check workflows for CI.
+show-workflows:  ## Show GitHub workflows (requires yq).
 show-workflows:
-	-@(cat .github/workflows/workflows.yml | yq)
+	-@(yq . .github/workflows/workflows.yml)
 
 #---------------------------------------------
 # Format
@@ -92,9 +92,12 @@ setup-miniconda:
 	) || true)
 
 .PHONY: setup
-setup:  ## Setup dotfiles
-setup: $(SETUP_SCRIPT) setup-venv setup-workon setup-miniconda
-	(./$<)
+setup:  ## Setup dotfiles (OS-aware + Python tooling)
+setup: setup-os setup-venv setup-workon setup-miniconda
+
+.PHONY: setup-os
+setup-os: ## Run OS bare installer (Linux: Ubuntu bare)
+	@bash make/install.bash
 
 .PHONY: install uninstall
 install: ## Install dotfiles (OS-aware)

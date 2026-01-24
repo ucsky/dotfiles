@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
 # Description:
-#   Bare installation for Linux:
+#   Bare installation for Ubuntu:
 #   - Configure bash to source dotfiles configs
 #   - Optionally install packages via apt (if admin privileges are available)
 #   - Optionally install userland tools (yq, miniconda) without requiring admin
 #
 # Usage:
-#   ./make/install_bare-linux.bash
+#   ./make/install_bare-ubuntu.bash
 #
 set -euo pipefail
 
@@ -37,7 +37,7 @@ if command -v apt >/dev/null 2>&1; then
   HAS_APT=1
 fi
 
-echo "Linux bare install (HAS_ADMIN=$HAS_ADMIN, HAS_APT=$HAS_APT)"
+echo "Ubuntu bare install (HAS_ADMIN=$HAS_ADMIN, HAS_APT=$HAS_APT)"
 
 ###############################################################################
 # Always: shell integration (bash)

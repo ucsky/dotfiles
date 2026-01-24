@@ -71,10 +71,10 @@ case "$os" in
       bash "$REPO_ROOT/make/install_bare-mswin-wsl.bash"
     elif detect_vbox; then
       echo "Detected OS: linux (VirtualBox) (HAS_ADMIN=$HAS_ADMIN)"
-      bash "$REPO_ROOT/make/install_vbox-linux.bash"
+      bash "$REPO_ROOT/make/install_vbox-ubuntu.bash"
     else
       echo "Detected OS: linux (HAS_ADMIN=$HAS_ADMIN)"
-      bash "$REPO_ROOT/make/install_bare-linux.bash"
+      bash "$REPO_ROOT/make/install_bare-ubuntu.bash"
     fi
 
     # Tooling bootstrap (non-fatal if something is missing)

@@ -3,6 +3,7 @@
 import sys
 import unittest
 from pathlib import Path
+import importlib.util
 
 try:
     import nbformat
@@ -13,9 +14,15 @@ except ImportError:
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 scripts_dir = REPO_ROOT / "scripts" / "python3"
-sys.path.insert(0, str(scripts_dir))
 
-from d51_CheckNotebookParams import count_parameters_tags  # noqa: E402
+# The script filename contains hyphens, so it cannot be imported as a normal module.
+_script_path = scripts_dir / "d51_nb-check-params.py"
+_spec = importlib.util.spec_from_file_location("d51_nb_check_params", _script_path)
+assert _spec and _spec.loader, f"Unable to load module from {_script_path}"
+_mod = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_mod)  # type: ignore[union-attr]
+
+count_parameters_tags = _mod.count_parameters_tags  # noqa: E305
 
 
 class TestCheckNbParams(unittest.TestCase):

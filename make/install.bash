@@ -10,6 +10,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+NAME_PYTHON_VENV="${NAME_PYTHON_VENV:-dotfiles51}"
 
 check_admin() {
   # True if we can run privileged commands (root or passwordless sudo).
@@ -65,7 +66,7 @@ detect_vbox() {
 os="$(uname -s | tr '[:upper:]' '[:lower:]')"
 
 setup_venv() {
-  local env_name="${NAME_PYTHON_VENV:-dotfiles51}"
+  local env_name="${NAME_PYTHON_VENV}"
   local venv_root="${HOME}/.venv"
   local venv_path="${venv_root}/${env_name}"
   mkdir -p "$venv_root"
@@ -82,7 +83,7 @@ setup_venv() {
 }
 
 setup_workon() {
-  local env_name="${NAME_PYTHON_VENV:-dotfiles51}"
+  local env_name="${NAME_PYTHON_VENV}"
   export WORKON_HOME="${HOME}/.virtualenvs"
 
   if ! command -v workon >/dev/null 2>&1; then
@@ -112,24 +113,30 @@ setup_workon() {
 }
 
 setup_conda() {
-  local env_name="${NAME_PYTHON_VENV:-dotfiles51}"
+  local env_name="${NAME_PYTHON_VENV}"
 
+  # Ensure `conda` is available and functional in non-interactive shells.
   if command -v conda >/dev/null 2>&1; then
-    # ok
-    true
+    if conda info --base >/dev/null 2>&1; then
+      conda_base="$(conda info --base)"
+      if [ -f "$conda_base/etc/profile.d/conda.sh" ]; then
+        # shellcheck disable=SC1090
+        source "$conda_base/etc/profile.d/conda.sh" || true
+      fi
+    fi
   elif [ -f "$HOME/.miniconda3/etc/profile.d/conda.sh" ]; then
     # shellcheck disable=SC1090
-    source "$HOME/.miniconda3/etc/profile.d/conda.sh"
+    source "$HOME/.miniconda3/etc/profile.d/conda.sh" || true
   elif [ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]; then
     # shellcheck disable=SC1090
-    source "$HOME/miniconda3/etc/profile.d/conda.sh"
+    source "$HOME/miniconda3/etc/profile.d/conda.sh" || true
   else
     echo "INFO: conda not available; skipping conda env setup."
     return 0
   fi
 
   if ! command -v conda >/dev/null 2>&1; then
-    echo "INFO: conda shell not available; skipping conda env setup."
+    echo "INFO: conda still not available after sourcing; skipping conda env setup."
     return 0
   fi
 
@@ -140,9 +147,10 @@ setup_conda() {
     echo "Creating conda env: $env_name"
     conda create --name "$env_name" python=3.10 -y
   fi
-  conda activate "$env_name"
-  conda install anaconda::pip -y
-  pip install -r "$REPO_ROOT/requirements.txt"
+
+  # Avoid `conda activate` (requires conda init). Use conda-run instead.
+  conda run -n "$env_name" python -m pip install -U pip
+  conda run -n "$env_name" python -m pip install -r "$REPO_ROOT/requirements.txt"
 }
 
 case "$os" in

@@ -77,39 +77,66 @@ setup_venv() {
   # Install/update requirements (idempotent)
   # shellcheck disable=SC1090
   . "$venv_path/bin/activate"
-  pip install -U pip
-  pip install -r "$REPO_ROOT/requirements.txt"
+  python -m pip install -q -U pip
+  python -m pip install -q -r "$REPO_ROOT/requirements.txt"
   deactivate || true
 }
 
 setup_workon() {
   local env_name="${NAME_PYTHON_VENV}"
   export WORKON_HOME="${HOME}/.virtualenvs"
+  # virtualenvwrapper scripts are often NOT compatible with `set -u` (nounset).
+  # Disable nounset for the whole setup_workon section and re-enable on exit.
+  set +u
 
-  if ! command -v workon >/dev/null 2>&1; then
-    echo "INFO: virtualenvwrapper not available; skipping workon env setup."
-    return 0
-  fi
-
+  # virtualenvwrapper provides `workon`/`mkvirtualenv` as shell functions.
+  # Do NOT check `command -v workon` before sourcing, or it may appear "missing".
+  #
   # shellcheck disable=SC1091
   source /usr/share/virtualenvwrapper/virtualenvwrapper.sh 2>/dev/null \
     || source /usr/local/bin/virtualenvwrapper.sh 2>/dev/null \
     || source "$HOME/.local/bin/virtualenvwrapper.sh" 2>/dev/null \
-    || true
+    || {
+      set -u
+      echo "INFO: virtualenvwrapper not found; skipping workon env setup."
+      return 0
+    }
 
   if ! command -v workon >/dev/null 2>&1; then
+    set -u
     echo "INFO: virtualenvwrapper init not found after sourcing; skipping workon env setup."
     return 0
   fi
-
-  if ! workon "$env_name" >/dev/null 2>&1; then
-    echo "Creating virtualenvwrapper env: $env_name"
-    mkvirtualenv "$env_name"
+  if ! command -v mkvirtualenv >/dev/null 2>&1; then
+    set -u
+    echo "INFO: mkvirtualenv not available after sourcing; skipping workon env setup."
+    return 0
   fi
-  workon "$env_name"
-  pip install -U pip
-  pip install -r "$REPO_ROOT/requirements.txt"
+
+  # Determine whether the env exists without relying on `workon` return codes.
+  if [ ! -d "${WORKON_HOME}/${env_name}" ]; then
+    echo "Creating virtualenvwrapper env: $env_name"
+    mkvirtualenv "$env_name" >/dev/null 2>&1 || {
+      set -u
+      echo "WARNING: failed to create virtualenvwrapper env '$env_name'; skipping."
+      return 0
+    }
+  fi
+
+  # `set -e` can be brittle with `workon` in non-interactive shells; guard explicitly.
+  set +e
+  workon "$env_name" >/dev/null 2>&1
+  rc=$?
+  set -e
+  if [ "$rc" -ne 0 ]; then
+    set -u
+    echo "WARNING: failed to activate virtualenvwrapper env '$env_name' (rc=$rc); skipping."
+    return 0
+  fi
+  python -m pip install -q -U pip
+  python -m pip install -q -r "$REPO_ROOT/requirements.txt"
   deactivate || true
+  set -u
 }
 
 setup_conda() {
@@ -149,8 +176,8 @@ setup_conda() {
   fi
 
   # Avoid `conda activate` (requires conda init). Use conda-run instead.
-  conda run -n "$env_name" python -m pip install -U pip
-  conda run -n "$env_name" python -m pip install -r "$REPO_ROOT/requirements.txt"
+  conda run -n "$env_name" python -m pip install -q -U pip
+  conda run -n "$env_name" python -m pip install -q -r "$REPO_ROOT/requirements.txt"
 }
 
 case "$os" in

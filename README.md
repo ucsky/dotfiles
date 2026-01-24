@@ -13,7 +13,7 @@ cd .dotfiles
 ### Alternative install (Makefile)
 
 ```bash
-make setup
+make install
 ```
 
 ### Uninstall (safe)
@@ -31,11 +31,25 @@ make setup
 
 ## Development
 
-### Python environment (venv / virtualenvwrapper / conda)
+### Python environments (venv / virtualenvwrapper / conda)
 
-- **venv**: `make setup-venv`
-- **virtualenvwrapper**: `make setup-workon` (env name: `dotfiles51`)
-- **conda**: `make setup-miniconda` (env name: `dotfiles51`)
+`./make/install.bash` (or `make install`) bootstraps Python tooling **idempotently**:
+
+- **venv**: `~/.venv/dotfiles51`
+- **virtualenvwrapper**: env `dotfiles51` under `~/.virtualenvs` (skipped if virtualenvwrapper is not installed)
+- **conda**: env `dotfiles51` (skipped if conda is not installed)
+
+You can override the environment name via `NAME_PYTHON_VENV` (default: `dotfiles51`).
+
+### Start JupyterLab
+
+Use `DOTFILES_PY_ENV` to select the Python environment type:
+
+```bash
+DOTFILES_PY_ENV=venv  make startlab
+DOTFILES_PY_ENV=workon make startlab
+DOTFILES_PY_ENV=conda make startlab
+```
 
 ### Run tests
 
@@ -45,7 +59,7 @@ make tests
 
 ## See also
 
-https://github.com/webpro/awesome-dotfiles
+[awesome-dotfiles](https://github.com/webpro/awesome-dotfiles)
 
 
 ![linux icon](./assets/icon-tux.png)

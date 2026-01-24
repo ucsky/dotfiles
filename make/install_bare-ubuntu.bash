@@ -90,7 +90,7 @@ if [ "$HAS_ADMIN" = "1" ] && [ "$HAS_APT" = "1" ]; then
     done
 
     # Ensure config block exists in ~/.bashrc
-    read -r -d '' VENVWRAPPER_CONFIG << 'EOF'
+    VENVWRAPPER_CONFIG="$(cat <<'EOF'
 # START setup-virtualenvwrapper.bash
 export WORKON_HOME=$HOME/.virtualenvs
 export PROJECT_HOME=$HOME/project
@@ -98,6 +98,7 @@ export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3
 source /usr/share/virtualenvwrapper/virtualenvwrapper.sh
 # END setup-virtualenvwrapper.bash
 EOF
+)"
 
     if grep -q "# START setup-virtualenvwrapper.bash" "$HOME/.bashrc"; then
       sed -i '/# START setup-virtualenvwrapper.bash/,/# END setup-virtualenvwrapper.bash/d' "$HOME/.bashrc" || true
@@ -123,15 +124,39 @@ install_yq() {
     return 0
   fi
 
+  if ! command -v sha256sum >/dev/null 2>&1; then
+    echo "WARNING: sha256sum not available; skipping yq install (cannot verify download integrity)." 1>&2
+    return 0
+  fi
+
+  local asset="${binary}.tar.gz"
+  local base_url="https://github.com/mikefarah/yq/releases/download/${version}"
+  local tmpdir
+  tmpdir="$(mktemp -d)"
+  trap 'rm -rf "$tmpdir"' RETURN
+
   if command -v wget >/dev/null 2>&1; then
-    wget "https://github.com/mikefarah/yq/releases/download/${version}/${binary}.tar.gz" -O - | tar xz
+    wget -q "${base_url}/${asset}" -O "${tmpdir}/${asset}"
+    wget -q "${base_url}/checksums" -O "${tmpdir}/checksums"
   elif command -v curl >/dev/null 2>&1; then
-    curl -fsSL "https://github.com/mikefarah/yq/releases/download/${version}/${binary}.tar.gz" | tar xz
+    curl -fsSL "${base_url}/${asset}" -o "${tmpdir}/${asset}"
+    curl -fsSL "${base_url}/checksums" -o "${tmpdir}/checksums"
   else
     echo "WARNING: neither wget nor curl found; skipping yq install." 1>&2
     return 0
   fi
-  mv "$binary" "$path_exe"
+
+  local expected_sha
+  expected_sha="$(awk -v a="$asset" '$2==a {print $1; exit}' "${tmpdir}/checksums" | tr -d '\r')"
+  if [ -z "${expected_sha}" ]; then
+    echo "WARNING: unable to find checksum for ${asset}; skipping yq install." 1>&2
+    return 0
+  fi
+
+  echo "${expected_sha}  ${tmpdir}/${asset}" | sha256sum -c - >/dev/null
+
+  tar -xzf "${tmpdir}/${asset}" -C "${tmpdir}"
+  mv "${tmpdir}/${binary}" "$path_exe"
   rm -f "$HOME/bin/yq" || true
   ln -s "$path_exe" "$HOME/bin/yq"
 }
@@ -141,9 +166,26 @@ install_yq || true
 # Optional: miniconda install (userland, no admin required)
 ###############################################################################
 install_miniconda() {
-  local url="https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+  local base="https://repo.anaconda.com/miniconda"
+  local arch
+  arch="$(uname -m 2>/dev/null || echo unknown)"
+  local file
+  case "$arch" in
+    x86_64|amd64) file="Miniconda3-latest-Linux-x86_64.sh" ;;
+    aarch64|arm64) file="Miniconda3-latest-Linux-aarch64.sh" ;;
+    *)
+      echo "WARNING: unsupported architecture for miniconda ($arch); skipping miniconda install." 1>&2
+      return 0
+      ;;
+  esac
+  local url="${base}/${file}"
   if command -v conda >/dev/null 2>&1; then
     echo "conda already installed"
+    return 0
+  fi
+
+  if ! command -v sha256sum >/dev/null 2>&1; then
+    echo "WARNING: sha256sum not available; skipping miniconda install (cannot verify download integrity)." 1>&2
     return 0
   fi
 
@@ -158,7 +200,7 @@ install_miniconda() {
 
   if [ ! -f "$installer" ]; then
     if command -v wget >/dev/null 2>&1; then
-      wget "$url" -O "$installer"
+      wget -q "$url" -O "$installer"
     elif command -v curl >/dev/null 2>&1; then
       curl -fsSL "$url" -o "$installer"
     else
@@ -166,6 +208,20 @@ install_miniconda() {
       return 0
     fi
   fi
+
+  # Verify installer integrity against the official SHA256 listed in the Miniconda index.
+  # Source: https://repo.anaconda.com/miniconda/
+  local expected_sha
+  expected_sha="$(
+    (curl -fsSL "${base}/" 2>/dev/null || wget -qO- "${base}/" 2>/dev/null || true) \
+      | awk -F'|' -v f="$file" '$1 ~ "\\[" f "\\]" {gsub(/^[[:space:]]+|[[:space:]]+$/, "", $4); print $4; exit}'
+  )"
+  if [ -z "${expected_sha}" ]; then
+    echo "WARNING: unable to fetch official SHA256 for ${file}; skipping miniconda install." 1>&2
+    return 0
+  fi
+
+  echo "${expected_sha}  ${installer}" | sha256sum -c - >/dev/null
 
   bash "$installer" -b -u -p "$root"
   "$root/bin/conda" init || true

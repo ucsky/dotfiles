@@ -5,7 +5,7 @@
 #   This is destructive. Use with extreme caution.
 #
 # Usage:
-#   d51_docker-wipe.bash
+#   docker-wipe.bash
 #
 set -euo pipefail
 

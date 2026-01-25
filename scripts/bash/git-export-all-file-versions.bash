@@ -5,7 +5,7 @@
 #   Inspired by: https://stackoverflow.com/questions/12850030/
 #
 # Usage:
-#   d51_git-export-all-file-versions.bash <path/to/file>
+#   git-export-all-file-versions.bash <path/to/file>
 #
 set -euo pipefail
 

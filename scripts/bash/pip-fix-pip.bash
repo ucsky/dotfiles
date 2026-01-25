@@ -5,7 +5,7 @@
 #   See: https://stackoverflow.com/questions/49478573/
 #
 # Usage:
-#   d51_pip-fix-pip.bash
+#   pip-fix-pip.bash
 #
 set -euo pipefail
 

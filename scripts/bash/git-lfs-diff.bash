@@ -4,7 +4,7 @@
 #   Compare the working tree version of a Git LFS-tracked file with the version in HEAD.
 #
 # Usage:
-#   d51_gitlfsdiff <path/to/file>
+#   gitlfsdiff <path/to/file>
 #
 set -euo pipefail
 

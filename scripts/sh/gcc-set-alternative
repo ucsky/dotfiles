@@ -4,7 +4,7 @@
 #   Select a GCC/G++ version using update-alternatives.
 #
 # Usage:
-#   d51_g-set-atlternative.sh <version>
+#   gcc-set-alternative <version>
 #
 
 if [ -z "$1" ]; then

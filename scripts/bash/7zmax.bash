@@ -4,7 +4,7 @@
 #   Compress a file or directory as a `.7z` archive using maximum compression.
 #
 # Usage:
-#   d51_7zmax <file_or_folder_to_compress>
+#   7zmax <file_or_folder_to_compress>
 #
 set -euo pipefail
 

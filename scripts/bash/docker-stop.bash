@@ -4,7 +4,7 @@
 #   Kill all running Docker containers.
 #
 # Usage:
-#   d51_docker-stop.bash
+#   docker-stop.bash
 #
 set -euo pipefail
 

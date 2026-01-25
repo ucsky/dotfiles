@@ -4,7 +4,7 @@
 #   Lists disk usage of items under /var/lib/docker in a human-readable format.
 #
 # Usage:
-#   d51_docker-checksize.bash [help]
+#   docker-checksize.bash [help]
 #
 set -euo pipefail
 

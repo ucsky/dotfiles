@@ -16,8 +16,8 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 scripts_dir = REPO_ROOT / "scripts" / "python3"
 
 # The script filename contains hyphens, so it cannot be imported as a normal module.
-_script_path = scripts_dir / "d51_nb-check-params.py"
-_spec = importlib.util.spec_from_file_location("d51_nb_check_params", _script_path)
+_script_path = scripts_dir / "nb-check-params.py"
+_spec = importlib.util.spec_from_file_location("nb_check_params", _script_path)
 assert _spec and _spec.loader, f"Unable to load module from {_script_path}"
 _mod = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_mod)  # type: ignore[union-attr]

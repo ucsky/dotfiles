@@ -4,7 +4,7 @@
 #   Download audio from a URL and convert it to MP3 using youtube-dl.
 #
 # Usage:
-#   d51_youtube-dl-audio <url>
+#   youtube-dl-audio <url>
 #
 set -euo pipefail
 

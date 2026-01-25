@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #
-# Basic test for d51_docker-checksize.bash.
+# Basic test for docker-checksize.bash.
 # The script is allowed to emit WARNING and exit 0 when docker is unavailable.
 #
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
-SCRIPT="$REPO_ROOT/scripts/bash/d51_docker-checksize.bash"
+SCRIPT="$REPO_ROOT/scripts/bash/docker-checksize.bash"
 
 "$SCRIPT" help >/dev/null
 

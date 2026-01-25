@@ -4,7 +4,7 @@
 #   Collect useful information about a Linux machine into a directory (default: $HOME/.info).
 #
 # Usage:
-#   d51_mset-get-info.bash [-p <path> | --path <path>] [-h | --help]
+#   mset-get-info.bash [-p <path> | --path <path>] [-h | --help]
 #
 set -euo pipefail
 

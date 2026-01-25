@@ -4,7 +4,7 @@
 #   Substitute a string ($1) by another string ($2) in files under a directory ($3).
 #
 # Usage:
-#   d51_subsr <old> <new> <directory>
+#   subsr <old> <new> <directory>
 #
 # Notes:
 #   This script is interactive and will ask for confirmation.

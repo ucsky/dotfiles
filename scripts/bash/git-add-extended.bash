@@ -5,7 +5,7 @@
 #   - If the file is a Jupyter notebook, clear outputs before staging.
 #
 # Usage:
-#   d51_git-add-extended.bash <path>
+#   git-add-extended.bash <path>
 #
 set -euo pipefail
 

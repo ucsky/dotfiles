@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Functional test for d51_7zmax (skips if 7z is unavailable).
+# Functional test for 7zmax (skips if 7z is unavailable).
 #
 set -euo pipefail
 
@@ -10,7 +10,7 @@ if ! command -v 7z >/dev/null 2>&1; then
 fi
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
-SCRIPT="$REPO_ROOT/scripts/bash/d51_7zmax.bash"
+SCRIPT="$REPO_ROOT/scripts/bash/7zmax.bash"
 
 test_file="$(mktemp)"
 output_file="${test_file}.7z"

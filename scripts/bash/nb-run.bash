@@ -4,7 +4,7 @@
 #   Execute a Jupyter notebook in batch mode and export an HTML report.
 #
 # Usage:
-#   d51_jrun <path/to/notebook.ipynb>
+#   nb-run <path/to/notebook.ipynb>
 #
 set -euo pipefail
 
@@ -13,7 +13,7 @@ helpme() {
   echo "Run a Jupyter notebook in batch and output results as HTML."
   echo "Uses papermill if available, otherwise falls back to jupyter nbconvert."
   echo ""
-  echo "See also: d51_jpdf, d51_jstart."
+  echo "See also: nb-pdf, nb-start."
   echo ""
 }
 

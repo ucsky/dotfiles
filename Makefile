@@ -19,7 +19,7 @@ help:
 #---------------------------------------------
 # Show
 #---------------------------------------------
-show-vars: ## Show variables.
+show-vars: ## Show variables used in the Makefile
 show-vars:
 	-@(echo "CODENAME=$(CODENAME)")
 	-@(echo "PATH_PYTHON_VENV=$(PATH_PYTHON_VENV)")
@@ -27,9 +27,6 @@ show-vars:
 	-@(echo "PATH_PYTHON_VIRTUALENV=$(PATH_PYTHON_VIRTUALENV)")
 	-@(echo "SHELL=$(SHELL)")
 
-show-workflows:  ## Show GitHub workflows (requires yq).
-show-workflows:
-	-@(yq . .github/workflows/workflows.yml)
 
 #---------------------------------------------
 # Format
@@ -42,11 +39,6 @@ format-req:
 	uniq $$i > temp-format-req.txt && mv temp-format-req.txt $$i;\
 	done)
 
-#---------------------------------------------
-# Setup is handled by 'make install' (idempotent).
-.PHONY: setup
-setup: ## Deprecated: use install
-	@$(MAKE) install
 
 .PHONY: install uninstall
 install: ## Install dotfiles (OS-aware)
@@ -69,11 +61,11 @@ startlab:
 			. "$(PATH_PYTHON_VENV)/bin/activate"; \
 			;; \
 		workon) \
-			command -v workon >/dev/null 2>&1 || (echo "ERROR: workon not available. Run: make install (with admin) to set it up." 1>&2; exit 1); \
+			command -v workon >/dev/null 2>&1 || (echo "ERROR: workon not available. Install virtualenvwrapper via pip: pip install virtualenvwrapper" 1>&2; exit 1); \
 			export WORKON_HOME="$(PATH_PYTHON_VIRTUALENV)"; \
-			(source /usr/share/virtualenvwrapper/virtualenvwrapper.sh 2>/dev/null \
+			(source $$HOME/.local/bin/virtualenvwrapper.sh 2>/dev/null \
 				|| source /usr/local/bin/virtualenvwrapper.sh 2>/dev/null \
-				|| source $$HOME/.local/bin/virtualenvwrapper.sh 2>/dev/null); \
+				|| source /usr/share/virtualenvwrapper/virtualenvwrapper.sh 2>/dev/null); \
 			workon $(NAME_PYTHON_VENV); \
 			;; \
 		conda) \
@@ -154,10 +146,9 @@ test-script-python3:
 		done; \
 	elif command -v workon &> /dev/null; then \
 		export WORKON_HOME=$$HOME/.virtualenvs \
-		&& export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3 \
-		&& (source /usr/share/virtualenvwrapper/virtualenvwrapper.sh 2>/dev/null \
+		&& (source $$HOME/.local/bin/virtualenvwrapper.sh 2>/dev/null \
 			|| source /usr/local/bin/virtualenvwrapper.sh 2>/dev/null \
-			|| source $$HOME/.local/bin/virtualenvwrapper.sh 2>/dev/null) \
+			|| source /usr/share/virtualenvwrapper/virtualenvwrapper.sh 2>/dev/null) \
 		&& workon $(NAME_PYTHON_VENV) 2>/dev/null \
 		&& for i in tests/scripts/python3/*.*;do \
 			echo "Testing $$i";\
@@ -224,27 +215,6 @@ tests: test-configs test-script-bash test-script-python3 test-hooks test-noteboo
 	@echo ""
 	@echo "All tests completed. Logs available in $(LOGS_DIR)/"
 
-#---------------------------------------------
-# Scripts (each script has a Makefile rule)
-#---------------------------------------------
-
-SCRIPTS_BASH := $(wildcard scripts/bash/*)
-SCRIPTS_PY   := $(wildcard scripts/python3/*)
-SCRIPTS_SH   := $(wildcard scripts/sh/*)
-
-.PHONY: scripts-list
-scripts-list: ## List available scripts
-	@echo "Bash scripts:" && printf "  %s\n" $(SCRIPTS_BASH)
-	@echo "Python scripts:" && printf "  %s\n" $(SCRIPTS_PY)
-	@echo "SH scripts:" && printf "  %s\n" $(SCRIPTS_SH)
-
-.PHONY: $(SCRIPTS_BASH) $(SCRIPTS_PY) $(SCRIPTS_SH)
-$(SCRIPTS_BASH):
-	@bash "$@"
-$(SCRIPTS_PY):
-	@python3 "$@"
-$(SCRIPTS_SH):
-	@sh "$@"
 
 #---------------------------------------------
 # Cleaning
@@ -255,22 +225,6 @@ clean-nb-output:
 	jupyter nbconvert --ClearOutputPreprocessor.enabled=True --clear-output --inplace $$i; \
 	done
 
-clean-workon: ## Clean dotfiles project using virtualenv wrapper.
-clean-workon:
-	-@(command -v workon &> /dev/null \
-	&& \
-		(\
-		echo "Cleaning virtual env wrapper project dotfiles." \
-		&& \
-			( \
-			rmvirtualenv $(NAME_PYTHON_VENV) \
-			) \
-		) \
-	|| \
-		(\
-		echo "ERROR: please install Virtualenv Wrapper." \
-		) \
-	)
 
 
 

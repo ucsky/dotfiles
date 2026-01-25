@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 #
 # Description:
-#   Install dotfiles by running the appropriate bare installer for the current OS,
+#   Install dotfiles by running the appropriate installer for the current OS,
 #   then bootstrap developer tooling where possible.
+#   This installer is userland-only and does not require admin privileges.
 #
 # Usage:
 #   ./make/install.bash
@@ -11,57 +12,6 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 NAME_PYTHON_VENV="${NAME_PYTHON_VENV:-dotfiles51}"
-
-check_admin() {
-  # True if we can run privileged commands (root or passwordless sudo).
-  if [ "$(id -u)" -eq 0 ]; then
-    return 0
-  fi
-  if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
-    return 0
-  fi
-  return 1
-}
-
-HAS_ADMIN=0
-if check_admin; then
-  HAS_ADMIN=1
-fi
-export HAS_ADMIN
-
-detect_wsl() {
-  # WSL exposes these markers in most versions.
-  if [ -n "${WSL_INTEROP:-}" ] || [ -n "${WSL_DISTRO_NAME:-}" ]; then
-    return 0
-  fi
-  if [ -r /proc/version ] && grep -qi "microsoft" /proc/version; then
-    return 0
-  fi
-  return 1
-}
-
-detect_gitbash() {
-  case "$(uname -s 2>/dev/null || true)" in
-    MINGW*|MSYS*|CYGWIN*) return 0 ;;
-  esac
-  return 1
-}
-
-detect_vbox() {
-  # Prefer systemd-detect-virt, otherwise check DMI strings.
-  if command -v systemd-detect-virt >/dev/null 2>&1; then
-    if systemd-detect-virt -v 2>/dev/null | grep -qiE 'oracle|vbox|virtualbox'; then
-      return 0
-    fi
-  fi
-  if [ -r /sys/class/dmi/id/product_name ] && grep -qi "virtualbox" /sys/class/dmi/id/product_name; then
-    return 0
-  fi
-  if [ -r /sys/class/dmi/id/sys_vendor ] && grep -qi "oracle" /sys/class/dmi/id/sys_vendor; then
-    return 0
-  fi
-  return 1
-}
 
 os="$(uname -s | tr '[:upper:]' '[:lower:]')"
 
@@ -91,14 +41,16 @@ setup_workon() {
 
   # virtualenvwrapper provides `workon`/`mkvirtualenv` as shell functions.
   # Do NOT check `command -v workon` before sourcing, or it may appear "missing".
+  # Userland-only: check userland paths first, then system paths as fallback.
   #
   # shellcheck disable=SC1091
-  source /usr/share/virtualenvwrapper/virtualenvwrapper.sh 2>/dev/null \
+  source "$HOME/.local/bin/virtualenvwrapper.sh" 2>/dev/null \
     || source /usr/local/bin/virtualenvwrapper.sh 2>/dev/null \
-    || source "$HOME/.local/bin/virtualenvwrapper.sh" 2>/dev/null \
+    || source /usr/share/virtualenvwrapper/virtualenvwrapper.sh 2>/dev/null \
     || {
       set -u
       echo "INFO: virtualenvwrapper not found; skipping workon env setup."
+      echo "INFO: Install virtualenvwrapper via pip: pip install virtualenvwrapper"
       return 0
     }
 
@@ -182,17 +134,8 @@ setup_conda() {
 
 case "$os" in
   linux)
-    if detect_wsl; then
-      echo "Detected OS: linux (WSL) (HAS_ADMIN=$HAS_ADMIN)"
-      bash "$REPO_ROOT/make/install_bare-mswin-wsl.bash"
-    elif detect_vbox; then
-      echo "Detected OS: linux (VirtualBox) (HAS_ADMIN=$HAS_ADMIN)"
-      bash "$REPO_ROOT/make/install_vbox-ubuntu.bash"
-    else
-      echo "Detected OS: linux (HAS_ADMIN=$HAS_ADMIN)"
-      bash "$REPO_ROOT/make/install_bare-ubuntu.bash"
-    fi
-
+    echo "Detected OS: linux (userland-only)"
+    bash "$REPO_ROOT/make/install_linux.bash"
     # Python environments setup (idempotent)
     setup_venv
     setup_workon || true
@@ -200,23 +143,19 @@ case "$os" in
     ;;
   darwin)
     echo "Detected OS: macOS"
-    zsh "$REPO_ROOT/make/install_bare-macos.zsh"
+    zsh "$REPO_ROOT/make/install_macos.zsh"
     # Python environments setup (idempotent)
     setup_venv
     setup_workon || true
     setup_conda || true
     ;;
   msys*|mingw*|cygwin*)
-    if detect_gitbash; then
-      bash "$REPO_ROOT/make/install_bare-mswin-gitbash.bash"
-    else
-      echo "Detected OS: Windows (MSYS/MINGW/CYGWIN)"
-      echo "Run: powershell -ExecutionPolicy Bypass -File make/install_bare-mswin.ps1"
-    fi
+    echo "Detected OS: Windows (MSYS/MINGW/CYGWIN)"
+    echo "Run: powershell -ExecutionPolicy Bypass -File make/install_mswin.ps1"
     ;;
   *)
     echo "Unsupported OS: $os" 1>&2
-    echo "Try the bare installer scripts under make/." 1>&2
+    echo "Try the installer scripts under make/." 1>&2
     exit 1
     ;;
 esac

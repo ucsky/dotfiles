@@ -4,7 +4,7 @@
 #   Convert a Jupyter notebook to PDF while hiding code cells by default.
 #
 # Usage:
-#   d51_jpdf <path/to/notebook.ipynb>
+#   nb-pdf <path/to/notebook.ipynb>
 #
 set -euo pipefail
 
@@ -12,7 +12,7 @@ helpme() {
   echo ""
   echo "Convert a Jupyter notebook to PDF without code."
   echo ""
-  echo "See also: d51_jrun, d51_jstart."
+  echo "See also: nb-run, nb-start."
   echo ""
 }
 

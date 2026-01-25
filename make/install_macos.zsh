@@ -5,7 +5,7 @@
 #   - Add sourcing lines to ~/.zshrc and ~/.zprofile
 #
 # Usage:
-#   ./make/install_bare-macos.zsh
+#   ./make/install_macos.zsh
 #
 set -euo pipefail
 
@@ -17,5 +17,5 @@ touch "$HOME/.zshrc" "$HOME/.zprofile"
 grep -F "$line_rc" "$HOME/.zshrc" >/dev/null 2>&1 || echo "$line_rc" >> "$HOME/.zshrc"
 grep -F "$line_profile" "$HOME/.zprofile" >/dev/null 2>&1 || echo "$line_profile" >> "$HOME/.zprofile"
 
-echo "Bare install completed."
+echo "macOS install completed."
 

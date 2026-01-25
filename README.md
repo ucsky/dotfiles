@@ -25,7 +25,7 @@ make install
 ## Structure
 
 - **`configs/`**: shell + editor configuration files.
-- **`scripts/`**: command-line utilities (prefixed with `d51_`).
+- **`scripts/`**: command-line utilities.
 - **`make/`**: install helpers (including bare installers).
 - **`tests/`**: test suite runnable via `make tests`.
 

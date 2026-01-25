@@ -4,7 +4,7 @@
 #   Convert an MP4 file to MP3 using ffmpeg.
 #
 # Usage:
-#   d51_mp4-to-mp3.bash <file.mp4>
+#   mp4-to-mp3.bash <file.mp4>
 #
 set -euo pipefail
 

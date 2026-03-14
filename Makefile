@@ -39,6 +39,29 @@ format-req:
 	uniq $$i > temp-format-req.txt && mv temp-format-req.txt $$i;\
 	done)
 
+lock-requirements: ## Lock current venv package versions into requirements.txt
+lock-requirements:
+	@test -x "$(PATH_PYTHON_VENV)/bin/python" || (echo "ERROR: venv not found at $(PATH_PYTHON_VENV). Run: make install" 1>&2; exit 1)
+	@REPO_ROOT="$(PWD)" "$(PATH_PYTHON_VENV)/bin/python" - <<-'PY'
+		from importlib.metadata import PackageNotFoundError, version
+		from pathlib import Path
+		import re
+		
+		repo_root = Path(__import__("os").environ["REPO_ROOT"])
+		requirements_path = repo_root / "requirements.txt"
+		entries = []
+		for raw_line in requirements_path.read_text(encoding="utf-8").splitlines():
+		    line = raw_line.strip()
+		    if not line or line.startswith("#"):
+		        continue
+		    name = re.split(r"[<>=!~ ]", line, maxsplit=1)[0]
+		    try:
+		        entries.append(f"{name}=={version(name)}")
+		    except PackageNotFoundError as exc:
+		        raise SystemExit(f"Package not installed in venv: {name}") from exc
+		requirements_path.write_text("\n".join(entries) + "\n", encoding="utf-8")
+		PY
+
 
 .PHONY: install uninstall
 install: ## Install dotfiles (OS-aware)
@@ -224,8 +247,6 @@ clean-nb-output:
 	@for i in notebooks/*.ipynb;do \
 	jupyter nbconvert --ClearOutputPreprocessor.enabled=True --clear-output --inplace $$i; \
 	done
-
-
 
 
 

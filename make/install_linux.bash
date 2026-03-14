@@ -108,6 +108,11 @@ install_yq || true
 # Optional: miniconda install (userland, no admin required)
 ###############################################################################
 install_miniconda() {
+  if [ "${DOTFILES_INSTALL_MINICONDA:-0}" != "1" ]; then
+    echo "Skipping Miniconda install by default (set DOTFILES_INSTALL_MINICONDA=1 to enable)."
+    return 0
+  fi
+
   local base="https://repo.anaconda.com/miniconda"
   local arch
   arch="$(uname -m 2>/dev/null || echo unknown)"
@@ -164,8 +169,8 @@ install_miniconda() {
       return 0
     }
   else
-    echo "INFO: Unable to fetch official SHA256 for ${file}; proceeding without verification." 1>&2
-    echo "INFO: Installer is from official source and will verify itself during installation." 1>&2
+    echo "WARNING: unable to fetch official SHA256 for ${file}; refusing to run unverified installer." 1>&2
+    return 0
   fi
 
   bash "$installer" -b -u -p "$root"

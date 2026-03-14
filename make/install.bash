@@ -15,6 +15,48 @@ NAME_PYTHON_VENV="${NAME_PYTHON_VENV:-dotfiles51}"
 
 os="$(uname -s | tr '[:upper:]' '[:lower:]')"
 
+stat_owner() {
+  stat -c '%u' "$1" 2>/dev/null || stat -f '%u' "$1" 2>/dev/null
+}
+
+stat_mode() {
+  stat -c '%a' "$1" 2>/dev/null || stat -f '%Lp' "$1" 2>/dev/null
+}
+
+is_safe_source_file() {
+  local file="$1"
+  local owner mode
+
+  [ -f "$file" ] || return 1
+  [ ! -L "$file" ] || return 1
+
+  owner="$(stat_owner "$file" 2>/dev/null || true)"
+  mode="$(stat_mode "$file" 2>/dev/null || true)"
+  [ -n "$owner" ] || return 1
+  [ -n "$mode" ] || return 1
+
+  case "$owner" in
+    0|"$(id -u)") ;;
+    *) return 1 ;;
+  esac
+
+  if [ $((8#$mode & 18)) -ne 0 ]; then
+    return 1
+  fi
+}
+
+source_if_safe() {
+  local file="$1"
+
+  if ! is_safe_source_file "$file"; then
+    echo "WARNING: refusing to source unsafe shell file: $file" 1>&2
+    return 1
+  fi
+
+  # shellcheck disable=SC1090
+  source "$file"
+}
+
 setup_venv() {
   local env_name="${NAME_PYTHON_VENV}"
   local venv_root="${HOME}/.venv"
@@ -51,15 +93,23 @@ setup_workon() {
   # Userland-only: check userland paths first, then system paths as fallback.
   #
   # shellcheck disable=SC1091
-  source "$HOME/.local/bin/virtualenvwrapper.sh" 2>/dev/null \
-    || source /usr/local/bin/virtualenvwrapper.sh 2>/dev/null \
-    || source /usr/share/virtualenvwrapper/virtualenvwrapper.sh 2>/dev/null \
-    || {
+  local sourced=0
+  local candidate
+  for candidate in \
+    "$HOME/.local/bin/virtualenvwrapper.sh" \
+    /usr/local/bin/virtualenvwrapper.sh \
+    /usr/share/virtualenvwrapper/virtualenvwrapper.sh; do
+    if [ -f "$candidate" ] && source_if_safe "$candidate"; then
+      sourced=1
+      break
+    fi
+  done
+  if [ "$sourced" -ne 1 ]; then
       set -u
       echo "INFO: virtualenvwrapper not found; skipping workon env setup."
-      echo "INFO: Install virtualenvwrapper via pip: pip install virtualenvwrapper"
+      echo "INFO: Install virtualenvwrapper via pip and ensure the script is owner-only writable."
       return 0
-    }
+  fi
 
   if ! command -v workon >/dev/null 2>&1; then
     set -u
@@ -106,16 +156,13 @@ setup_conda() {
     if conda info --base >/dev/null 2>&1; then
       conda_base="$(conda info --base)"
       if [ -f "$conda_base/etc/profile.d/conda.sh" ]; then
-        # shellcheck disable=SC1090
-        source "$conda_base/etc/profile.d/conda.sh" || true
+        source_if_safe "$conda_base/etc/profile.d/conda.sh" || true
       fi
     fi
   elif [ -f "$HOME/.miniconda3/etc/profile.d/conda.sh" ]; then
-    # shellcheck disable=SC1090
-    source "$HOME/.miniconda3/etc/profile.d/conda.sh" || true
+    source_if_safe "$HOME/.miniconda3/etc/profile.d/conda.sh" || true
   elif [ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]; then
-    # shellcheck disable=SC1090
-    source "$HOME/miniconda3/etc/profile.d/conda.sh" || true
+    source_if_safe "$HOME/miniconda3/etc/profile.d/conda.sh" || true
   else
     echo "INFO: conda not available; skipping conda env setup."
     return 0
@@ -166,4 +213,3 @@ case "$os" in
     exit 1
     ;;
 esac
-

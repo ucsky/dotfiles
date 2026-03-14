@@ -49,8 +49,40 @@ blockinfile() {
 
 autoload_dotenv() {
   local env_file=".env"
-  if [ -f "$env_file" ]; then
-    # NOTE: This is convenient but can be unsafe if you don't trust the .env file.
-    export $(grep -v '^#' "$env_file" | xargs)
+  local line key value mode
+
+  if [ ! -f "$env_file" ] || [ -L "$env_file" ] || [ ! -O "$env_file" ]; then
+    return 0
   fi
+
+  mode="$(stat -c '%a' "$env_file" 2>/dev/null || stat -f '%Lp' "$env_file" 2>/dev/null || true)"
+  if [ -n "$mode" ] && [ $((8#$mode & 18)) -ne 0 ]; then
+    echo "WARNING: refusing to load group/world-writable .env file: $env_file" 1>&2
+    return 0
+  fi
+
+  while IFS= read -r line || [ -n "$line" ]; do
+    [[ "$line" =~ ^[[:space:]]*$ ]] && continue
+    [[ "$line" =~ ^[[:space:]]*# ]] && continue
+
+    if [[ "$line" =~ ^[[:space:]]*export[[:space:]]+ ]]; then
+      line="${line#${line%%[![:space:]]*}}"
+      line="${line#export }"
+    fi
+
+    if [[ ! "$line" =~ ^[A-Za-z_][A-Za-z0-9_]*= ]]; then
+      echo "WARNING: skipping invalid .env line in $env_file" 1>&2
+      continue
+    fi
+
+    key="${line%%=*}"
+    value="${line#*=}"
+
+    if [[ "$value" =~ ^\".*\"$ ]] || [[ "$value" =~ ^\'.*\'$ ]]; then
+      value="${value:1:${#value}-2}"
+    fi
+
+    printf -v "$key" '%s' "$value"
+    export "$key"
+  done < "$env_file"
 }

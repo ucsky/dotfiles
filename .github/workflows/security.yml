@@ -1,0 +1,60 @@
+name: Security
+run-name: ${{ github.actor }} security
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  security:
+    name: Security checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install security tooling
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install detect-secrets pip-audit shellcheck-py
+
+      - name: Run repository security tests
+        run: tests/infra/test_repo_security.bash
+
+      - name: Audit pinned Python dependencies
+        run: pip-audit -r requirements.txt
+
+      - name: Lint shell scripts
+        run: |
+          find hooks make scripts tests -type f \( -name '*.bash' -o -path 'scripts/sh/*' \) -print0 \
+            | xargs -0 shellcheck
+
+      - name: Scan for committed secrets
+        run: |
+          detect-secrets scan --all-files > .secrets.scan
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path(".secrets.scan").read_text())
+          findings = {
+              path: items
+              for path, items in report.get("results", {}).items()
+              if items
+          }
+          if findings:
+              for path, items in sorted(findings.items()):
+                  print(f"{path}: {len(items)} potential secret(s)")
+              raise SystemExit(1)
+          print("No committed secrets detected.")
+          PY

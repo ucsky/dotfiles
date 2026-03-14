@@ -47,9 +47,10 @@ is_safe_source_file() {
 
 source_if_safe() {
   local file="$1"
+  local quiet="${2:-}"
 
   if ! is_safe_source_file "$file"; then
-    echo "WARNING: refusing to source unsafe shell file: $file" 1>&2
+    [ "$quiet" != "quiet" ] && echo "WARNING: refusing to source unsafe shell file: $file" 1>&2
     return 1
   fi
 
@@ -150,40 +151,60 @@ setup_workon() {
 
 setup_conda() {
   local env_name="${NAME_PYTHON_VENV}"
+  local conda_exe=""
+  local skipped_unsafe=""
 
-  # Ensure `conda` is available and functional in non-interactive shells.
+  # Ensure `conda` is available (source script only if safe; otherwise use conda binary).
   if command -v conda >/dev/null 2>&1; then
+    conda_exe="conda"
     if conda info --base >/dev/null 2>&1; then
+      local conda_base
       conda_base="$(conda info --base)"
       if [ -f "$conda_base/etc/profile.d/conda.sh" ]; then
-        source_if_safe "$conda_base/etc/profile.d/conda.sh" || true
+        source_if_safe "$conda_base/etc/profile.d/conda.sh" quiet || skipped_unsafe="$conda_base/etc/profile.d/conda.sh"
       fi
     fi
   elif [ -f "$HOME/.miniconda3/etc/profile.d/conda.sh" ]; then
-    source_if_safe "$HOME/.miniconda3/etc/profile.d/conda.sh" || true
+    if is_safe_source_file "$HOME/.miniconda3/etc/profile.d/conda.sh"; then
+      # shellcheck disable=SC1090
+      source "$HOME/.miniconda3/etc/profile.d/conda.sh"
+      conda_exe="conda"
+    else
+      skipped_unsafe="$HOME/.miniconda3/etc/profile.d/conda.sh"
+      [ -x "$HOME/.miniconda3/bin/conda" ] && conda_exe="$HOME/.miniconda3/bin/conda"
+    fi
   elif [ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]; then
-    source_if_safe "$HOME/miniconda3/etc/profile.d/conda.sh" || true
-  else
-    echo "INFO: conda not available; skipping conda env setup."
-    return 0
+    if is_safe_source_file "$HOME/miniconda3/etc/profile.d/conda.sh"; then
+      # shellcheck disable=SC1090
+      source "$HOME/miniconda3/etc/profile.d/conda.sh"
+      conda_exe="conda"
+    else
+      skipped_unsafe="$HOME/miniconda3/etc/profile.d/conda.sh"
+      [ -x "$HOME/miniconda3/bin/conda" ] && conda_exe="$HOME/miniconda3/bin/conda"
+    fi
   fi
 
-  if ! command -v conda >/dev/null 2>&1; then
-    echo "INFO: conda still not available after sourcing; skipping conda env setup."
+  if [ -z "$conda_exe" ]; then
+    if [ -n "$skipped_unsafe" ]; then
+      echo "WARNING: refusing to source unsafe shell file: $skipped_unsafe (fix: chmod g-w,o-w \"\$CONDA_ROOT/etc/profile.d/conda.sh\")" 1>&2
+    fi
+    echo "INFO: conda not available; skipping conda env setup."
     return 0
   fi
 
   conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main 2>/dev/null || true
   conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r 2>/dev/null || true
 
-  if ! conda env list | grep -E "^${env_name}[[:space:]]+" >/dev/null 2>&1; then
+  if ! "$conda_exe" env list | grep -E "^${env_name}[[:space:]]+" >/dev/null 2>&1; then
     echo "Creating conda env: $env_name"
-    conda create --name "$env_name" python=3.10 -y
+    "$conda_exe" create --name "$env_name" python=3.10 -y
   fi
 
   # Avoid `conda activate` (requires conda init). Use conda-run instead.
-  conda run -n "$env_name" python -m pip install -q -U pip
-  conda run -n "$env_name" python -m pip install -q -r "$REPO_ROOT/requirements.txt"
+  "$conda_exe" run -n "$env_name" python -m pip install -q -U pip
+  if ! "$conda_exe" run -n "$env_name" python -m pip install -q -r "$REPO_ROOT/requirements.txt"; then
+    echo "INFO: conda env $env_name pip install reported issues (e.g. dependency conflicts); dotfiles install continues."
+  fi
 }
 
 case "$os" in

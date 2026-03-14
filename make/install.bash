@@ -20,9 +20,16 @@ setup_venv() {
   local venv_root="${HOME}/.venv"
   local venv_path="${venv_root}/${env_name}"
   mkdir -p "$venv_root"
-  if [ ! -d "$venv_path" ]; then
+  if [ ! -f "$venv_path/bin/activate" ]; then
+    [ -d "$venv_path" ] && rm -rf "$venv_path"
     echo "Creating venv: $venv_path"
-    python3 -m venv "$venv_path"
+    if ! python3 -m venv "$venv_path"; then
+      local py_ver
+      py_ver=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")' 2>/dev/null || echo "3")
+      echo "INFO: venv creation failed (ensurepip not available). On Debian/Ubuntu run: sudo apt install python${py_ver}-venv"
+      echo "INFO: Skipping venv setup; install will continue. Run 'make install' again after installing the package."
+      return 0
+    fi
   fi
   # Install/update requirements (idempotent)
   # shellcheck disable=SC1090

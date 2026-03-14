@@ -87,10 +87,11 @@ install_yq() {
     return 0
   fi
 
+  # yq checksums file: first column is filename, then hashes in order of checksums_hashes_order (SHA-256 is 18th algorithm = field 19).
   local expected_sha
-  expected_sha="$(awk -v a="$asset" '$2==a {print $1; exit}' "${tmpdir}/checksums" | tr -d '\r')"
-  if [ -z "${expected_sha}" ]; then
-    echo "WARNING: unable to find checksum for ${asset}; skipping yq install." 1>&2
+  expected_sha="$(awk -v a="$asset" '$1==a {print $19; exit}' "${tmpdir}/checksums" | tr -d '\r')"
+  if [ -z "${expected_sha}" ] || [ "${#expected_sha}" -ne 64 ]; then
+    echo "WARNING: unable to find SHA256 checksum for ${asset}; skipping yq install." 1>&2
     return 0
   fi
 
@@ -151,13 +152,11 @@ install_miniconda() {
   fi
 
   # Verify installer integrity against the official SHA256 listed in the Miniconda index.
-  # Source: https://repo.anaconda.com/miniconda/
-  # Note: SHA256 verification is optional - if we can't fetch it, we proceed anyway
-  # since the installer is from an official source and will verify itself.
+  # Source: https://repo.anaconda.com/miniconda/ (HTML table: Filename, Size, Last Modified, SHA256)
   local expected_sha
   expected_sha="$(
     (curl -fsSL "${base}/" 2>/dev/null || wget -qO- "${base}/" 2>/dev/null || true) \
-      | awk -F'|' -v f="$file" '$1 ~ "\\[" f "\\]" {gsub(/^[[:space:]]+|[[:space:]]+$/, "", $4); print $4; exit}'
+      | grep -A3 ">${file}</a>" | tail -1 | sed -n 's/.*<td>\([a-f0-9]\{64\}\)<\/td>.*/\1/p'
   )"
   if [ -n "${expected_sha}" ]; then
     echo "${expected_sha}  ${installer}" | sha256sum -c - >/dev/null || {

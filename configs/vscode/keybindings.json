@@ -1,0 +1,23 @@
+[
+    // Terminal
+    { "key": "ctrl+`",          "command": "workbench.action.terminal.toggleTerminal" },
+    { "key": "ctrl+shift+`",    "command": "workbench.action.terminal.new" },
+
+    // Navigation entre éditeurs
+    { "key": "alt+left",        "command": "workbench.action.navigateBack" },
+    { "key": "alt+right",       "command": "workbench.action.navigateForward" },
+
+    // Déplacer des lignes
+    { "key": "alt+up",          "command": "editor.action.moveLinesUpAction",   "when": "editorTextFocus" },
+    { "key": "alt+down",        "command": "editor.action.moveLinesDownAction", "when": "editorTextFocus" },
+
+    // Copier des lignes
+    { "key": "shift+alt+up",    "command": "editor.action.copyLinesUpAction",   "when": "editorTextFocus" },
+    { "key": "shift+alt+down",  "command": "editor.action.copyLinesDownAction", "when": "editorTextFocus" },
+
+    // Jupyter: exécuter cellule et descendre
+    { "key": "shift+enter",     "command": "jupyter.execSelectionInteractive",  "when": "editorTextFocus && !notebookEditorFocused" },
+
+    // Sauvegarder sans formatter (utile pour fichiers tiers)
+    { "key": "ctrl+k ctrl+s",   "command": "workbench.action.files.saveWithoutFormatting" }
+]

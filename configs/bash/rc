@@ -1,5 +1,62 @@
 # Configuration for interactive bash shells
 
+###############################################################################
+# History
+###############################################################################
+HISTSIZE=50000
+HISTFILESIZE=100000
+HISTCONTROL=ignoredups:erasedups
+HISTTIMEFORMAT="%F %T  "
+shopt -s histappend
+# Flush history after each command so multiple terminals share it
+PROMPT_COMMAND="history -a; history -c; history -r${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
+
+###############################################################################
+# Prompt PS1 with git branch
+###############################################################################
+_ps1_git_branch() {
+    local branch
+    branch="$(git symbolic-ref --short HEAD 2>/dev/null || git describe --tags --exact-match 2>/dev/null)" || return
+    printf ' (%s)' "$branch"
+}
+
+# Colors: bold green user@host, bold blue path, yellow branch, reset
+PS1='\[\e[1;32m\]\u@\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0;33m\]$(_ps1_git_branch)\[\e[0m\]\$ '
+
+###############################################################################
+# fzf (optional – only if installed)
+###############################################################################
+if command -v fzf >/dev/null 2>&1; then
+    # Ctrl+R: recherche dans l'historique avec fzf
+    if [ -f /usr/share/bash-completion/completions/fzf ]; then
+        source /usr/share/bash-completion/completions/fzf
+    fi
+    if [ -f /usr/share/doc/fzf/examples/key-bindings.bash ]; then
+        source /usr/share/doc/fzf/examples/key-bindings.bash
+    elif [ -f ~/.fzf.bash ]; then
+        source ~/.fzf.bash
+    fi
+    export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
+fi
+
+###############################################################################
+# Git aliases
+###############################################################################
+alias gs='git status -sb'
+alias gl='git lg'
+alias gd='git diff'
+alias gdc='git diff --cached'
+alias ga='git add'
+alias gc='git commit'
+alias gco='git checkout'
+alias gbr='git branch -vv'
+alias gundo='git reset HEAD~1 --mixed'
+alias gpush='git push'
+alias gpull='git pull'
+
+###############################################################################
+# General aliases
+###############################################################################
 # Disk usage on all files (including dotfiles), sorted
 alias dusort='du -sh .[!.]* * | sort -h'
 

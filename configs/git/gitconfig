@@ -1,0 +1,55 @@
+[core]
+	whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
+	autocrlf = input
+
+[push]
+	default = current
+	autoSetupRemote = true
+
+[pull]
+	rebase = true
+
+[rebase]
+	autoStash = true
+
+[init]
+	defaultBranch = main
+
+[diff]
+	algorithm = histogram
+	colorMoved = default
+
+[merge]
+	conflictstyle = diff3
+
+[fetch]
+	prune = true
+
+[alias]
+	# Log lisible
+	lg = log --oneline --graph --decorate --all
+	ll = log --pretty=format:"%C(yellow)%h%Creset %C(blue)%ad%Creset %s %C(green)[%an]%Creset" --date=short
+
+	# Raccourcis courants
+	st = status -sb
+	co = checkout
+	br = branch -vv
+	ci = commit
+	cp = cherry-pick
+
+	# Staging
+	unstage = restore --staged
+	undo    = reset HEAD~1 --mixed
+
+	# Diff utiles
+	df   = diff
+	dc   = diff --cached
+	word = diff --word-diff
+
+	# Branches
+	recent = branch --sort=-committerdate --format='%(committerdate:relative)%09%(refname:short)'
+	gone    = !git fetch -p && git branch -vv | grep ': gone]' | awk '{print $1}' | xargs -r git branch -d
+
+	# Divers
+	aliases = config --get-regexp alias
+	root    = rev-parse --show-toplevel

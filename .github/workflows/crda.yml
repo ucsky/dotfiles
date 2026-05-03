@@ -25,7 +25,7 @@ jobs:
 
       # Install the required tool stack (e.g., Node.js, Python, etc.)
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
 

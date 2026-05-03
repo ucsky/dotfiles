@@ -11,7 +11,7 @@ jupyter-server==2.17.0
 kaleido==1.2.0
 mccabe==0.7.0
 numpy==2.2.6
-pandas==2.2.3
+pandas==3.0.2
 papermill==2.7.0
 plotly==6.6.0
 pyarrow==23.0.1

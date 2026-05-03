@@ -22,7 +22,7 @@ pylint==4.0.5
 pyyaml==6.0.3
 python-lsp-jsonrpc==1.1.2
 python-lsp-server==1.14.0
-requests==2.32.5
+requests==2.33.0
 rope==1.14.0
 setuptools==82.0.1
 tabulate==0.10.0

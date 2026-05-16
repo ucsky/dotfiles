@@ -15,5 +15,5 @@ fi
 
 running="$(docker ps -q)"
 if [ -n "$running" ]; then
-  docker kill $running
+  docker kill "$running"
 fi

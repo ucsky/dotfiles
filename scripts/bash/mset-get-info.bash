@@ -71,7 +71,7 @@ exec_with_sudo_and_save() {
     exec_and_save "$filename" "$@"
   else
     echo "Executing: sudo -n $*"
-    sudo -n "$@" > "$PATH_INFO/$filename.txt"
+    sudo -n "$@" | sudo tee "$PATH_INFO/$filename.txt" > /dev/null
   fi
 }
 

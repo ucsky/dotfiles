@@ -16,26 +16,26 @@ fi
 
 ALL_CONTAINERS="$(docker ps -qa || true)"
 echo "Stopping all containers ..."
-test -n "${ALL_CONTAINERS}" && docker stop ${ALL_CONTAINERS} || true
+test -n "${ALL_CONTAINERS}" && docker stop "${ALL_CONTAINERS}" || true
 
 echo "Removing all containers ..."
-test -n "${ALL_CONTAINERS}" && docker rm ${ALL_CONTAINERS} || true
+test -n "${ALL_CONTAINERS}" && docker rm "${ALL_CONTAINERS}" || true
 
 echo "Removing all images ..."
 ALL_IMAGES="$(docker images -qa || true)"
-test -n "${ALL_IMAGES}" && docker rmi -f ${ALL_IMAGES} || true
+test -n "${ALL_IMAGES}" && docker rmi -f "${ALL_IMAGES}" || true
 
 echo "Removing all volumes ..."
 ALL_VOLUMES="$(docker volume ls -q || true)"
-test -n "${ALL_VOLUMES}" && docker volume rm ${ALL_VOLUMES} || true
+test -n "${ALL_VOLUMES}" && docker volume rm "${ALL_VOLUMES}" || true
 ALL_VOLUMES_DANGLING="$(docker volume ls -qf dangling=true || true)"
-test -n "${ALL_VOLUMES_DANGLING}" && docker volume rm ${ALL_VOLUMES_DANGLING} || true
+test -n "${ALL_VOLUMES_DANGLING}" && docker volume rm "${ALL_VOLUMES_DANGLING}" || true
 
 echo "Removing all networks ..."
 ALL_NETWORK="$(docker network ls -q || true)"
 if [ -n "${ALL_NETWORK}" ]; then
   set +e
-  docker network rm ${ALL_NETWORK}
+  docker network rm "${ALL_NETWORK}"
   set -e
 fi
 

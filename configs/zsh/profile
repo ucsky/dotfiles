@@ -1,18 +1,12 @@
 # Zsh profile (non-interactive)
 
-# PATH utilities
-pathadd() {
-    if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
-        PATH="${PATH:+"$PATH:"}$1"
-    fi
-}
+export ROOT_DOTFILES="${ROOT_DOTFILES:-$HOME/.dotfiles}"
 
-pythonpathadd() {
-    if [ -d "$1" ] && [[ ":$PYTHONPATH:" != *":$1:"* ]]; then
-        PYTHONPATH="${PYTHONPATH:+"$PYTHONPATH:"}$1"
-    fi
-}
+# Shared path logic
+if [ -f "$ROOT_DOTFILES/configs/shell/path.sh" ]; then
+    . "$ROOT_DOTFILES/configs/shell/path.sh"
+fi
 
-pathadd "$HOME/.dotfiles/scripts/sh"
-pathadd "$HOME/.dotfiles/scripts/bash"
-pathadd "$HOME/.dotfiles/scripts/python3"
+pathadd "$ROOT_DOTFILES/scripts/sh"
+pathadd "$ROOT_DOTFILES/scripts/bash"
+pathadd "$ROOT_DOTFILES/scripts/python3"

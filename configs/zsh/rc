@@ -1,7 +1,8 @@
-BINSH="$HOME/.dotfiles/scripts/sh"
-BINBASH="$HOME/.dotfiles/scripts/bash"
-BINPYTHON3="$HOME/.dotfiles/scripts/python3"
+# Zsh configuration for interactive shells
 
-export PATH="$BINSH:$PATH"
-export PATH="$BINBASH:$PATH"
-export PATH="$BINPYTHON3:$PATH"
+export ROOT_DOTFILES="${ROOT_DOTFILES:-$HOME/.dotfiles}"
+
+# Shared configurations
+if [ -f "$ROOT_DOTFILES/configs/shell/path.sh" ]; then . "$ROOT_DOTFILES/configs/shell/path.sh"; fi
+if [ -f "$ROOT_DOTFILES/configs/shell/aliases.sh" ]; then . "$ROOT_DOTFILES/configs/shell/aliases.sh"; fi
+if [ -f "$ROOT_DOTFILES/configs/shell/functions.sh" ]; then . "$ROOT_DOTFILES/configs/shell/functions.sh"; fi

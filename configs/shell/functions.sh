@@ -1,0 +1,68 @@
+wk() {
+    # Link task files into $HOME/.wk (idempotent)
+    mkdir -p "$HOME/.wk"
+    for i in "$HOME"/.*files/wk/*; do
+        [ -e "$i" ] || continue
+        j=$(basename "$i")
+        if [ ! -L "$HOME/.wk/$j" ]; then
+            ln -s "$i" "$HOME/.wk/$j"
+        fi
+    done
+    ls -1 "$HOME/.wk"
+}
+
+blockinfile() {
+    #
+    # Description:
+    #   Bash equivalent of Ansible blockinfile.
+    #   Source: https://kkovacs.eu/ansible-lineinfile-blockinfile-in-bash
+    #
+    # Usage:
+    #   blockinfile STARTMARK ENDMARK filename <<EOF
+    #   # STARTMARK
+    #   some text to
+    #   put inside
+    #   # ENDMARK
+    #   EOF
+    sed -i -ne '/'"${1//\//\\/}"'/{r/dev/stdin' -e ':a;n;/'"${2//\//\\/}"'/{:b;n;p;bb};ba};p;$r/dev/stdin' "$3"
+}
+
+autoload_dotenv() {
+  local env_file=".env"
+  local line key value mode
+
+  if [ ! -f "$env_file" ] || [ -L "$env_file" ] || [ ! -O "$env_file" ]; then
+    return 0
+  fi
+
+  mode="$(stat -c '%a' "$env_file" 2>/dev/null || stat -f '%Lp' "$env_file" 2>/dev/null || true)"
+  if [ -n "$mode" ] && [ $((8#$mode & 18)) -ne 0 ]; then
+    echo "WARNING: refusing to load group/world-writable .env file: $env_file" 1>&2
+    return 0
+  fi
+
+  while IFS= read -r line || [ -n "$line" ]; do
+    [[ "$line" =~ ^[[:space:]]*$ ]] && continue
+    [[ "$line" =~ ^[[:space:]]*# ]] && continue
+
+    if [[ "$line" =~ ^[[:space:]]*export[[:space:]]+ ]]; then
+      line="${line#${line%%[![:space:]]*}}"
+      line="${line#export }"
+    fi
+
+    if [[ ! "$line" =~ ^[A-Za-z_][A-Za-z0-9_]*= ]]; then
+      echo "WARNING: skipping invalid .env line in $env_file" 1>&2
+      continue
+    fi
+
+    key="${line%%=*}"
+    value="${line#*=}"
+
+    if [[ "$value" =~ ^\".*\"$ ]] || [[ "$value" =~ ^\'.*\'$ ]]; then
+      value="${value:1:${#value}-2}"
+    fi
+
+    printf -v "$key" '%s' "$value"
+    export "$key"
+  done < "$env_file"
+}

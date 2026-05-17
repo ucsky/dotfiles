@@ -1,5 +1,11 @@
 # dotfiles 51
+
 <p align="center">Keep it simple</p>
+
+<p align="center">
+  <a href="https://github.com/ucsky/dotfiles/actions/workflows/ci.yml"><img src="https://github.com/ucsky/dotfiles/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/ucsky/dotfiles/actions/workflows/security.yml"><img src="https://github.com/ucsky/dotfiles/actions/workflows/security.yml/badge.svg" alt="Security"></a>
+</p>
 
 ## Install
 
@@ -22,12 +28,96 @@ make install
 ./make/uninstall.bash
 ```
 
+## What's inside
+
+### Shell configs (`configs/`)
+
+| File | What it does |
+|---|---|
+| `bash/rc` | Prompt with git branch, fzf history search (Ctrl+R), git aliases (`gs`, `gl`, `gd`…), `autoload_dotenv`, `pathadd`, `wk` |
+| `bash/profile` | Adds `scripts/bash`, `scripts/sh`, `scripts/python3` to `$PATH` |
+| `zsh/rc` | Same PATH setup for zsh |
+| `git/gitconfig` | Git aliases and sensible defaults |
+| `vscode/` | VS Code settings |
+| `emacs/` | Emacs init |
+
+Notable shell features:
+- **50 000-line history** shared across all terminals in real time
+- **`autoload_dotenv`** — auto-sources `.env` files (owner-only, rejects world-writable files)
+- **`wk`** — symlinks task files from `~/.dotfiles/wk/` into `~/.wk/` and lists them
+- **`fzf` integration** — fuzzy history search if fzf is installed
+
+### Scripts (`scripts/`)
+
+#### Bash (`scripts/bash/`)
+
+| Script | Description |
+|---|---|
+| `7zmax.bash` | Compress a file or directory with maximum 7z compression |
+| `docker-checksize.bash` | List disk usage of `/var/lib/docker` items |
+| `docker-stop.bash` | Kill all running Docker containers |
+| `docker-wipe.bash` | Wipe all Docker containers, images, volumes, and networks |
+| `git-add-extended.bash` | `git add` that clears Jupyter notebook outputs before staging |
+| `git-export-all-file-versions.bash` | Export every historical version of a file from git |
+| `git-lfs-diff.bash` | Diff a Git LFS-tracked file against HEAD |
+| `mp4-to-mp3.bash` | Convert MP4 to MP3 via ffmpeg |
+| `mset-get-info.bash` | Collect machine info into `~/.info/` |
+| `nb-pdf.bash` | Convert a Jupyter notebook to PDF (code cells hidden by default) |
+| `nb-run.bash` | Execute a notebook in batch mode and export an HTML report |
+| `nb-start.bash` | Start Jupyter Notebook |
+| `pip-fix-pip.bash` | Fix pip inside a virtualenv |
+| `subsr.bash` | Bulk find-and-replace a string across files in a directory |
+| `youtube-dl-audio.bash` | Download audio from a URL and convert to MP3 |
+
+#### Python (`scripts/python3/`)
+
+| Script | Description |
+|---|---|
+| `csv2yaml.py` | Convert CSV to YAML |
+| `json2csv.py` | Convert JSON to CSV (via pandas) |
+| `nb-check-params.py` | Check that Jupyter notebooks have a `parameters`-tagged cell |
+| `nb-start.py` | Start Jupyter Notebook with sensible defaults |
+| `papermill2csv` | Parse papermill progress logs into CSV |
+| `parse-script-header.py` | Extract the `Description` block from a script header |
+
+#### POSIX sh (`scripts/sh/`)
+
+| Script | Description |
+|---|---|
+| `gcc-set-alternative` | Select a GCC/G++ version via `update-alternatives` |
+
+### Docker (`docker/`)
+
+Dockerfiles for testing the install on clean systems:
+
+| Image | Base |
+|---|---|
+| `ubuntu/` | `ubuntu:24.04` — runs `make install && make tests` |
+| `macos/` | macOS base |
+| `mswin/` | Windows base |
+
+Useful to verify the install is truly portable before pushing changes.
+
 ## Structure
 
-- **`configs/`**: shell + editor configuration files.
-- **`scripts/`**: command-line utilities.
-- **`make/`**: install helpers (including bare installers).
-- **`tests/`**: test suite runnable via `make tests`.
+```
+.
+├── configs/        # Shell + editor configuration files
+│   ├── bash/
+│   ├── zsh/
+│   ├── git/
+│   ├── emacs/
+│   └── vscode/
+├── docker/         # Dockerfiles for cross-platform install testing
+│   ├── macos/
+│   ├── mswin/
+│   └── ubuntu/
+├── hooks/          # Git hooks (e.g. notebook pre-commit cleaner)
+├── make/           # Install / uninstall helpers
+├── notebooks/      # Example Jupyter notebooks
+├── scripts/        # Command-line utilities (bash, python3, sh)
+└── tests/          # Test suite
+```
 
 ## Development
 
@@ -36,14 +126,12 @@ make install
 `./make/install.bash` (or `make install`) bootstraps Python tooling **idempotently**:
 
 - **venv**: `~/.venv/dotfiles51`
-- **virtualenvwrapper**: env `dotfiles51` under `~/.virtualenvs` (skipped if virtualenvwrapper is not installed)
-- **conda**: env `dotfiles51` (skipped if conda is not installed)
+- **virtualenvwrapper**: env `dotfiles51` under `~/.virtualenvs` (skipped if not installed)
+- **conda**: env `dotfiles51` (skipped if not installed)
 
-You can override the environment name via `NAME_PYTHON_VENV` (default: `dotfiles51`).
+Override the env name with `NAME_PYTHON_VENV` (default: `dotfiles51`).
 
 ### Start JupyterLab
-
-Use `DOTFILES_PY_ENV` to select the Python environment type:
 
 ```bash
 DOTFILES_PY_ENV=venv  make startlab
@@ -60,6 +148,5 @@ make tests
 ## See also
 
 [awesome-dotfiles](https://github.com/webpro/awesome-dotfiles)
-
 
 ![linux icon](./assets/icon-tux.png)

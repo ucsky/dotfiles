@@ -142,15 +142,17 @@ Useful to verify the install is truly portable before pushing changes.
 - **venv**: `~/.venv/<dirname>` (e.g. `~/.venv/dotfiles` when cloned as `.dotfiles`)
 - **virtualenvwrapper**: env `<dirname>` under `~/.virtualenvs` (skipped if not installed)
 - **conda**: env `<dirname>` (skipped if not installed)
+- **micromamba**: env `<dirname>` under `$MAMBA_ROOT_PREFIX` (skipped if not installed)
 
 The env name defaults to the cloned directory name (leading `.` stripped). Override with `NAME_PYTHON_VENV`.
 
 ### Start JupyterLab
 
 ```bash
-DOTFILES_PY_ENV=venv  make startlab
-DOTFILES_PY_ENV=workon make startlab
-DOTFILES_PY_ENV=conda make startlab
+DOTFILES_PY_ENV=venv       make startlab
+DOTFILES_PY_ENV=workon     make startlab
+DOTFILES_PY_ENV=conda      make startlab
+DOTFILES_PY_ENV=micromamba make startlab
 ```
 
 ### Run tests

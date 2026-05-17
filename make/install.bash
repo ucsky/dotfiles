@@ -208,6 +208,36 @@ setup_conda() {
   fi
 }
 
+setup_micromamba() {
+  local env_name="${NAME_PYTHON_VENV}"
+  local mamba_exe=""
+
+  if command -v micromamba >/dev/null 2>&1; then
+    mamba_exe="micromamba"
+  elif [ -x "$HOME/.local/bin/micromamba" ]; then
+    mamba_exe="$HOME/.local/bin/micromamba"
+  elif [ -x "$HOME/micromamba/bin/micromamba" ]; then
+    mamba_exe="$HOME/micromamba/bin/micromamba"
+  fi
+
+  if [ -z "$mamba_exe" ]; then
+    echo "INFO: micromamba not available; skipping micromamba env setup."
+    return 0
+  fi
+
+  local mamba_root="${MAMBA_ROOT_PREFIX:-$HOME/micromamba}"
+
+  if ! "$mamba_exe" env list 2>/dev/null | grep -E "^${env_name}[[:space:]]+" >/dev/null 2>&1; then
+    echo "Creating micromamba env: $env_name"
+    MAMBA_ROOT_PREFIX="$mamba_root" "$mamba_exe" create --name "$env_name" python=3.10 -y --quiet
+  fi
+
+  MAMBA_ROOT_PREFIX="$mamba_root" "$mamba_exe" run -n "$env_name" python -m pip install -q -U pip
+  if ! MAMBA_ROOT_PREFIX="$mamba_root" "$mamba_exe" run -n "$env_name" python -m pip install -q -r "$REPO_ROOT/requirements.txt"; then
+    echo "INFO: micromamba env $env_name pip install reported issues; dotfiles install continues."
+  fi
+}
+
 case "$os" in
   linux)
     echo "Detected OS: linux (userland-only)"
@@ -216,6 +246,7 @@ case "$os" in
     setup_venv
     setup_workon || true
     setup_conda || true
+    setup_micromamba || true
     ;;
   darwin)
     echo "Detected OS: macOS"
@@ -224,6 +255,7 @@ case "$os" in
     setup_venv
     setup_workon || true
     setup_conda || true
+    setup_micromamba || true
     ;;
   msys*|mingw*|cygwin*)
     echo "Detected OS: Windows (MSYS/MINGW/CYGWIN)"

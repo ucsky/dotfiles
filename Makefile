@@ -74,7 +74,7 @@ uninstall: ## Uninstall dotfiles integration (safe)
 # Start Jupyter Notebook and Lab
 #---------------------------------------------
 ## Jupyter notebook and lab
-startlab: ## Start JupyterLab (DOTFILES_PY_ENV=venv|workon|conda)
+startlab: ## Start JupyterLab (DOTFILES_PY_ENV=venv|workon|conda|micromamba)
 startlab:
 	@(ENV_TYPE=$${DOTFILES_PY_ENV:-venv}; \
 	echo "Starting JupyterLab (DOTFILES_PY_ENV=$$ENV_TYPE)"; \
@@ -103,8 +103,14 @@ startlab:
 			fi; \
 			conda activate $(NAME_PYTHON_VENV) || (echo "ERROR: conda env $(NAME_PYTHON_VENV) not found. Run: make install" 1>&2; exit 1); \
 			;; \
+		micromamba) \
+			MAMBA_EXE=$$(command -v micromamba 2>/dev/null || echo "$$HOME/.local/bin/micromamba"); \
+			test -x "$$MAMBA_EXE" || (echo "ERROR: micromamba not found. Install it first." 1>&2; exit 1); \
+			MAMBA_ROOT_PREFIX=$${MAMBA_ROOT_PREFIX:-$$HOME/micromamba} "$$MAMBA_EXE" run -n $(NAME_PYTHON_VENV) jupyter lab --no-browser; \
+			exit 0; \
+			;; \
 		*) \
-			echo "ERROR: invalid DOTFILES_PY_ENV=$$ENV_TYPE (use venv|workon|conda)" 1>&2; \
+			echo "ERROR: invalid DOTFILES_PY_ENV=$$ENV_TYPE (use venv|workon|conda|micromamba)" 1>&2; \
 			exit 1; \
 			;; \
 	esac; \

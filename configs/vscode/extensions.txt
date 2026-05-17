@@ -21,5 +21,3 @@ tamasfe.even-better-toml
 ms-vscode-remote.remote-ssh
 ms-vscode-remote.remote-containers
 
-# Qualité
-streetsidesoftware.code-spell-checker

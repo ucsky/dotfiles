@@ -165,4 +165,4 @@ make tests
 
 [awesome-dotfiles](https://github.com/webpro/awesome-dotfiles)
 
-![linux icon](./assets/icon-tux.png)
+![linux icon](./assets/icon-tux.png) ![macos icon](./assets/icon-macos.svg) ![windows icon](./assets/icon-windows.svg)

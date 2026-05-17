@@ -3,7 +3,7 @@
 <p align="center">Keep it simple</p>
 
 <p align="center">
-  <a href="https://github.com/ucsky/dotfiles/actions/workflows/ci.yml"><img src="https://github.com/ucsky/dotfiles/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/ucsky/dotfiles/actions/workflows/workflows.yml"><img src="https://github.com/ucsky/dotfiles/actions/workflows/workflows.yml/badge.svg" alt="CI"></a>
   <a href="https://github.com/ucsky/dotfiles/actions/workflows/security.yml"><img src="https://github.com/ucsky/dotfiles/actions/workflows/security.yml/badge.svg" alt="Security"></a>
 </p>
 

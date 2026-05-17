@@ -20,10 +20,10 @@ You can clone the repo under **any name** — the Python virtual environments wi
 
 ```bash
 cd $HOME
-git clone git@github.com:ucsky/dotfiles.git .dotfiles34
-cd .dotfiles34
+git clone git@github.com:ucsky/dotfiles.git .dotfiles51
+cd .dotfiles51
 ./make/install.bash
-# → venv created at ~/.venv/dotfiles34
+# → venv created at ~/.venv/dotfiles51
 ```
 
 Override the name explicitly with `NAME_PYTHON_VENV`:

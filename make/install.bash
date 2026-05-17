@@ -54,7 +54,7 @@ source_if_safe() {
     return 1
   fi
 
-  # shellcheck disable=SC1090
+  # shellcheck disable=SC1090,SC1091
   source "$file"
 }
 
@@ -75,7 +75,7 @@ setup_venv() {
     fi
   fi
   # Install/update requirements (idempotent)
-  # shellcheck disable=SC1090
+  # shellcheck disable=SC1090,SC1091
   . "$venv_path/bin/activate"
   python -m pip install -q -U pip
   python -m pip install -q -r "$REPO_ROOT/requirements.txt"
@@ -166,7 +166,7 @@ setup_conda() {
     fi
   elif [ -f "$HOME/.miniconda3/etc/profile.d/conda.sh" ]; then
     if is_safe_source_file "$HOME/.miniconda3/etc/profile.d/conda.sh"; then
-      # shellcheck disable=SC1090
+      # shellcheck disable=SC1090,SC1091
       source "$HOME/.miniconda3/etc/profile.d/conda.sh"
       conda_exe="conda"
     else
@@ -175,7 +175,7 @@ setup_conda() {
     fi
   elif [ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]; then
     if is_safe_source_file "$HOME/miniconda3/etc/profile.d/conda.sh"; then
-      # shellcheck disable=SC1090
+      # shellcheck disable=SC1090,SC1091
       source "$HOME/miniconda3/etc/profile.d/conda.sh"
       conda_exe="conda"
     else

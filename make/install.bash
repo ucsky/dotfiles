@@ -11,7 +11,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-NAME_PYTHON_VENV="${NAME_PYTHON_VENV:-dotfiles51}"
+_repo_basename="$(basename "$REPO_ROOT")"
+NAME_PYTHON_VENV="${NAME_PYTHON_VENV:-${_repo_basename#.}}"
 
 os="$(uname -s | tr '[:upper:]' '[:lower:]')"
 

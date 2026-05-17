@@ -1,4 +1,4 @@
-# dotfiles 51
+# dotfiles
 
 <p align="center">Keep it simple</p>
 
@@ -14,6 +14,22 @@ cd $HOME
 git clone git@github.com:ucsky/dotfiles.git .dotfiles
 cd .dotfiles
 ./make/install.bash
+```
+
+You can clone the repo under **any name** — the Python virtual environments will be named after the directory (stripping the leading `.` if present):
+
+```bash
+cd $HOME
+git clone git@github.com:ucsky/dotfiles.git .dotfiles34
+cd .dotfiles34
+./make/install.bash
+# → venv created at ~/.venv/dotfiles34
+```
+
+Override the name explicitly with `NAME_PYTHON_VENV`:
+
+```bash
+NAME_PYTHON_VENV=myenv ./make/install.bash
 ```
 
 ### Alternative install (Makefile)
@@ -123,11 +139,11 @@ Useful to verify the install is truly portable before pushing changes.
 
 `./make/install.bash` (or `make install`) bootstraps Python tooling **idempotently**:
 
-- **venv**: `~/.venv/dotfiles51`
-- **virtualenvwrapper**: env `dotfiles51` under `~/.virtualenvs` (skipped if not installed)
-- **conda**: env `dotfiles51` (skipped if not installed)
+- **venv**: `~/.venv/<dirname>` (e.g. `~/.venv/dotfiles` when cloned as `.dotfiles`)
+- **virtualenvwrapper**: env `<dirname>` under `~/.virtualenvs` (skipped if not installed)
+- **conda**: env `<dirname>` (skipped if not installed)
 
-Override the env name with `NAME_PYTHON_VENV` (default: `dotfiles51`).
+The env name defaults to the cloned directory name (leading `.` stripped). Override with `NAME_PYTHON_VENV`.
 
 ### Start JupyterLab
 

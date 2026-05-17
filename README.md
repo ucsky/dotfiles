@@ -44,7 +44,6 @@ make install
 Notable shell features:
 - **50 000-line history** shared across all terminals in real time
 - **`autoload_dotenv`** — auto-sources `.env` files (owner-only, rejects world-writable files)
-- **`wk`** — symlinks task files from `~/.dotfiles/wk/` into `~/.wk/` and lists them
 - **`fzf` integration** — fuzzy history search if fzf is installed
 
 ### Scripts (`scripts/`)

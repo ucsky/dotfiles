@@ -17,7 +17,11 @@ remove_line() {
   if [ -f "$file" ]; then
     local tmp
     tmp="$(mktemp)"
-    grep -F -v "$pattern" "$file" > "$tmp" && mv "$tmp" "$file" || rm -f "$tmp"
+    if grep -F -v "$pattern" "$file" > "$tmp"; then
+      mv "$tmp" "$file"
+    else
+      rm -f "$tmp"
+    fi
   fi
 }
 

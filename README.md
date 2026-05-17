@@ -55,7 +55,6 @@ Notable shell features:
 | `7zmax.bash` | Compress a file or directory with maximum 7z compression |
 | `docker-checksize.bash` | List disk usage of `/var/lib/docker` items |
 | `docker-stop.bash` | Kill all running Docker containers |
-| `docker-wipe.bash` | Wipe all Docker containers, images, volumes, and networks |
 | `git-add-extended.bash` | `git add` that clears Jupyter notebook outputs before staging |
 | `git-export-all-file-versions.bash` | Export every historical version of a file from git |
 | `git-lfs-diff.bash` | Diff a Git LFS-tracked file against HEAD |

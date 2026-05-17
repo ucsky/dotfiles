@@ -13,7 +13,7 @@ if ! command -v docker >/dev/null 2>&1; then
   exit 0
 fi
 
-running="$(docker ps -q)"
-if [ -n "$running" ]; then
-  docker kill $running
+mapfile -t running < <(docker ps -q)
+if [ "${#running[@]}" -gt 0 ]; then
+  docker kill "${running[@]}"
 fi

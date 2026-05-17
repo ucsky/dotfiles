@@ -14,28 +14,38 @@ if ! command -v docker >/dev/null 2>&1; then
   exit 1
 fi
 
-ALL_CONTAINERS="$(docker ps -qa || true)"
+mapfile -t ALL_CONTAINERS < <(docker ps -qa || true)
 echo "Stopping all containers ..."
-test -n "${ALL_CONTAINERS}" && docker stop ${ALL_CONTAINERS} || true
+if [ "${#ALL_CONTAINERS[@]}" -gt 0 ]; then
+  docker stop "${ALL_CONTAINERS[@]}" || true
+fi
 
 echo "Removing all containers ..."
-test -n "${ALL_CONTAINERS}" && docker rm ${ALL_CONTAINERS} || true
+if [ "${#ALL_CONTAINERS[@]}" -gt 0 ]; then
+  docker rm "${ALL_CONTAINERS[@]}" || true
+fi
 
 echo "Removing all images ..."
-ALL_IMAGES="$(docker images -qa || true)"
-test -n "${ALL_IMAGES}" && docker rmi -f ${ALL_IMAGES} || true
+mapfile -t ALL_IMAGES < <(docker images -qa || true)
+if [ "${#ALL_IMAGES[@]}" -gt 0 ]; then
+  docker rmi -f "${ALL_IMAGES[@]}" || true
+fi
 
 echo "Removing all volumes ..."
-ALL_VOLUMES="$(docker volume ls -q || true)"
-test -n "${ALL_VOLUMES}" && docker volume rm ${ALL_VOLUMES} || true
-ALL_VOLUMES_DANGLING="$(docker volume ls -qf dangling=true || true)"
-test -n "${ALL_VOLUMES_DANGLING}" && docker volume rm ${ALL_VOLUMES_DANGLING} || true
+mapfile -t ALL_VOLUMES < <(docker volume ls -q || true)
+if [ "${#ALL_VOLUMES[@]}" -gt 0 ]; then
+  docker volume rm "${ALL_VOLUMES[@]}" || true
+fi
+mapfile -t ALL_VOLUMES_DANGLING < <(docker volume ls -qf dangling=true || true)
+if [ "${#ALL_VOLUMES_DANGLING[@]}" -gt 0 ]; then
+  docker volume rm "${ALL_VOLUMES_DANGLING[@]}" || true
+fi
 
 echo "Removing all networks ..."
-ALL_NETWORK="$(docker network ls -q || true)"
-if [ -n "${ALL_NETWORK}" ]; then
+mapfile -t ALL_NETWORK < <(docker network ls -q || true)
+if [ "${#ALL_NETWORK[@]}" -gt 0 ]; then
   set +e
-  docker network rm ${ALL_NETWORK}
+  docker network rm "${ALL_NETWORK[@]}"
   set -e
 fi
 

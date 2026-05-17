@@ -30,7 +30,6 @@ grep -F "$line_profile" "$HOME/.profile" >/dev/null 2>&1 || echo "$line_profile"
 # Always: git global config (via [include])
 ###############################################################################
 touch "$HOME/.gitconfig"
-git_include="path = $HOME/.dotfiles/configs/git/gitconfig"
 if ! git config --global --get-all include.path 2>/dev/null | grep -qF "$HOME/.dotfiles/configs/git/gitconfig"; then
   git config --global --add include.path "$HOME/.dotfiles/configs/git/gitconfig"
   echo "INFO: git global config linked via [include]."

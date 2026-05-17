@@ -41,7 +41,7 @@ jobs:
 
       - name: Scan for committed secrets
         run: |
-          detect-secrets scan --all-files > .secrets.scan
+          git ls-files -z | xargs -0 detect-secrets scan > .secrets.scan
           python - <<'PY'
           import json
           from pathlib import Path

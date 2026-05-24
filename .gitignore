@@ -9,3 +9,7 @@ __pycache__
 
 # Test logs (all logs are in logs/ directory)
 /logs/
+
+# Jupyter
+.ipynb_checkpoints/
+.virtual_documents/

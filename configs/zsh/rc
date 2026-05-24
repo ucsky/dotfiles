@@ -1,3 +1,6 @@
+# Configuration for interactive zsh shells
+
+# Add dotfiles script directories to PATH
 BINSH="$HOME/.dotfiles/scripts/sh"
 BINBASH="$HOME/.dotfiles/scripts/bash"
 BINPYTHON3="$HOME/.dotfiles/scripts/python3"
@@ -5,3 +8,151 @@ BINPYTHON3="$HOME/.dotfiles/scripts/python3"
 export PATH="$BINSH:$PATH"
 export PATH="$BINBASH:$PATH"
 export PATH="$BINPYTHON3:$PATH"
+
+###############################################################################
+# History
+###############################################################################
+HISTSIZE=50000
+SAVEHIST=100000
+HISTFILE="$HOME/.zsh_history"
+setopt INC_APPEND_HISTORY     # Write to history file immediately
+setopt SHARE_HISTORY          # Share history across all sessions
+setopt HIST_IGNORE_ALL_DUPS   # Do not record duplicate commands
+setopt HIST_REDUCE_BLANKS     # Remove extra blanks from commands
+setopt HIST_IGNORE_SPACE      # Do not record lines starting with a space
+
+###############################################################################
+# Prompt PS1 with git branch
+###############################################################################
+setopt PROMPT_SUBST
+
+_ps1_git_branch() {
+    local branch
+    branch="$(git symbolic-ref --short HEAD 2>/dev/null || git describe --tags --exact-match 2>/dev/null)" || return
+    printf ' (%s)' "$branch"
+}
+
+# Colors: bold green user@host, bold blue path, yellow branch, reset
+PROMPT='%B%F{green}%n@%m%f%b:%B%F{blue}%~%f%b%F{yellow}$(_ps1_git_branch)%f%# '
+
+###############################################################################
+# fzf (optional – only if installed)
+###############################################################################
+if command -v fzf >/dev/null 2>&1; then
+    # Zsh key-bindings and completion
+    if [ -f /usr/share/zsh/vendor-completions/_fzf ]; then
+        source /usr/share/zsh/vendor-completions/_fzf
+    fi
+    if [ -f /usr/share/doc/fzf/examples/key-bindings.zsh ]; then
+        source /usr/share/doc/fzf/examples/key-bindings.zsh
+    elif [ -f ~/.fzf.zsh ]; then
+        source ~/.fzf.zsh
+    fi
+    export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
+fi
+
+###############################################################################
+# Git aliases
+###############################################################################
+alias gs='git status -sb'
+alias gl='git lg'
+alias gd='git diff'
+alias gdc='git diff --cached'
+alias ga='git add'
+alias gc='git commit'
+alias gco='git checkout'
+alias gbr='git branch -vv'
+alias gundo='git reset HEAD~1 --mixed'
+alias gpush='git push'
+alias gpull='git pull'
+
+###############################################################################
+# General aliases
+###############################################################################
+# Disk usage on all files (including dotfiles), sorted
+alias dusort='du -sh .[!.]* * | sort -h'
+
+# PATH utilities
+pathadd() {
+    if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
+        PATH="${PATH:+"$PATH:"}$1"
+    fi
+    export PATH
+}
+
+pythonpathadd() {
+    if [ -d "$1" ] && [[ ":$PYTHONPATH:" != *":$1:"* ]]; then
+        PYTHONPATH="${PYTHONPATH:+"$PYTHONPATH:"}$1"
+    fi
+    export PYTHONPATH
+}
+
+wk() {
+    # Link task files into $HOME/.wk (idempotent)
+    mkdir -p "$HOME/.wk"
+    for i in "$HOME"/.*files/wk/*; do
+        [ -e "$i" ] || continue
+        j=$(basename "$i")
+        if [ ! -L "$HOME/.wk/$j" ]; then
+            ln -s "$i" "$HOME/.wk/$j"
+        fi
+    done
+    ls -1 "$HOME/.wk"
+}
+
+blockinfile() {
+    #
+    # Description:
+    #   Zsh/Bash equivalent of Ansible blockinfile.
+    #   Source: https://kkovacs.eu/ansible-lineinfile-blockinfile-in-bash
+    #
+    # Usage:
+    #   blockinfile STARTMARK ENDMARK filename <<EOF
+    #   # STARTMARK
+    #   some text to
+    #   put inside
+    #   # ENDMARK
+    #   EOF
+    sed -i -ne '/'"${1//\//\\/}"'/{r/dev/stdin' -e ':a;n;/'"${2//\//\\/}"'/{:b;n;p;bb};ba};p;$r/dev/stdin' "$3"
+}
+
+autoload_dotenv() {
+  local env_file=".env"
+  local line key value mode
+
+  if [ ! -f "$env_file" ] || [ -L "$env_file" ] || [ ! -O "$env_file" ]; then
+    return 0
+  fi
+
+  mode="$(stat -c '%a' "$env_file" 2>/dev/null || stat -f '%Lp' "$env_file" 2>/dev/null || true)"
+  if [ -n "$mode" ] && [ $((8#$mode & 18)) -ne 0 ]; then
+    echo "WARNING: refusing to load group/world-writable .env file: $env_file" 1>&2
+    return 0
+  fi
+
+  # In Zsh, we read file line by line
+  while IFS= read -r line || [ -n "$line" ]; do
+    [[ "$line" =~ ^[[:space:]]*$ ]] && continue
+    [[ "$line" =~ ^[[:space:]]*# ]] && continue
+
+    if [[ "$line" =~ ^[[:space:]]*export[[:space:]]+ ]]; then
+      line="${line#${line%%[![:space:]]*}}"
+      line="${line#export }"
+    fi
+
+    if [[ ! "$line" =~ ^[A-Za-z_][A-Za-z0-9_]*= ]]; then
+      echo "WARNING: skipping invalid .env line in $env_file" 1>&2
+      continue
+    fi
+
+    key="${line%%=*}"
+    value="${line#*=}"
+
+    if [[ "$value" =~ ^\".*\"$ ]] || [[ "$value" =~ ^\'.*\'$ ]]; then
+      value="${value:1:${#value}-2}"
+    fi
+
+    typeset -g "$key"="$value"
+    export "$key"
+  done < "$env_file"
+}

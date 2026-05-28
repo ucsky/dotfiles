@@ -10,7 +10,7 @@ jupyter-server==2.18.2
 kaleido==1.2.0
 mccabe==0.7.0
 nbformat==5.10.4
-numpy==2.4.4
+numpy==2.4.6
 pandas==3.0.2
 papermill==2.7.0
 plotly==6.6.0

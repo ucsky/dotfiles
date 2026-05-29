@@ -59,6 +59,36 @@ source_if_safe() {
   source "$file"
 }
 
+_pip_install_fallback() {
+  local pip_exe="$1"
+  shift
+  if "$pip_exe" -m pip install "$@" 2>/dev/null; then
+    return 0
+  fi
+  # Fallback for pip bug with JSON API (common in pip<25 on Python 3.12+):
+  # download wheel directly via urllib (which works in this env) and install locally.
+  local tmpdir
+  tmpdir="$(mktemp -d)"
+  # shellcheck disable=SC2064
+  trap "rm -rf '$tmpdir'" RETURN
+  local url
+  url="$("$pip_exe" -c "
+import json, urllib.request, re
+data = json.loads(urllib.request.urlopen(
+    urllib.request.Request('https://pypi.org/simple/pip/',
+    headers={'Accept': 'application/vnd.pypi.simple.v1+json'})).read())
+wheels = [f for f in data['files'] if f['filename'].endswith('-py3-none-any.whl')]
+print(sorted(wheels, key=lambda x: [int(p) for p in re.findall(r'\d+', x['filename'])], reverse=True)[0]['url'])
+")" || true
+  [ -n "$url" ] || return 1
+  local whl_name="${url##*/}"
+  local whl_path="$tmpdir/$whl_name"
+  "$pip_exe" -c "
+import urllib.request
+urllib.request.urlretrieve('$url', '$whl_path')
+" && "$pip_exe" -m pip install --no-index "$whl_path"
+}
+
 setup_venv() {
   local env_name="${NAME_PYTHON_VENV}"
   local venv_root="${HOME}/.venv"
@@ -78,8 +108,12 @@ setup_venv() {
   # Install/update requirements (idempotent)
   # shellcheck disable=SC1090,SC1091
   . "$venv_path/bin/activate"
-  python -m pip install -q -U pip
-  python -m pip install -q -r "$REPO_ROOT/requirements.txt"
+  _pip_install_fallback python -q -U pip
+  python -m pip install -q -r "$REPO_ROOT/requirements.txt" 2>/dev/null || {
+    echo "WARNING: pip install failed; retrying after pip upgrade via fallback..."
+    _pip_install_fallback python -q -U pip
+    python -m pip install -q -r "$REPO_ROOT/requirements.txt" || true
+  }
   deactivate || true
 }
 
@@ -144,8 +178,12 @@ setup_workon() {
     echo "WARNING: failed to activate virtualenvwrapper env '$env_name' (rc=$rc); skipping."
     return 0
   fi
-  python -m pip install -q -U pip
-  python -m pip install -q -r "$REPO_ROOT/requirements.txt"
+  _pip_install_fallback python -q -U pip
+  python -m pip install -q -r "$REPO_ROOT/requirements.txt" 2>/dev/null || {
+    echo "WARNING: pip install failed; retrying after pip upgrade via fallback..."
+    _pip_install_fallback python -q -U pip
+    python -m pip install -q -r "$REPO_ROOT/requirements.txt" || true
+  }
   deactivate || true
   set -u
 }

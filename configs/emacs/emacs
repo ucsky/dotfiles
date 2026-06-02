@@ -35,6 +35,18 @@
 (unless (bound-and-true-p package--initialized)
   (package-initialize))
 
+(defun my/package-install-refresh-on-file-error (orig package &rest args)
+  "Retry PACKAGE installation once after refreshing stale package metadata."
+  (condition-case err
+      (apply orig package args)
+    (file-error
+     (message "[init] Package install failed: %S; refreshing package archives" err)
+     (package-refresh-contents)
+     (apply orig package args))))
+
+(unless (advice-member-p 'my/package-install-refresh-on-file-error 'package-install)
+  (advice-add 'package-install :around 'my/package-install-refresh-on-file-error))
+
 ;; Refresh package metadata only when needed.
 ;; Rationale:
 ;; - Refreshing on every startup is slow and brittle on laptops/offline.

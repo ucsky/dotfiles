@@ -39,15 +39,10 @@ backup_root="${old:-/tmp}"
 backup_dir="$backup_root/subsr"
 mkdir -p "$backup_dir"
 
-tmp_grep="$(mktemp)"
-tmp_files="$(mktemp)"
-cleanup() { rm -f "$tmp_grep" "$tmp_files"; }
-trap cleanup EXIT
-
-grep -nr -- "$old_str" "$dir" | grep -v "\.svn" | grep -v "\.git" > "$tmp_grep" || true
-awk -F: '{print $1}' "$tmp_grep" > "$tmp_files"
-
-files="$(cat "$tmp_files")"
+# -l lists each matching file once; a duplicated list would make the loop
+# below run sed several times on the same file, which compounds when
+# new_str contains old_str (e.g. foo -> prefix_foo -> prefix_prefix_foo).
+files="$(grep -rl --exclude-dir=.svn --exclude-dir=.git -- "$old_str" "$dir" || true)"
 
 for f in $files; do
   cp -f "$f" "$backup_dir"

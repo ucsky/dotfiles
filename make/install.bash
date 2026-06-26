@@ -13,6 +13,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 _repo_basename="$(basename "$REPO_ROOT")"
 NAME_PYTHON_VENV="${NAME_PYTHON_VENV:-${_repo_basename#.}}"
+DOTFILES_CONDA_PYTHON_VERSION="${DOTFILES_CONDA_PYTHON_VERSION:-3.12}"
 
 os="$(uname -s | tr '[:upper:]' '[:lower:]')"
 
@@ -234,9 +235,12 @@ setup_conda() {
   conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main 2>/dev/null || true
   conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r 2>/dev/null || true
 
-  if ! "$conda_exe" env list | grep -E "^${env_name}[[:space:]]+" >/dev/null 2>&1; then
+  if ! "$conda_exe" env list | grep -E "^[[:space:]]*${env_name}[[:space:]]+" >/dev/null 2>&1; then
     echo "Creating conda env: $env_name"
-    "$conda_exe" create --name "$env_name" python=3.10 -y
+    "$conda_exe" create --name "$env_name" "python=${DOTFILES_CONDA_PYTHON_VERSION}" -y
+  elif ! "$conda_exe" run -n "$env_name" python -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 11) else 1)' >/dev/null 2>&1; then
+    echo "Updating conda env $env_name to Python ${DOTFILES_CONDA_PYTHON_VERSION}"
+    "$conda_exe" install --name "$env_name" "python=${DOTFILES_CONDA_PYTHON_VERSION}" -y
   fi
 
   # Avoid `conda activate` (requires conda init). Use conda-run instead.
@@ -265,9 +269,12 @@ setup_micromamba() {
 
   local mamba_root="${MAMBA_ROOT_PREFIX:-$HOME/micromamba}"
 
-  if ! "$mamba_exe" env list 2>/dev/null | grep -E "^${env_name}[[:space:]]+" >/dev/null 2>&1; then
+  if ! MAMBA_ROOT_PREFIX="$mamba_root" "$mamba_exe" env list 2>/dev/null | grep -E "^[[:space:]]*${env_name}[[:space:]]+" >/dev/null 2>&1; then
     echo "Creating micromamba env: $env_name"
-    MAMBA_ROOT_PREFIX="$mamba_root" "$mamba_exe" create --name "$env_name" python=3.10 -y --quiet
+    MAMBA_ROOT_PREFIX="$mamba_root" "$mamba_exe" create --name "$env_name" "python=${DOTFILES_CONDA_PYTHON_VERSION}" -y --quiet
+  elif ! MAMBA_ROOT_PREFIX="$mamba_root" "$mamba_exe" run -n "$env_name" python -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 11) else 1)' >/dev/null 2>&1; then
+    echo "Updating micromamba env $env_name to Python ${DOTFILES_CONDA_PYTHON_VERSION}"
+    MAMBA_ROOT_PREFIX="$mamba_root" "$mamba_exe" install --name "$env_name" "python=${DOTFILES_CONDA_PYTHON_VERSION}" -y --quiet
   fi
 
   MAMBA_ROOT_PREFIX="$mamba_root" "$mamba_exe" run -n "$env_name" python -m pip install -q -U pip

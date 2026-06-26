@@ -29,5 +29,6 @@ tabulate==0.10.0
 tornado==6.5.7
 typer==0.26.7
 urllib3==2.7.0
+virtualenv==21.5.1
 yapf==0.43.0
 zipp==4.1.0

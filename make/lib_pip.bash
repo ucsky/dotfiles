@@ -6,10 +6,30 @@
 #   effects on source.
 #
 
+# Run `pip install` with the given args, retrying with --break-system-packages
+# if the system Python refuses due to PEP 668 (externally-managed-environment),
+# e.g. Debian 12+/Ubuntu 23.04+.
+_pip_install_pep668() {
+  local pip_exe="$1"
+  shift
+  local output
+  if output=$("$pip_exe" -m pip install "$@" 2>&1); then
+    return 0
+  fi
+  if printf '%s' "$output" | grep -q "externally-managed-environment"; then
+    echo "INFO: system Python is externally managed (PEP 668); retrying with --break-system-packages..." 1>&2
+    if output=$("$pip_exe" -m pip install --break-system-packages "$@" 2>&1); then
+      return 0
+    fi
+  fi
+  echo "$output" 1>&2
+  return 1
+}
+
 _pip_install_fallback() {
   local pip_exe="$1"
   shift
-  if "$pip_exe" -m pip install "$@" 2>/dev/null; then
+  if _pip_install_pep668 "$pip_exe" "$@" >/dev/null 2>&1; then
     return 0
   fi
   # Fallback for pip bug with JSON API (common in pip<25 on Python 3.12+):
@@ -33,27 +53,14 @@ print(sorted(wheels, key=lambda x: [int(p) for p in re.findall(r'\d+', x['filena
   "$pip_exe" -c "
 import urllib.request
 urllib.request.urlretrieve('$url', '$whl_path')
-" && "$pip_exe" -m pip install --no-index "$whl_path"
+" && _pip_install_pep668 "$pip_exe" --no-index "$whl_path"
 }
 
-# Install a package with `pip install --user`, retrying with
-# --break-system-packages if the system Python refuses due to PEP 668
-# (externally-managed-environment), e.g. Debian 12+/Ubuntu 23.04+.
+# Install a package with `pip install --user`, with PEP 668 retry.
 _pip_install_user_pkg() {
   local pip_exe="$1"
   shift
-  local output
-  if output=$("$pip_exe" -m pip install --user -q "$@" 2>&1); then
-    return 0
-  fi
-  if printf '%s' "$output" | grep -q "externally-managed-environment"; then
-    echo "INFO: system Python is externally managed (PEP 668); retrying with --break-system-packages..."
-    if output=$("$pip_exe" -m pip install --user -q --break-system-packages "$@" 2>&1); then
-      return 0
-    fi
-  fi
-  echo "$output" 1>&2
-  return 1
+  _pip_install_pep668 "$pip_exe" --user -q "$@"
 }
 
 # Paths where `pip install --user` may place virtualenvwrapper.sh, across

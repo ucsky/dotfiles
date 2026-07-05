@@ -15,6 +15,9 @@ _repo_basename="$(basename "$REPO_ROOT")"
 NAME_PYTHON_VENV="${NAME_PYTHON_VENV:-${_repo_basename#.}}"
 DOTFILES_CONDA_PYTHON_VERSION="${DOTFILES_CONDA_PYTHON_VERSION:-3.12}"
 
+# shellcheck source=make/lib_pip.bash
+source "$REPO_ROOT/make/lib_pip.bash"
+
 os="$(uname -s | tr '[:upper:]' '[:lower:]')"
 
 stat_owner() {
@@ -60,36 +63,6 @@ source_if_safe() {
   source "$file"
 }
 
-_pip_install_fallback() {
-  local pip_exe="$1"
-  shift
-  if "$pip_exe" -m pip install "$@" 2>/dev/null; then
-    return 0
-  fi
-  # Fallback for pip bug with JSON API (common in pip<25 on Python 3.12+):
-  # download wheel directly via urllib (which works in this env) and install locally.
-  local tmpdir
-  tmpdir="$(mktemp -d)"
-  # shellcheck disable=SC2064
-  trap "rm -rf '$tmpdir'" RETURN
-  local url
-  url="$("$pip_exe" -c "
-import json, urllib.request, re
-data = json.loads(urllib.request.urlopen(
-    urllib.request.Request('https://pypi.org/simple/pip/',
-    headers={'Accept': 'application/vnd.pypi.simple.v1+json'})).read())
-wheels = [f for f in data['files'] if f['filename'].endswith('-py3-none-any.whl')]
-print(sorted(wheels, key=lambda x: [int(p) for p in re.findall(r'\d+', x['filename'])], reverse=True)[0]['url'])
-")" || true
-  [ -n "$url" ] || return 1
-  local whl_name="${url##*/}"
-  local whl_path="$tmpdir/$whl_name"
-  "$pip_exe" -c "
-import urllib.request
-urllib.request.urlretrieve('$url', '$whl_path')
-" && "$pip_exe" -m pip install --no-index "$whl_path"
-}
-
 setup_venv() {
   local env_name="${NAME_PYTHON_VENV}"
   local venv_root="${HOME}/.venv"
@@ -132,15 +105,12 @@ setup_workon() {
   # shellcheck disable=SC1091
   local sourced=0
   local candidate
-  for candidate in \
-    "$HOME/.local/bin/virtualenvwrapper.sh" \
-    /usr/local/bin/virtualenvwrapper.sh \
-    /usr/share/virtualenvwrapper/virtualenvwrapper.sh; do
+  while IFS= read -r candidate; do
     if [ -f "$candidate" ] && source_if_safe "$candidate"; then
       sourced=1
       break
     fi
-  done
+  done < <(virtualenvwrapper_candidates)
   if [ "$sourced" -ne 1 ]; then
       set -u
       echo "INFO: virtualenvwrapper not found; skipping workon env setup."

@@ -9,23 +9,27 @@
 #
 set -euo pipefail
 
-candidates=(
-  "$HOME/.local/bin/virtualenvwrapper.sh"
-  /usr/local/bin/virtualenvwrapper.sh
-  /usr/share/virtualenvwrapper/virtualenvwrapper.sh
-)
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=make/lib_pip.bash
+source "$REPO_ROOT/make/lib_pip.bash"
 
-for candidate in "${candidates[@]}"; do
-  if [ -f "$candidate" ]; then
-    echo "virtualenvwrapper already installed: $candidate"
-    exit 0
-  fi
-done
+if [ -n "${VIRTUAL_ENV:-}" ]; then
+  echo "ERROR: a virtualenv is active (\$VIRTUAL_ENV=$VIRTUAL_ENV)." 1>&2
+  echo "Run 'deactivate' first: 'pip install --user' does not work inside an active virtualenv." 1>&2
+  exit 1
+fi
 
 command -v python3 >/dev/null 2>&1 || {
   echo "ERROR: python3 not found; cannot install virtualenvwrapper." 1>&2
   exit 1
 }
+
+while IFS= read -r candidate; do
+  if [ -f "$candidate" ]; then
+    echo "virtualenvwrapper already installed: $candidate"
+    exit 0
+  fi
+done < <(virtualenvwrapper_candidates)
 
 if ! python3 -m pip --version >/dev/null 2>&1; then
   echo "INFO: pip module not found; bootstrapping via ensurepip --user..."
@@ -36,17 +40,17 @@ if ! python3 -m pip --version >/dev/null 2>&1; then
 fi
 
 echo "Installing virtualenvwrapper via pip (--user)..."
-python3 -m pip install --user -q -U pip
-python3 -m pip install --user -q virtualenvwrapper
+_pip_install_fallback python3 --user -q -U pip
+_pip_install_user_pkg python3 virtualenvwrapper
 
-for candidate in "${candidates[@]}"; do
+while IFS= read -r candidate; do
   if [ -f "$candidate" ]; then
     chmod go-w "$candidate" 2>/dev/null || true
     echo "virtualenvwrapper installed: $candidate"
     echo "Run 'make install' (or 'DOTFILES_PY_ENV=workon make startlab') to set up the workon env."
     exit 0
   fi
-done
+done < <(virtualenvwrapper_candidates)
 
 echo "WARNING: virtualenvwrapper installed via pip but virtualenvwrapper.sh was not found in expected locations." 1>&2
 echo "Check your pip user-install script path (e.g. run: python3 -m site --user-base)." 1>&2

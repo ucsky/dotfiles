@@ -24,4 +24,4 @@ This repository is a personal `dotfiles` and utilities collection.
 
 - `make install` (or `./make/install.bash`) should remain the main entry point.
 - CI must run the real tests (no placeholder `echo`).
-- Python environments are bootstrapped during install (venv + virtualenvwrapper + conda when available).
+- Python environments are bootstrapped during install (venv + virtualenvwrapper + conda when available). virtualenvwrapper itself is not auto-installed; use `make install-virtualenvwrapper`.

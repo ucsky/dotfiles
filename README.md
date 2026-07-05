@@ -140,7 +140,7 @@ Useful to verify the install is truly portable before pushing changes.
 `./make/install.bash` (or `make install`) bootstraps Python tooling **idempotently**:
 
 - **venv**: `~/.venv/<dirname>` (e.g. `~/.venv/dotfiles` when cloned as `.dotfiles`)
-- **virtualenvwrapper**: env `<dirname>` under `~/.virtualenvs` (skipped if not installed)
+- **virtualenvwrapper**: env `<dirname>` under `~/.virtualenvs` (skipped if not installed; run `make install-virtualenvwrapper` to install it via pip `--user`)
 - **conda**: env `<dirname>` (skipped if not installed)
 - **micromamba**: env `<dirname>` under `$MAMBA_ROOT_PREFIX` (skipped if not installed)
 

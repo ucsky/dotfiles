@@ -63,12 +63,15 @@ lock-requirements:
 		PY
 
 
-.PHONY: install uninstall
+.PHONY: install uninstall install-virtualenvwrapper
 install: ## Install dotfiles (OS-aware)
 	@bash make/install.bash
 
 uninstall: ## Uninstall dotfiles integration (safe)
 	@bash make/uninstall.bash
+
+install-virtualenvwrapper: ## Install virtualenvwrapper for the current user (pip --user)
+	@bash make/install_virtualenvwrapper.bash
 
 #---------------------------------------------
 # Start Jupyter Notebook and Lab

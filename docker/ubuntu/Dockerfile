@@ -20,4 +20,7 @@ COPY . .
 # Install dependencies into a venv and run tests
 RUN make install && make tests
 
+RUN chown -R 1000:1000 /root/.dotfiles
+USER 1000
+
 CMD ["/bin/bash"]

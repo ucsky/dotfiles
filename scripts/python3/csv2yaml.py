@@ -23,6 +23,8 @@ def convert(
     """
     df = pd.read_csv(csv_file, delimiter=delimiter)
     data = df.to_dict(orient="records")
+    if ".." in yaml_file:
+        raise Exception("Invalid file path")
     with open(yaml_file, "w", encoding="utf-8") as f:
         yaml.dump(data, f, default_flow_style=False, allow_unicode=True)
     typer.echo(f"Conversion successful. YAML saved at: {yaml_file}")

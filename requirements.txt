@@ -27,7 +27,7 @@ rope==1.14.0
 setuptools==83.0.0
 tabulate==0.10.0
 tornado==6.5.7
-typer==0.26.8
+typer==0.27.0
 urllib3==2.7.0
 virtualenv==21.6.1
 yapf==0.43.0

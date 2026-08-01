@@ -1,4 +1,4 @@
-anyio==4.14.0
+anyio==4.14.2
 black==26.3.1
 ipython==9.15.0
 jupyter==1.1.1

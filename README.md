@@ -54,7 +54,6 @@ make install
 | `bash/profile` | Adds `scripts/bash`, `scripts/sh`, `scripts/python3` to `$PATH` |
 | `zsh/rc` | Same PATH setup for zsh |
 | `git/gitconfig` | Git aliases and sensible defaults |
-| `vscode/` | VS Code settings |
 | `emacs/` | Emacs init |
 
 Notable shell features:
@@ -120,8 +119,7 @@ Useful to verify the install is truly portable before pushing changes.
 │   ├── bash/
 │   ├── zsh/
 │   ├── git/
-│   ├── emacs/
-│   └── vscode/
+│   └── emacs/
 ├── docker/         # Dockerfiles for cross-platform install testing
 │   ├── macos/
 │   ├── mswin/

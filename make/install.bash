@@ -228,8 +228,8 @@ setup_micromamba() {
     mamba_exe="micromamba"
   elif [ -x "$HOME/.local/bin/micromamba" ]; then
     mamba_exe="$HOME/.local/bin/micromamba"
-  elif [ -x "$HOME/micromamba/bin/micromamba" ]; then
-    mamba_exe="$HOME/micromamba/bin/micromamba"
+  elif [ -x "$HOME/.micromamba/bin/micromamba" ]; then
+    mamba_exe="$HOME/.micromamba/bin/micromamba"
   fi
 
   if [ -z "$mamba_exe" ]; then
@@ -237,7 +237,7 @@ setup_micromamba() {
     return 0
   fi
 
-  local mamba_root="${MAMBA_ROOT_PREFIX:-$HOME/micromamba}"
+  local mamba_root="${MAMBA_ROOT_PREFIX:-$HOME/.micromamba}"
 
   if ! MAMBA_ROOT_PREFIX="$mamba_root" "$mamba_exe" env list 2>/dev/null | grep -E "^[[:space:]]*${env_name}[[:space:]]+" >/dev/null 2>&1; then
     echo "Creating micromamba env: $env_name"

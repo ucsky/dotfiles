@@ -32,4 +32,9 @@ if rg -n -v '^([A-Za-z0-9._-]+==[^#[:space:]]+)([[:space:]]+#.*)?$|^[[:space:]]*
   exit 1
 fi
 
+if rg -n 'HOME/micromamba\b' "$REPO_ROOT/Makefile" "$REPO_ROOT/make/install.bash" >/dev/null 2>&1; then
+  echo "ERROR: micromamba defaults must use the dotted \$HOME/.micromamba, not \$HOME/micromamba." 1>&2
+  exit 1
+fi
+
 echo "Repository security checks passed."

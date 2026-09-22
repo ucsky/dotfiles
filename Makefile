@@ -109,7 +109,7 @@ startlab:
 		micromamba) \
 			MAMBA_EXE=$$(command -v micromamba 2>/dev/null || echo "$$HOME/.local/bin/micromamba"); \
 			test -x "$$MAMBA_EXE" || (echo "ERROR: micromamba not found. Install it first." 1>&2; exit 1); \
-			MAMBA_ROOT_PREFIX=$${MAMBA_ROOT_PREFIX:-$$HOME/micromamba} "$$MAMBA_EXE" run -n $(NAME_PYTHON_VENV) jupyter lab --no-browser; \
+			MAMBA_ROOT_PREFIX=$${MAMBA_ROOT_PREFIX:-$$HOME/.micromamba} "$$MAMBA_EXE" run -n $(NAME_PYTHON_VENV) jupyter lab --no-browser; \
 			exit 0; \
 			;; \
 		*) \

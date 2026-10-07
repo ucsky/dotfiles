@@ -37,4 +37,12 @@ if rg -n 'HOME/micromamba\b' "$REPO_ROOT/Makefile" "$REPO_ROOT/make/install.bash
   exit 1
 fi
 
+for wf in "$REPO_ROOT"/.github/workflows/*.yml "$REPO_ROOT"/.github/workflows/*.yaml; do
+  [ -e "$wf" ] || continue
+  if ! grep -Eq '^permissions:' "$wf"; then
+    echo "ERROR: $(basename "$wf") must declare top-level 'permissions:' (least privilege)." 1>&2
+    exit 1
+  fi
+done
+
 echo "Repository security checks passed."

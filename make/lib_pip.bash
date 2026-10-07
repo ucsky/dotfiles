@@ -75,3 +75,39 @@ virtualenvwrapper_candidates() {
     [ -n "$user_base" ] && echo "$user_base/bin/virtualenvwrapper.sh"
   fi
 }
+
+# Succeed if $1 is a usable venv whose activation really selects its own
+# interpreter. Venvs are not relocatable: if $HOME moved since creation,
+# `activate` and console-script shebangs still point at the old path, so
+# `python` silently resolves to the system interpreter (PEP 668 errors).
+venv_is_healthy() {
+  local venv="$1"
+  [ -x "$venv/bin/python" ] && [ -f "$venv/bin/activate" ] || return 1
+  "$venv/bin/python" -c 'import sys; raise SystemExit(sys.prefix == sys.base_prefix)' >/dev/null 2>&1 || return 1
+  (
+    set +eu
+    unset VIRTUAL_ENV
+    # shellcheck disable=SC1090,SC1091
+    . "$venv/bin/activate" >/dev/null 2>&1
+    resolved="$(command -v python)" || exit 1
+    [ "$(cd "$(dirname "$resolved")" && pwd -P)" = "$(cd "$venv/bin" && pwd -P)" ]
+  )
+}
+
+# Install requirements into venv $1 using its own interpreter explicitly
+# (never relies on PATH, so it can never fall through to system Python).
+venv_install_requirements() {
+  local venv="$1"
+  local requirements="$2"
+  local py="$venv/bin/python"
+  if ! venv_is_healthy "$venv"; then
+    echo "WARNING: refusing to pip install into unhealthy venv: $venv" 1>&2
+    return 1
+  fi
+  _pip_install_fallback "$py" -q -U pip \
+    || echo "WARNING: pip self-upgrade failed in $venv; continuing with current pip." 1>&2
+  if ! "$py" -m pip install -q -r "$requirements"; then
+    echo "WARNING: requirements install failed in $venv." 1>&2
+    return 1
+  fi
+}

@@ -67,42 +67,43 @@ setup_venv() {
   local env_name="${NAME_PYTHON_VENV}"
   local venv_root="${HOME}/.venv"
   local venv_path="${venv_root}/${env_name}"
+  [ -n "$env_name" ] || { echo "WARNING: empty venv name; skipping venv setup." 1>&2; return 0; }
   mkdir -p "$venv_root"
-  if [ ! -f "$venv_path/bin/activate" ]; then
-    [ -d "$venv_path" ] && rm -rf "$venv_path"
+  if [ -e "$venv_path" ] && ! venv_is_healthy "$venv_path"; then
+    echo "INFO: venv $venv_path is stale or broken (e.g. created under another \$HOME); recreating..."
+    rm -rf "$venv_path"
+  fi
+  if [ ! -d "$venv_path" ]; then
     echo "Creating venv: $venv_path"
     if ! python3 -m venv "$venv_path"; then
       local py_ver
       py_ver=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")' 2>/dev/null || echo "3")
+      rm -rf "$venv_path"
       echo "INFO: venv creation failed (ensurepip not available). On Debian/Ubuntu run: sudo apt install python${py_ver}-venv"
       echo "INFO: Skipping venv setup; install will continue. Run 'make install' again after installing the package."
       return 0
     fi
   fi
-  # Install/update requirements (idempotent)
-  # shellcheck disable=SC1090,SC1091
-  . "$venv_path/bin/activate"
-  _pip_install_fallback python -q -U pip
-  python -m pip install -q -r "$REPO_ROOT/requirements.txt" 2>/dev/null || {
-    echo "WARNING: pip install failed; retrying after pip upgrade via fallback..."
-    _pip_install_fallback python -q -U pip
-    python -m pip install -q -r "$REPO_ROOT/requirements.txt" || true
-  }
-  deactivate || true
+  venv_install_requirements "$venv_path" "$REPO_ROOT/requirements.txt" || true
 }
 
+# virtualenvwrapper scripts are often NOT compatible with `set -u` (nounset)
+# or `set -e`; relax both for this section and restore afterwards.
 setup_workon() {
+  set +eu
+  _setup_workon_body
+  set -eu
+}
+
+_setup_workon_body() {
   local env_name="${NAME_PYTHON_VENV}"
   export WORKON_HOME="${HOME}/.virtualenvs"
-  # virtualenvwrapper scripts are often NOT compatible with `set -u` (nounset).
-  # Disable nounset for the whole setup_workon section and re-enable on exit.
-  set +u
+  local env_path="${WORKON_HOME}/${env_name}"
+  [ -n "$env_name" ] || { echo "WARNING: empty venv name; skipping workon env setup." 1>&2; return 0; }
 
   # virtualenvwrapper provides `workon`/`mkvirtualenv` as shell functions.
   # Do NOT check `command -v workon` before sourcing, or it may appear "missing".
   # Userland-only: check userland paths first, then system paths as fallback.
-  #
-  # shellcheck disable=SC1091
   local sourced=0
   local candidate
   while IFS= read -r candidate; do
@@ -112,51 +113,32 @@ setup_workon() {
     fi
   done < <(virtualenvwrapper_candidates)
   if [ "$sourced" -ne 1 ]; then
-      set -u
-      echo "INFO: virtualenvwrapper not found; skipping workon env setup."
-      echo "INFO: Install virtualenvwrapper via pip and ensure the script is owner-only writable."
-      return 0
-  fi
-
-  if ! command -v workon >/dev/null 2>&1; then
-    set -u
-    echo "INFO: virtualenvwrapper init not found after sourcing; skipping workon env setup."
+    echo "INFO: virtualenvwrapper not found; skipping workon env setup."
+    echo "INFO: Install virtualenvwrapper via pip and ensure the script is owner-only writable."
     return 0
   fi
   if ! command -v mkvirtualenv >/dev/null 2>&1; then
-    set -u
     echo "INFO: mkvirtualenv not available after sourcing; skipping workon env setup."
     return 0
   fi
 
-  # Determine whether the env exists without relying on `workon` return codes.
-  if [ ! -d "${WORKON_HOME}/${env_name}" ]; then
+  if [ -e "$env_path" ] && ! venv_is_healthy "$env_path"; then
+    echo "INFO: workon env $env_path is stale or broken (e.g. created under another \$HOME); recreating..."
+    rm -rf "$env_path"
+  fi
+  if [ ! -d "$env_path" ]; then
     echo "Creating virtualenvwrapper env: $env_name"
-    mkvirtualenv "$env_name" >/dev/null 2>&1 || {
-      set -u
+    if ! mkvirtualenv "$env_name" >/dev/null 2>&1; then
       echo "WARNING: failed to create virtualenvwrapper env '$env_name'; skipping."
       return 0
-    }
+    fi
+    # mkvirtualenv activates the new env in this shell; undo that.
+    deactivate >/dev/null 2>&1
   fi
 
-  # `set -e` can be brittle with `workon` in non-interactive shells; guard explicitly.
-  set +e
-  workon "$env_name" >/dev/null 2>&1
-  rc=$?
-  set -e
-  if [ "$rc" -ne 0 ]; then
-    set -u
-    echo "WARNING: failed to activate virtualenvwrapper env '$env_name' (rc=$rc); skipping."
-    return 0
-  fi
-  _pip_install_fallback python -q -U pip
-  python -m pip install -q -r "$REPO_ROOT/requirements.txt" 2>/dev/null || {
-    echo "WARNING: pip install failed; retrying after pip upgrade via fallback..."
-    _pip_install_fallback python -q -U pip
-    python -m pip install -q -r "$REPO_ROOT/requirements.txt" || true
-  }
-  deactivate || true
-  set -u
+  # Install with the env's own interpreter: no `workon` activation needed.
+  venv_install_requirements "$env_path" "$REPO_ROOT/requirements.txt"
+  return 0
 }
 
 setup_conda() {

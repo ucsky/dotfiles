@@ -8,13 +8,15 @@ on:
     branches: [ "master" ]
   workflow_dispatch:
 
+# Deny everything by default; jobs request only what they need.
+permissions: {}
+
 jobs:
   security:
     name: Security checks
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      security-events: write
     steps:
       - uses: actions/checkout@v7
 

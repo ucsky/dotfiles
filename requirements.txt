@@ -31,4 +31,4 @@ typer==0.27.2
 urllib3==2.8.0
 virtualenv==21.7.13
 yapf==0.43.0
-zipp==4.1.0
+zipp==4.1.1

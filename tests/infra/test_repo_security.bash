@@ -43,6 +43,16 @@ for wf in "$REPO_ROOT"/.github/workflows/*.yml "$REPO_ROOT"/.github/workflows/*.
     echo "ERROR: $(basename "$wf") must declare top-level 'permissions:' (least privilege)." 1>&2
     exit 1
   fi
+  # Third-party actions must be pinned to a full commit SHA (tags are mutable).
+  # Local actions (./path) and docker:// references are exempt.
+  unpinned="$(grep -En '^[[:space:]]*(-[[:space:]]+)?uses:[[:space:]]' "$wf" \
+    | grep -Ev 'uses:[[:space:]]*["'\'']?(\./|docker://)' \
+    | grep -Ev 'uses:[[:space:]]*["'\'']?[^@[:space:]]+@[0-9a-f]{40}([[:space:]"'\'']|$)' || true)"
+  if [ -n "$unpinned" ]; then
+    echo "ERROR: $(basename "$wf") has actions not pinned to a full commit SHA:" 1>&2
+    echo "$unpinned" 1>&2
+    exit 1
+  fi
 done
 
 echo "Repository security checks passed."

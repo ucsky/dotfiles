@@ -8,3 +8,16 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    # One PR per week for minor/patch bumps; majors stay separate for review.
+    groups:
+      python-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+  # Hash-locked tooling used by the Security workflow.
+  - package-ecosystem: "pip"
+    directory: "/.github"
+    schedule:
+      interval: "weekly"
+    groups:
+      ci-tooling:
+        patterns: ["*"]

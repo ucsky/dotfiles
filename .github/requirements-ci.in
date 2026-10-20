@@ -1,0 +1,7 @@
+# Python tooling used by .github/workflows/security.yml.
+# Regenerate the locked file (with hashes) after editing this list:
+#   pip-compile --generate-hashes --allow-unsafe .github/requirements-ci.in
+detect-secrets
+pip-audit
+pyyaml
+shellcheck-py

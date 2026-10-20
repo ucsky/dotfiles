@@ -14,7 +14,7 @@ numpy==2.5.4
 pandas==3.0.6
 papermill==2.7.0
 plotly==7.1.0
-pyarrow==25.0.1
+pyarrow==26.0.0
 pycodestyle==2.15.0
 pydocstyle==6.3.0
 pyflakes==3.4.0

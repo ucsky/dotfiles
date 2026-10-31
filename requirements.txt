@@ -11,7 +11,7 @@ kaleido==1.5.0
 mccabe==0.7.0
 nbformat==5.11.1
 numpy==2.5.4
-pandas==3.0.6
+pandas==3.1.0
 papermill==2.7.0
 plotly==7.1.0
 pyarrow==26.0.0
@@ -26,9 +26,9 @@ requests==2.34.2
 rope==1.15.0
 setuptools==84.2.1
 tabulate==0.10.0
-tornado==6.5.10
+tornado==6.6
 typer==0.27.3
 urllib3==2.8.0
-virtualenv==21.14.13
+virtualenv==21.15.1
 yapf==0.43.0
-zipp==4.1.1
+zipp==4.1.2

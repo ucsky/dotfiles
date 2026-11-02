@@ -59,7 +59,10 @@ if ! python3 -m pip --version >/dev/null 2>&1; then
 fi
 
 echo "Installing virtualenvwrapper via pip (--user)..."
-_pip_install_fallback python3 --user -q -U pip
+# Best-effort pip upgrade; on failure keep the current pip (no unverified
+# side-channel download).
+_pip_install_pep668 python3 --user -q -U pip \
+  || echo "WARNING: pip self-upgrade failed; continuing with current pip." 1>&2
 _pip_install_user_pkg python3 virtualenvwrapper
 
 _report_virtualenvwrapper_installed && exit 0

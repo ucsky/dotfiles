@@ -24,4 +24,5 @@ This repository is a personal `dotfiles` and utilities collection.
 
 - `make install` (or `./make/install.bash`) should remain the main entry point.
 - CI must run the real tests (no placeholder `echo`).
+- `requirements.txt` is generated and hash-locked: edit `requirements.in`, then run `make lock-requirements`. Installers must use `pip install --require-hashes`.
 - Python environments are bootstrapped during install (venv + virtualenvwrapper + conda when available). virtualenvwrapper itself is not auto-installed; use `make install-virtualenvwrapper`.

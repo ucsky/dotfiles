@@ -35,8 +35,10 @@ jobs:
       - name: Run repository security tests
         run: tests/infra/test_repo_security.bash
 
-      - name: Audit pinned Python dependencies
-        run: pip-audit -r requirements.txt
+      # requirements.txt is fully locked with hashes (transitive deps included),
+      # so it can be audited as-is without re-resolving.
+      - name: Audit locked Python dependencies
+        run: pip-audit --require-hashes --disable-pip -r requirements.txt
 
       - name: Lint shell scripts
         run: |

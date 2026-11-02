@@ -144,6 +144,19 @@ Useful to verify the install is truly portable before pushing changes.
 
 The env name defaults to the cloned directory name (leading `.` stripped). Override with `NAME_PYTHON_VENV`.
 
+### Python dependencies (hash-locked)
+
+- `requirements.in` lists the direct dependencies (exact pins). Edit this file.
+- `requirements.txt` is **generated** from it: every package, transitive ones and `pip` included, is pinned with its sha256 hashes, for Linux, macOS and Windows and Python >= 3.12.
+- The installer runs `pip install --require-hashes -r requirements.txt`, so a download whose hash does not match is refused.
+
+After editing `requirements.in`, regenerate the lock (requires [uv](https://docs.astral.sh/uv/)):
+
+```bash
+make format-req        # optional: sort requirements.in
+make lock-requirements
+```
+
 ### Start JupyterLab
 
 ```bash

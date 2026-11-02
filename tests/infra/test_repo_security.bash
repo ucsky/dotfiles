@@ -26,9 +26,22 @@ if rg -n 'proceeding without verification' "$REPO_ROOT/make/install_linux.bash" 
   exit 1
 fi
 
-if rg -n -v '^([A-Za-z0-9._-]+==[^#[:space:]]+)([[:space:]]+#.*)?$|^[[:space:]]*$' \
-  "$REPO_ROOT/requirements.txt" >/dev/null 2>&1; then
-  echo "ERROR: requirements.txt must contain only exact pins." 1>&2
+if rg -n -v '^([A-Za-z0-9._-]+==[^#[:space:]]+)([[:space:]]+#.*)?$|^[[:space:]]*(#.*)?$' \
+  "$REPO_ROOT/requirements.in" >/dev/null 2>&1; then
+  echo "ERROR: requirements.in must contain only exact pins." 1>&2
+  exit 1
+fi
+
+# The installers must only install the hash-locked requirements file:
+# every `pip install -r` in make/ goes through --require-hashes, and no
+# hand-rolled download (urllib/urlretrieve) of Python packages is allowed.
+if rg -n 'pip install[^\n]*-r ' "$REPO_ROOT/make" | rg -v -- '--require-hashes' >/dev/null 2>&1; then
+  echo "ERROR: make/ must install requirements with --require-hashes." 1>&2
+  rg -n 'pip install[^\n]*-r ' "$REPO_ROOT/make" | rg -v -- '--require-hashes' 1>&2
+  exit 1
+fi
+if rg -n 'urlretrieve|urllib\.request' "$REPO_ROOT/make" >/dev/null 2>&1; then
+  echo "ERROR: make/ must not download Python packages outside pip's hash checking." 1>&2
   exit 1
 fi
 
@@ -91,7 +104,7 @@ if errors:
     sys.exit(1)
 PY
 
-# Python tooling installed by workflows must be locked with hashes:
+# Python packages installed by workflows must be locked with hashes:
 # every `pip install` in a `run:` step must use `--require-hashes -r <file>`,
 # and the CI lock file must carry a hash for every pinned package.
 python3 - "$REPO_ROOT" "$REPO_ROOT"/.github/workflows/*.yml "$REPO_ROOT"/.github/workflows/*.yaml <<'PY'
@@ -129,21 +142,28 @@ for wf in workflows:
     with open(wf, encoding="utf-8") as fh:
         walk(yaml.safe_load(fh), os.path.basename(wf))
 
-lock = os.path.join(repo_root, ".github", "requirements-ci.txt")
-if not os.path.exists(lock):
-    errors.append(".github/requirements-ci.txt is missing")
-else:
+# Both lock files (CI tooling and the user environments) must pin every
+# package, transitive ones included, with at least one sha256 hash.
+# An optional environment marker (`; sys_platform == 'darwin'`) is allowed.
+LOCKED = re.compile(
+    r"^[A-Za-z0-9._-]+==[^\s;]+(\s*;[^-]+?)?(\s+--hash=sha256:[0-9a-f]{64})+$"
+)
+for rel in (os.path.join(".github", "requirements-ci.txt"), "requirements.txt"):
+    lock = os.path.join(repo_root, rel)
+    if not os.path.exists(lock):
+        errors.append(f"{rel} is missing")
+        continue
     with open(lock, encoding="utf-8") as fh:
         content = fh.read().replace("\\\n", " ")
     for line in content.splitlines():
         line = line.split("#", 1)[0].strip()
         if not line:
             continue
-        if not re.match(r"^[A-Za-z0-9._-]+==\S+(\s+--hash=sha256:[0-9a-f]{64})+$", line):
-            errors.append(f"requirements-ci.txt: not pinned with a hash: {line.split()[0]}")
+        if not LOCKED.match(line):
+            errors.append(f"{rel}: not pinned with a hash: {line.split()[0]}")
 
 if errors:
-    print("ERROR: workflow Python tooling must be hash-locked:", file=sys.stderr)
+    print("ERROR: Python dependencies must be hash-locked:", file=sys.stderr)
     for err in errors:
         print(f"  {err}", file=sys.stderr)
     sys.exit(1)

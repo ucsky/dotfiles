@@ -31,36 +31,18 @@ show-vars:
 #---------------------------------------------
 # Format
 #---------------------------------------------
-format-req: ## Format requirements
+format-req: ## Sort and dedupe the direct dependencies in requirements.in
 format-req:
-	-@(for i in requirements.txt;do \
-	echo "Processing $$i";\
-	sort $$i -o $$i;\
-	uniq $$i > temp-format-req.txt && mv temp-format-req.txt $$i;\
-	done)
+	@{ grep -E '^[[:space:]]*(#|$$)' requirements.in; \
+	   grep -vE '^[[:space:]]*(#|$$)' requirements.in | sort -fu; } > temp-format-req.in \
+	  && mv temp-format-req.in requirements.in
 
-lock-requirements: ## Lock current venv package versions into requirements.txt
+# requirements.txt is generated: universal (Linux/macOS/Windows, Python >= 3.12)
+# and hash-locked, so `pip install --require-hashes` verifies every download.
+lock-requirements: ## Regenerate the hash-locked requirements.txt from requirements.in (needs uv)
 lock-requirements:
-	@test -x "$(PATH_PYTHON_VENV)/bin/python" || (echo "ERROR: venv not found at $(PATH_PYTHON_VENV). Run: make install" 1>&2; exit 1)
-	@REPO_ROOT="$(PWD)" "$(PATH_PYTHON_VENV)/bin/python" - <<-'PY'
-		from importlib.metadata import PackageNotFoundError, version
-		from pathlib import Path
-		import re
-		
-		repo_root = Path(__import__("os").environ["REPO_ROOT"])
-		requirements_path = repo_root / "requirements.txt"
-		entries = []
-		for raw_line in requirements_path.read_text(encoding="utf-8").splitlines():
-		    line = raw_line.strip()
-		    if not line or line.startswith("#"):
-		        continue
-		    name = re.split(r"[<>=!~ ]", line, maxsplit=1)[0]
-		    try:
-		        entries.append(f"{name}=={version(name)}")
-		    except PackageNotFoundError as exc:
-		        raise SystemExit(f"Package not installed in venv: {name}") from exc
-		requirements_path.write_text("\n".join(entries) + "\n", encoding="utf-8")
-		PY
+	@command -v uv >/dev/null 2>&1 || (echo "ERROR: uv not found. Install it: https://docs.astral.sh/uv/" 1>&2; exit 1)
+	uv pip compile requirements.in --universal --generate-hashes --python-version 3.12 -o requirements.txt
 
 
 .PHONY: install uninstall install-virtualenvwrapper

@@ -26,34 +26,14 @@ _pip_install_pep668() {
   return 1
 }
 
-_pip_install_fallback() {
-  local pip_exe="$1"
+# Install the hash-locked requirements file $1 with the Python command given
+# in the remaining args (e.g. `"$venv/bin/python"` or `conda run -n env python`).
+# requirements.txt pins every package, pip included, with sha256 hashes, so
+# nothing unverified is downloaded: pip refuses any file whose hash differs.
+pip_install_locked() {
+  local requirements="$1"
   shift
-  if _pip_install_pep668 "$pip_exe" "$@" >/dev/null 2>&1; then
-    return 0
-  fi
-  # Fallback for pip bug with JSON API (common in pip<25 on Python 3.12+):
-  # download wheel directly via urllib (which works in this env) and install locally.
-  local tmpdir
-  tmpdir="$(mktemp -d)"
-  # shellcheck disable=SC2064
-  trap "rm -rf '$tmpdir'" RETURN
-  local url
-  url="$("$pip_exe" -c "
-import json, urllib.request, re
-data = json.loads(urllib.request.urlopen(
-    urllib.request.Request('https://pypi.org/simple/pip/',
-    headers={'Accept': 'application/vnd.pypi.simple.v1+json'})).read())
-wheels = [f for f in data['files'] if f['filename'].endswith('-py3-none-any.whl')]
-print(sorted(wheels, key=lambda x: [int(p) for p in re.findall(r'\d+', x['filename'])], reverse=True)[0]['url'])
-")" || true
-  [ -n "$url" ] || return 1
-  local whl_name="${url##*/}"
-  local whl_path="$tmpdir/$whl_name"
-  "$pip_exe" -c "
-import urllib.request
-urllib.request.urlretrieve('$url', '$whl_path')
-" && _pip_install_pep668 "$pip_exe" --no-index "$whl_path"
+  "$@" -m pip install -q --require-hashes -r "$requirements"
 }
 
 # Install a package with `pip install --user`, with PEP 668 retry.
@@ -104,9 +84,7 @@ venv_install_requirements() {
     echo "WARNING: refusing to pip install into unhealthy venv: $venv" 1>&2
     return 1
   fi
-  _pip_install_fallback "$py" -q -U pip \
-    || echo "WARNING: pip self-upgrade failed in $venv; continuing with current pip." 1>&2
-  if ! "$py" -m pip install -q -r "$requirements"; then
+  if ! pip_install_locked "$requirements" "$py"; then
     echo "WARNING: requirements install failed in $venv." 1>&2
     return 1
   fi

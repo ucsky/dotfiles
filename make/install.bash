@@ -196,8 +196,7 @@ setup_conda() {
   fi
 
   # Avoid `conda activate` (requires conda init). Use conda-run instead.
-  "$conda_exe" run -n "$env_name" python -m pip install -q -U pip
-  if ! "$conda_exe" run -n "$env_name" python -m pip install -q -r "$REPO_ROOT/requirements.txt"; then
+  if ! pip_install_locked "$REPO_ROOT/requirements.txt" "$conda_exe" run -n "$env_name" python; then
     echo "INFO: conda env $env_name pip install reported issues (e.g. dependency conflicts); dotfiles install continues."
   fi
 }
@@ -229,8 +228,7 @@ setup_micromamba() {
     MAMBA_ROOT_PREFIX="$mamba_root" "$mamba_exe" install --name "$env_name" "python=${DOTFILES_CONDA_PYTHON_VERSION}" -y --quiet
   fi
 
-  MAMBA_ROOT_PREFIX="$mamba_root" "$mamba_exe" run -n "$env_name" python -m pip install -q -U pip
-  if ! MAMBA_ROOT_PREFIX="$mamba_root" "$mamba_exe" run -n "$env_name" python -m pip install -q -r "$REPO_ROOT/requirements.txt"; then
+  if ! pip_install_locked "$REPO_ROOT/requirements.txt" env MAMBA_ROOT_PREFIX="$mamba_root" "$mamba_exe" run -n "$env_name" python; then
     echo "INFO: micromamba env $env_name pip install reported issues; dotfiles install continues."
   fi
 }

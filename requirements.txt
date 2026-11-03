@@ -854,9 +854,9 @@ ipykernel==7.4.0 \
     #   jupyter
     #   jupyter-console
     #   jupyterlab
-ipython==9.17.1 \
-    --hash=sha256:6d1645743cfd1a07eb695d85aa2b5fa66721f8cbae9431d4049f7084bbf06509 \
-    --hash=sha256:8919be8c27f20a6f4423145028063f6637b42a03ce57665bb12015ee1f073529
+ipython==9.18.0 \
+    --hash=sha256:93ec98e27d5ce494c962758111c7dff1ef45f9efdd55604ae70a7d4cabb3e1ea \
+    --hash=sha256:d9b8e19267e811cafbc9d72e794a130c3fc60518108d20f5e1f05dae74f619ec
     # via
     #   -r requirements.in
     #   ipykernel
@@ -1009,9 +1009,9 @@ jupyter-server-terminals==0.5.4 \
     --hash=sha256:55be353fc74a80bc7f3b20e6be50a55a61cd525626f578dcb66a5708e2007d14 \
     --hash=sha256:bbda128ed41d0be9020349f9f1f2a4ab9952a73ed5f5ac9f1419794761fb87f5
     # via jupyter-server
-jupyterlab==4.6.4 \
-    --hash=sha256:15b13f991d3985129c797eb84d9949eeb8b6615e14b444868e642411f2c418b2 \
-    --hash=sha256:404f49b081819378524886c9db66dba57a5565981eff885830df1baba3a17df5
+jupyterlab==4.6.5 \
+    --hash=sha256:cb96fc3d59d20b6f17d0cc1afe6e0508a61d881ab39be89236c55b01fa0e2b99 \
+    --hash=sha256:e115a0ef663927d60afd20bd9a8e822a5c61d7d22bcab489d8e37f4885d0d2ce
     # via
     #   -r requirements.in
     #   jupyter
@@ -1785,7 +1785,7 @@ propcache==0.5.4 ; python_full_version < '3.13' \
     # via
     #   aiohttp
     #   yarl
-psutil==7.2.2 ; sys_platform != 'cygwin' and sys_platform != 'emscripten' \
+psutil==7.2.2 ; sys_platform != 'android' and sys_platform != 'cygwin' and sys_platform != 'emscripten' \
     --hash=sha256:0746f5f8d406af344fd547f1c8daa5f5c33dbc293bb8d6a16d80b4bb88f59372 \
     --hash=sha256:076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9 \
     --hash=sha256:11fe5a4f613759764e79c65cf11ebdf26e33d6dd34336f8a337aa2996d71c841 \
@@ -1882,9 +1882,9 @@ pydocstyle==6.3.0 \
     --hash=sha256:118762d452a49d6b05e194ef344a55822987a462831ade91ec5c06fd2169d019 \
     --hash=sha256:7ce43f0c0ac87b07494eb9c0b462c0b73e6ff276807f204d6b53edc72b7e44e1
     # via -r requirements.in
-pyflakes==4.0.3 \
-    --hash=sha256:330ba92b8c1db2eb0b8f4068f6c58674e2649a99e334769aa50e3e9c5b11c23a \
-    --hash=sha256:94762a3a5a343a79b28754f96c554bce057a592a4896907d73f0369fe824e053
+pyflakes==4.1.0 \
+    --hash=sha256:592beb57058eb82eb190fb7514f2081c555c51000b029ff71286a681e6cf2f83 \
+    --hash=sha256:b2e05e6bac8e49b67be2a6ffa63422c60f7193fc72e8180255907b41ec997dc1
     # via -r requirements.in
 pygments==2.21.0 \
     --hash=sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9 \
@@ -2752,9 +2752,9 @@ urllib3==2.8.0 \
     # via
     #   -r requirements.in
     #   requests
-virtualenv==21.15.1 \
-    --hash=sha256:0d14a991689c67600316880eadc0a37b7690cb632e3b4ac67e2bc05b2b2e24a4 \
-    --hash=sha256:e79c90b8f601701599c25905e02839924fede2c798d52325670d24fbdaab74ee
+virtualenv==21.15.2 \
+    --hash=sha256:dbd886e6e5689eb4dde6a9bbc478ad14b4fc8ed0852690d8273ccfb8c467f635 \
+    --hash=sha256:fb8c62c7c328e0238061c721068f06b7bc6bd10f7a0f5987195cef1008837ee6
     # via -r requirements.in
 wcwidth==0.9.4 \
     --hash=sha256:093469e01d881bff3db93ff3f56c364dc87c441ea01f9f41c22de0c0bdf5c6ef \

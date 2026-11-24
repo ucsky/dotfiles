@@ -12,7 +12,7 @@ jupyter==1.1.1
 jupyterlab-git==0.55.0
 jupyterlab-lsp==5.3.0
 jupyterlab==4.6.6
-kaleido==1.5.1
+kaleido==1.5.2
 mccabe==0.7.0
 nbformat==5.11.1
 numpy==2.5.5
@@ -33,8 +33,8 @@ rope==1.15.2
 setuptools==84.2.1
 tabulate==0.10.0
 tornado==6.6.1
-typer==0.29.1
+typer==0.29.2
 urllib3==2.8.0
-virtualenv==21.15.8
+virtualenv==21.15.9
 yapf==0.43.0
 zipp==4.1.2
